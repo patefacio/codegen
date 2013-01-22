@@ -1,0 +1,204 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'place' ?>
+import package ;
+import common ;
+import os ;
+import feature : set-default ;
+
+constant #{Place.top.upcase}_INSTALL_PATH : #{Place[Place.top].parent + (Place.top + '_install')} ;
+constant TOP : #{Place['cpp']} ;
+
+local rule explicit-alias ( id : targets + )
+{
+    alias $(id) : $(targets) ;
+    explicit $(id) ;
+}
+
+#          <cxxflags>/P
+#          <cxxflags>/showIncludes
+#          <toolset>msvc:<linkflags>/VERBOSE:LIB
+
+if [ os.on-windows ] 
+{
+project fcs_projects
+        : requirements 
+          <define>BOOST_ALL_DYN_LINK
+          <define>_SCL_SECURE_NO_WARNINGS
+          <toolset>intel:<define>WIN32
+          <tag>@$(__name__).tag
+          <include>$(BOOST_INCLUDE_PATH)
+          <include>$(TINYJSON_INCLUDE_PATH)
+	  <include>$(HDF5_INCLUDE_PATH)
+	  <include>$(PANTHEIOS_INCLUDE_PATH)
+	  <include>$(STLSOFT_INCLUDE_PATH)
+          <include>$(STL_INCLUDE_PATH)
+          <include>$(OTL_INCLUDE_PATH)
+          <include>.
+          <library-path>$(BOOST_LIB_PATH)
+	  <library-path>$(HDF5_LIB_PATH)
+	  <library-path>$(PANTHEIOS_LIB_PATH)
+          <toolset>msvc:<define>WIN32
+	  <toolset>msvc:<linkflags>/NODEFAULTLIB:libcmt
+	  <toolset>msvc:<linkflags>/NODEFAULTLIB:libcmtd
+          <toolset>msvc:<cxxflags>/wd4100                  
+          <toolset>msvc:<cxxflags>/wd4996
+          <toolset>msvc:<cxxflags>/W3
+# This looked like a good idea but does no work if you want both static
+# and dynamic linked libraries. The problem is, if a library is shared
+# only (no static version) then the dll will be built with proper dll
+# exports, but the client static libs that use that shared lib will have
+# this flag set and thus will not have proper dllimports
+#          <link>static:<define>GLOBAL_STATIC_LINKAGE
+        :
+        : build-dir ../../build-dir
+        ;
+
+} 
+else 
+{
+
+project fcs_projects
+        : requirements 
+          <define>BOOST_ALL_DYN_LINK
+          <define>OTL_ODBC_UNIX 
+          <define>BOOST_FILESYSTEM_VERSION=3
+          <variant>debug:<define>DEBUG
+          <toolset>gcc:<cxxflags>-fPIC
+          <toolset>gcc:<cxxflags>-Wno-invalid-offsetof
+          <toolset>gcc:<cxxflags>-Wno-deprecated-declarations
+          <toolset>gcc:<cxxflags>-std=c++0x
+          <linkflags>-lpthread
+          <include>$(BOOST_INCLUDE_PATH)
+          <tag>@$(__name__).tag
+          <include>.
+          <toolset>intel:<cxxflags>-std=c++0x
+          <toolset>intel:<cxxflags>-Qoption,cpp,--rvalue_ctor_is_not_copy_ctor
+          <toolset>intel:<define>BOOST_CALLBACK_EXPLICIT_COPY_CONSTRUCTOR
+          <toolset>intel:<linkflags>-i-static
+          <toolset>intel:<linkflags>-i-static
+          <library>/site-config//boost_thread
+          <library>/site-config//boost_system
+          <library>/site-config//pantheios_core
+        :
+        : build-dir ../../build-dir
+        ;
+
+}
+
+#layout = versioned ;
+
+<?rb @all_libs.each do |lib| ?>
+<?rb if lib.static_only ?>
+# #{lib.name} is static_only
+<?rb elsif lib.shared_only ?>
+# #{lib.name} is shared_only
+<?rb elsif not lib.header_only ?>
+# #{lib.name} is static and shared
+<?rb end ?>
+<?rb if lib.header_only ?>
+# #{lib.name} is header-only
+<?rb else ?>
+alias #{lib.name} : #{lib.build_path.relative_path_from(Place.place['cpp'])}//#{lib.name} ;
+<?rb end ?>
+<?rb if lib.unit_tests_required ?>
+explicit-alias #{lib.name}_test : #{lib.test_path.relative_path_from(Place.place['cpp'])} ;
+<?rb end ?>
+<?rb end ?>
+
+################################################################################
+# Install targets
+################################################################################
+package.install fcs_install_libs_debug : <install-default-prefix>$(FCS_INSTALL_PATH) <variant>debug : :
+<?rb @all_libs.select {|l| not l.header_only }.each do |lib| ?>
+    #{lib.name}
+<?rb end ?>
+    ;
+
+package.install fcs_install_libs_release : <install-default-prefix>$(FCS_INSTALL_PATH) <variant>release : :
+<?rb @all_libs.select {|l| not l.header_only }.each do |lib| ?>
+    #{lib.name} 
+<?rb end ?>
+    ;
+
+alias fcs_libs : 
+<?rb @all_libs.select {|l| not l.header_only }.each do |lib| ?>
+     #{lib.name} 
+<?rb end ?>
+     ;
+
+alias fcs_install_libs : fcs_install_libs_debug fcs_install_libs_release ;
+
+# all apps
+<?rb @all_apps.each do |app| ?>
+alias #{app.name} : #{app.build_path.relative_path_from(Place.place['cpp'])}//#{app.name} ;
+<?rb end ?>
+
+alias fcs_apps : 
+<?rb @all_apps.each do |app| ?>
+     #{app.name} 
+<?rb end ?>
+     ;
+
+
+############ Install apps
+<?rb if @all_apps.length > 0 ?>
+alias fcs_install_apps : 
+<?rb @all_apps.each do |app| ?>
+    #{app.build_path.relative_path_from(Place.place['cpp'])}//install_app
+<?rb end ?>
+;
+explicit fcs_install_apps ;
+
+<?rb end ?>
+
+alias fcs_unit_tests :
+     fcs_install_libs
+<?rb @all_libs.select {|l| l.unit_tests_required }.each do |lib| ?>
+     #{lib.name}_test
+<?rb end ?>
+;
+
+fcs_headers = [ path.glob-tree fcs : *.hpp *.h *.ipp *.inc ] ;
+package.install fcs_install_headers
+  : 
+  <install-source-root>../cpp 
+  <install-default-prefix>$(FCS_INSTALL_PATH)
+  :
+  :
+  : $(fcs_headers)
+;
+
+alias fcs_install :
+      fcs_install_libs
+      fcs_install_apps
+      fcs_install_headers
+;
+
+alias fcs_install_debug :
+      fcs_install_headers
+      fcs_install_libs_debug
+;
+
+alias fcs_install_release :
+      fcs_install_headers
+      fcs_install_libs_release
+;
+
+alias fcs_tests : 
+      fcs_install
+      fcs_unit_tests
+      tests/singleton
+      tests/api_initializer
+;
+
+alias fcs_all : fcs_libs fcs_tests ;
+
+################################################################################
+# Aliases to pin Qt to shared libraries
+################################################################################
+alias fcs_qt_gui : /qt5//QtGui/<link>shared : : : ;
+alias fcs_qt_core : /qt5//QtCore/<link>shared : : : ;
+alias fcs_qt_widgets : /qt5//QtWidgets/<link>shared : : : ;
+alias fcs_qt : fcs_qt_widgets ;

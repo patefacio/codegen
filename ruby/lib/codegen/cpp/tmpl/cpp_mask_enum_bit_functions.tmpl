@@ -1,0 +1,15 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{@me.bit_mask_decorations}bool test_#{@me.name.downcase}(int value, #{@me.name} e) {
+  return (e & value) == e;
+}
+
+#{@me.bit_mask_decorations}void set_#{@me.name.downcase}(int &value, #{@me.name} e) {
+  value |= e;
+}
+
+#{@me.bit_mask_decorations}void clear_#{@me.name.downcase}(int &value, #{@me.name} e) {
+  value &= ~e;
+}
+

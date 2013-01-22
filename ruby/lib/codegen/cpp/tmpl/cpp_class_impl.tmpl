@@ -1,0 +1,101 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @cls.static_members.length>0 ?>
+/// Class static variable definitions
+<?rb   @cls.static_members.each do |m| ?>
+<?rb     if m.initialize_as_array ?>
+#{m.cpp_type} #{@cls.name}::#{m.variable_name} = { #{m.init.chomp} 
+};
+<?rb     else ?>
+#{m.cpp_type} #{@cls.name}::#{m.variable_name}(#{m.init});
+<?rb     end ?>
+<?rb   end ?>
+
+<?rb end ?>
+<?rb if @cls.hide_member_init_ctor ?>
+// Member init ctor
+<?rb import('cpp_member_init_ctor.tmpl') ?>
+<?rb end ?>
+<?rb if @cls.hide_default_ctor ?>
+// Default ctor
+<?rb import('cpp_default_ctor.tmpl') ?>
+<?rb end ?>
+<?rb if @cls.property_tree ?>
+#{@cls.property_tree_impl().chomp} 
+<?rb end ?>   
+<?rb if @cls.dtor_impl ?>
+
+#{@cls.name}::~#{@cls.name}() {
+<?rb if @cls.log_dtor ?>
+#{i}pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Destroyed #{@cls.name}(", 
+#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)),
+#{i}               pantheios::character(')'));
+<?rb end ?>
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.name}::~#{@cls.name}"), 0)}
+}
+
+<?rb end ?>
+<?rb if @cls.comparable and @cls.hide_comparable ?>
+#{@cls.op_less_than_text}
+
+<?rb end ?>
+<?rb if @cls.op_equal and @cls.hide_op_equal ?>
+#{@cls.op_eq_text}
+
+<?rb end ?>
+<?rb @cls.members.select {|m| m.hide_impl and @cls.readable_members.include? m }.each do |m| ?>
+#{m.reader_impl.chomp}
+<?rb end ?>
+<?rb @cls.members.select {|m| m.hide_impl and @cls.writable_members.include? m  }.each do |m| ?>
+#{m.writer_impl.chomp}
+<?rb end ?>
+<?rb @cls.members.select {|m| m.hide_impl and m.pass_by_ref and @cls.writable_members.include? m  }.each do |m| ?>
+#{m.reader_impl_non_const.chomp}
+<?rb end ?>
+<?rb if @cls.streamable ?>
+#{Codegen.indent_absolute_text(@cls.streamable_impl().chomp, 0)}
+<?rb end ?>   
+<?rb ####################################################################### ?>
+<?rb ## Nested classes streamers ?>
+<?rb ####################################################################### ?>
+<?rb if @cls.nested_classes.length > 0 ?>
+
+<?rb @cls.nested_classes.each do |nc| ?>
+#{Codegen.indent_absolute_text(nc.streamable_impl().chomp, 0)}
+<?rb end ?>
+<?rb end ?>
+<?rb @cls.forward_enums.each do |enum| ?>
+#{Codegen.indent_text(enum.enum_stream_ipml)} 
+<?rb end ?>
+<?rb if @cls.enums.select { |e| !e.inline }.length > 0 ?>
+// Class enumerations
+<?rb @cls.enums.each do |enum| ?>
+#{Codegen.indent_text(enum.enum_stream_ipml)} 
+<?rb end ?>
+<?rb end ?>
+
+<?rb if @cls.additions_impl.length>0 ?>
+#{Codegen.indent_text(@cls.additions_impl, 0)}
+
+<?rb end ?>
+<?rb if @cls.ctor_member_init_method ?>
+void #{@cls.name}::ctor_member_init() {
+<?rb if @cls.time_ctor_init ?>
+#{i}  fcs::utils::performance::Block_performance_counter_tracker time_block(&std::cout, "#{@cls.name} init");
+<?rb end ?>
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.name}::init"), 1)}
+}
+<?rb end ?>
+<?rb if @cls.observer_of.length>0 ?>
+
+#{i}/////////////////////////////////////////////////////////////////
+#{i}// Observer methods
+#{i}/////////////////////////////////////////////////////////////////
+<?rb @cls.observer_of.each do |observer| ?>
+#{i}void #{@cls.name}::observe(#{observer} const& observed) {
+#{Codegen.protect_block("#{@cls.protect_block_tag} #{observer} observe")}
+#{i}}
+<?rb end ?>
+<?rb end ?>

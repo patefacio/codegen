@@ -1,0 +1,18 @@
+import stage ;
+import package ;
+import os ;
+project fcs_examples_camel_case_filename_examples
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     ExampleCamelCaseFilename
+;
+
+lib fcs_examples_camel_case_filename_examples
+    : $(SOURCES).cpp
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

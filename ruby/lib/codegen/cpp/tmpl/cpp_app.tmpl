@@ -1,0 +1,116 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent ?>
+<?rb if @app.app_sig_handler ?>
+#if !defined(DEBUG)
+fcs::app_sig_handler::Application_signal_handler<>::Pointer_t
+app_sig_handler_s(fcs::app_sig_handler::Application_signal_handler<>::get_instance());
+#endif
+
+<?rb end ?>
+<?rb if @app.unit_test ?>
+boost::unit_test::test_suite* init_unit_test_suite(int , char*[]) {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Running Test: #{@app.name} ");
+  using namespace boost::unit_test;
+  test_suite* test= BOOST_TEST_SUITE( "Test <#{@app.name}>" );
+  test->add( BOOST_TEST_CASE( &#{@app.namespace.join('::')}::#{@app.name} ) );
+  return test;
+}
+<?rb else ?>
+int main(int argc, char** argv, char** envp) {
+<?rb if @app.die_with_parent ?>
+  if(0 != prctl(PR_SET_PDEATHSIG, SIGHUP)) {
+    pantheios::log(PANTHEIOS_SEV_ERROR, 
+                   "Unable to app to hang up when parent dies");
+  }
+<?rb end ?>
+
+<?rb if @app.program_options_class ?>
+  // Get the user supplied program options
+  using namespace #{@app.program_options_class.namespace.join('::')};
+  #{@app.program_options_class.name} options;
+  try {
+    read_parameters(options, argc, argv);
+    if(options.help_) {
+      std::cout << #{@app.program_options.description_method_name}();
+      std::cout.flush();
+      return 0;
+    }
+  } catch(std::exception const& excp) {
+    std::cout << "Caught exception:" << excp.what() << std::endl;
+    return -1;
+  }
+
+<?rb if @app.standard_logging ?>
+  if(options.parsed_program_options_.count("log_level")) {
+    fcs::utils::set_log_level(options.log_level_);
+  }
+<?rb end ?>
+<?rb if @app.standard_otl_logging ?>
+  if(options.parsed_program_options_.count("otl_log_level")) {
+    fcs::orm::set_otl_log_level(options.otl_log_level_);
+  }
+<?rb end ?>
+<?rb end ?>
+
+#{i}pantheios::log(PANTHEIOS_SEV_DEBUG, "app #{@app.name} run with main(", 
+#{i}  pantheios::args(argc, argv, pantheios::args::arg0FileOnly), ")");
+<?rb if 0 != @app.additions_main_pre_main_body.length ?>
+
+#{Codegen.align_preprocessor(Codegen.indent_absolute_text(@app.additions_main_pre_main_body.join(Codegen::NL), 1))}
+<?rb end ?>
+#{Codegen.indent_text(Codegen.protect_block("main_body"), 1, :trim_blank_lines => true)} 
+<?rb if 0 != @app.additions_main_post_main_body.length ?>
+
+#{Codegen.align_preprocessor(Codegen.indent_absolute_text(@app.additions_main_post_main_body.join(Codegen::NL), 1))}
+
+<?rb end ?>
+#{i}return 0;
+}
+<?rb end ?>
+
+<?rb if @app.uses_pantheios ?>
+<?rb if @app.log_pantheios_fe ?>
+
+////////////////////////////////////////////////////////////////////////////////
+// The following pantheios related functions provide basic selective
+// logging support
+////////////////////////////////////////////////////////////////////////////////
+PANTHEIOS_CALL(int) pantheios_fe_init(void*, void** ptoken) { 
+  *ptoken = NULL; 
+  return 0; 
+}
+
+PANTHEIOS_CALL(void) pantheios_fe_uninit(void*) {}
+
+PANTHEIOS_CALL(PAN_CHAR_T const*) pantheios_fe_getProcessIdentity(void*)
+{
+  return ("#{@app.name}");
+}
+
+::pantheios::pan_sev_t app_log_severity_s(::pantheios::SEV_ERROR);
+
+namespace fcs { 
+namespace utils {
+
+namespace {
+  boost::mutex protect_severity_s;
+}
+
+  void set_log_level(::pantheios::pan_sev_t new_severity) {
+    boost::mutex::scoped_lock lock(protect_severity_s);
+    app_log_severity_s = new_severity;
+  }
+}
+}
+
+PANTHEIOS_CALL(int) pantheios_fe_isSeverityLogged(void*, int severity, int)
+{
+  return severity <= app_log_severity_s;
+}
+<?rb else ?>
+extern "C" const char PANTHEIOS_FE_PROCESS_IDENTITY[] = "#{@app.name}";
+<?rb end ?>
+<?rb end ?>
+

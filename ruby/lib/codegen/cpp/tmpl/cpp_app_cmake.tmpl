@@ -1,0 +1,28 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+<?rb require 'place' ?>
+project (#{@app.name})
+
+# Local code base public headers (.../fcs/cpp)
+include_directories (#{Place.place['cpp'].relative_path_from(@app.cpp_path)})
+
+<?rb @app.system_includes.each do |include| ?>
+include_directories (#{Codegen.macro Place.system_include_macros[include]})
+<?rb end ?>
+
+
+#link_directories (
+#)
+
+add_executable (#{@app.name} 
+                #{@app.main_cpp}
+<?rb @app.impl_classes.each do |c| ?>
+                #{c.impl_filename}
+<?rb end ?>
+)
+
+#target_link_libraries (
+#)

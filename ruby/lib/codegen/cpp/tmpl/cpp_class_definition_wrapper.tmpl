@@ -1,0 +1,94 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if not @cls.no_class ?>
+<?rb if(@cls.disable_windows_warnings.length>0) ?>
+<?rb i=Codegen.single_indent ?>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : #{(@cls.disable_windows_warnings & @cls.disable_windows_warnings).join(' ')})
+#endif
+
+<?rb end ?>
+<?rb if @cls.typedef_ptr or @cls.typedef_const_ptr ?>
+// Forward class declaration
+class #{@cls.name};
+<?rb   if @cls.typedef_ptr ?>
+typedef #{$shared_ptr_type}< #{@cls.name} > #{@cls.name}_ptr;
+<?rb   end ?>
+<?rb   if @cls.typedef_const_ptr ?>
+typedef #{$shared_ptr_type}< const #{@cls.name} > #{@cls.name}_const_ptr;
+<?rb   end ?>
+
+<?rb end ?>
+<?rb @cls.forward_enums.each do |enum| ?>
+#{Codegen.indent_absolute_text(enum.enum_header_contents, 0)} 
+
+<?rb end ?>
+<?rb if @cls.forward_typedefs.length > 0 ?>
+#{i}// Forward typedefs
+<?rb @cls.forward_typedefs.each do |td| ?>
+#{Codegen.resolve_lambda td};
+<?rb end ?>
+
+<?rb end ?>
+<?rb if 0 != @cls.additions_namespace_forward_class.length ?>
+#{@cls.additions_namespace_forward_class.join(Codegen::NL)}
+
+<?rb end ?>
+<?rb if @cls.class_forward_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} class forward section")}
+
+<?rb end ?>
+<?rb if @cls.brief and @cls.brief.length > 0 ?>
+//! #{@cls.brief}
+<?rb end ?>
+<?rb if @cls.descr.length > 0 ?>
+#{Codegen.indent_text("""/**
+#{@cls.descr} 
+*/""")}
+<?rb end ?>
+#{@cls.class_definition.chomp}
+<?rb if @cls.dtor_virtual_inline_noop ?>
+
+<?rb if @cls.template_decls.length > 0 ?>
+#{@cls.template_decls_text}
+<?rb end ?>
+<?rb if @cls.log_dtor ?>
+inline #{@cls.templatized(@cls.name)}::~#{@cls.name}() {
+  pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Destroyed #{@cls.name}(",
+                 pantheios::hex_ptr(reinterpret_cast< void * >(this)),
+                 pantheios::character(')'));
+}
+<?rb else ?>
+inline #{@cls.templatized(@cls.name)}::~#{@cls.name}() {}
+<?rb end ?>
+<?rb end ?>
+<?rb if (@cls.streamable_inline or @cls.streamable_inline_custom) and !@cls.nesting_class ?>
+
+#{Codegen.indent_absolute_text(@cls.streamable_impl().chomp, 0)} 
+<?rb end ?>   
+<?rb if @cls.post_class_typedefs.length>0 ?>
+<?rb @cls.post_class_typedefs.each do |td| ?>
+#{Codegen.indent_absolute_text(td, 0)};
+<?rb end ?>
+
+<?rb end ?>
+<?rb if @cls.post_class_section ?>
+
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.protect_block_tag} post class"))}
+<?rb end ?>
+<?rb if @cls.additions_header_post_class.length>0 ?>
+
+#{Codegen.indent_absolute_text(@cls.additions_header_post_class, 0)}
+
+<?rb end ?>
+<?rb if(@cls.disable_windows_warnings.length>0) ?>
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
+<?rb end ?>
+<?rb end ?>

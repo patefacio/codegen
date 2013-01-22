@@ -1,0 +1,46 @@
+require "spec_helper"
+require "package"
+require "flare"
+require "yaml"
+
+include Package
+include Package::Identifier
+
+describe WadIdentity do
+  it "supports VIM_SCRIPT" do
+    sample_url = 'http://www.vim.org/scripts/download_script.php?src_id=10778'
+    wad_identity = VimScriptIdentity.new(:name => 'code_complete.vim',
+                                         :source_uri => sample_url)
+    wad_identity.wad_type.should == WadTypes::VIM_SCRIPT
+    wad_identity.install_type.should == InstallTypes::VIM_SCRIPT
+    wad_identity.source_uri.to_s == sample_url
+    wad_identity.pull_source
+    puts "Pulled wad: #{wad_identity.pulled_source.to_yaml}"
+  end
+end
+
+describe WadIdentity do
+  it "supports RUBY_GEM" do
+    wad_identity = RubyGemIdentity.new(:name => :tenjin)
+    wad_identity.wad_type.should == WadTypes::RUBY_GEM
+    wad_identity.install_type.should == InstallTypes::GEM_INSTALL
+  end
+end
+
+describe WadIdentity do
+  it "supports CPP_SOURCE_PACKAGE" do
+    wad_identity = CppSourcePackage.new(:name => :zlib)
+    wad_identity.wad_type.should == WadTypes::CPP_SOURCE_PACKAGE
+    wad_identity.install_type.should == InstallTypes::CPP_INSTALL
+  end
+end
+
+describe WadIdentity do
+  it "supports WEB_GET" do
+    sample_url = 'httrack http://www.agner.org/optimize'
+    wad_identity = WebGetIdentity.new(:name => :optimize,
+                                      :wad_type => WadTypes::WEB_GET)
+    wad_identity.wad_type.should == WadTypes::WEB_GET
+  end
+end
+

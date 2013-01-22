@@ -1,0 +1,48 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+<?rb i=Codegen.single_indent ?>
+#{Codegen.cpp_copyright(@cls.name + '.cpp', @cls.brief)}
+<?rb if @cls.impl_includes.length ?>
+#{@cls.clean_impl_includes}
+
+<?rb end ?>
+<?rb @cls.namespace.each do |ns| ?>
+namespace #{ns} {
+<?rb end ?>
+<?rb if @cls.enums.select { |e| !e.inline }.length > 0 ?>
+#{i}// Class enumerations
+<?rb @cls.enums.each do |enum| ?>
+<?rb i=Codegen.indent() ?>
+#{Codegen.indent_text(enum.enum_stream_ipml, 0, :trim_blank_lines => true)} 
+<?rb i=Codegen.outdent() ?>
+<?rb end ?>
+<?rb end ?>
+<?rb if @cls.static_members.length>0 ?>
+#{i}/// Library variables
+<?rb end ?>
+<?rb @cls.static_members.each do |m| ?>
+#{i}#{m.cpp_type} #{@cls.name}::#{m.name}(#{m.init});
+<?rb end ?>
+    
+<?rb @cls.namespace.each do |ns| ?>
+} // namespace #{ns}
+<?rb end ?>
+#if defined(#{@cls.api_decl}_EXPORTS)
+extern  "C" const char PANTHEIOS_FE_PROCESS_IDENTITY[] = "#{@cls.name.downcase}_so";
+#endif
+
+namespace {
+#{i}void #{@cls.name.downcase}_init() {
+#{i}#{i}pantheios::log(PANTHEIOS_SEV_DEBUG, "Init api #{@cls.name.downcase}");
+#{i}}
+
+#{i}void #{@cls.name.downcase}_fini() {
+#{i}#{i}pantheios::log(PANTHEIOS_SEV_DEBUG, "Fini api #{@cls.name.downcase}");
+#{i}}
+
+#{i}fcs::patterns::Api_initializer<> initializer_s(&#{@cls.name.downcase}_init, &#{@cls.name.downcase}_fini);
+
+}

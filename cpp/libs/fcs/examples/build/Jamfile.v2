@@ -1,0 +1,24 @@
+import stage ;
+import package ;
+import os ;
+project fcs_examples_sample
+    : source-location ../src
+    : requirements
+    <link>static:<define>SAMPLE_API_STATIC_LIB=1
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     apiheader
+     sample
+     goo
+     foo
+;
+
+lib fcs_examples_sample
+    : $(SOURCES).cpp
+      /site-config//boost_serialization
+      $(PANTHEIOS_LIBS)
+    : <link>shared <define>SAMPLE_API_EXPORTS 
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

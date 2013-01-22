@@ -1,0 +1,45 @@
+require "spec_helper"
+require "package"
+require "flare"
+require "yaml"
+include Flare
+
+$root = Pathname.new(File.expand_path(__FILE__)).parent.parent.parent
+
+describe Deflater do
+  it "deflates as tar" do
+    target = "/tmp/admin.tar"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR, :target_path => target)
+    deflater.deflate
+    output = Commands.run_commands(["tar -tf #{target}"], true, false, false)
+    output.join.should =~ /round_trip_flate.rspec/
+  end
+  it "deflates as tar bzip" do
+    target = "/tmp/admin.tar.bz2"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_BZ2, :target_path => target)
+    deflater.deflate
+    output = Commands.run_commands(["tar -tf #{target}"], true, false, false)
+    output.join.should =~ /round_trip_flate.rspec/
+  end
+  it "deflates as tar lzma" do
+    target = "/tmp/admin.tar.lzma"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_LZMA, :target_path => target)
+    deflater.deflate
+    output = Commands.run_commands(["tar -tf #{target}"], true, false, false)
+    output.join.should =~ /round_trip_flate.rspec/
+  end
+  it "deflates as tar gz" do
+    target = "/tmp/admin.tgz"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_GZ, :target_path => target)
+    deflater.deflate
+    output = Commands.run_commands(["tar -tf #{target}"], true, false, false)
+    output.join.should =~ /round_trip_flate.rspec/
+  end
+  it "deflates as tar 7z" do
+    target = "/tmp/admin.tar.7z"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_SEVEN_ZIP, :target_path => target)
+    deflater.deflate
+    output = Commands.run_commands(["7z e -so -y /tmp/admin.tar.7z 2>/dev/null | tar -t"], true, false, false)
+    output.join.should =~ /round_trip_flate.rspec/
+  end
+end

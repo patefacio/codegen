@@ -1,0 +1,12 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+  out << '(';
+    <?rb i=0 ?>
+    <?rb @me.values.each do |v| ?>
+  if(test_#{@me.name.downcase}(e, #{@me.scope_to_class(v)})) {
+    out << "#{v},";
+  }
+        <?rb i+=1 ?>
+    <?rb end ?>
+  out << ')';

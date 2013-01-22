@@ -1,0 +1,75 @@
+import os ;
+project fcs_gui_selection_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_gui_selection
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         ../build//fcs_gui_selection
+         $(ADDITIONAL_SRC)
+         $(TOP)//fcs_qt
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_gui_selection_test_suite : [ test_fcs_gui_selection ] ;
+explicit fcs_gui_selection_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe q_multiple_pick_list_unit_test :
+         test_q_multiple_pick_list.cpp
+         ../build//fcs_gui_selection
+         $(ADDITIONAL_SRC)
+         $(TOP)//fcs_qt
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=q_multiple_pick_list_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit q_multiple_pick_list_unit_test ;
+
+
+
+alias fcs_gui_selection_unit_tests :
+   q_multiple_pick_list_unit_test
+  ;
+
+explicit fcs_gui_selection_unit_tests ;
+
+

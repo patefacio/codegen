@@ -1,0 +1,89 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.current_indent ?>
+<?rb constant_filter(@children).each do |c| ?>
+<?rb if c.doc ?>
+#{Codegen.block_comment(c.doc)}
+<?rb end ?>
+#{c.definition.chomp}
+
+<?rb end ?>
+<?rb mixin_filter(@children).each do |m| ?>
+<?rb if m.is_template ?>
+mixin #{m.mixin_arg};
+<?rb else ?>
+mixin(#{m.mixin_arg});
+<?rb end ?>
+<?rb end ?>
+<?rb alias_filter(@children).each do |a| ?>
+<?rb if a.doc ?>
+#{Codegen.block_comment(a.doc)}
+<?rb end ?>
+alias #{a.aliased} #{a.name};
+<?rb end ?>
+<?rb enum_filter(@children).each do |e| ?>
+#{@@engine.render('enum.tmpl', {:enum => e }).chomp}
+
+<?rb end ?>
+<?rb union_filter(@children).each do |u| ?>
+#{@@engine.render('union.tmpl', {:union => u }).chomp}
+
+<?rb end ?>
+<?rb struct_filter(@children).each do |s| ?>
+<?rb if s.doc ?>
+#{Codegen.block_comment(s.doc)}
+<?rb end ?>
+#{@@engine.render('struct.tmpl', {:struct => s }).chomp}
+
+<?rb end ?>
+<?rb class_filter(@children).each do |c| ?>
+<?rb if c.doc ?>
+#{Codegen.block_comment(c.doc)}
+<?rb end ?>
+#{@@engine.render('class.tmpl', {:cls => c }).chomp}
+
+<?rb end ?>
+<?rb property_filter(@children).each do |p| ?>
+<?rb if p.is_read ?>
+@property auto #{p.pname}() const { 
+  return #{p.vname}; 
+}
+
+<?rb else ?>
+@property auto #{p.pname}(const ref #{p.type} #{p.pname}) { 
+  return #{p.vname} = #{p.pname}; 
+}
+
+<?rb end ?>
+<?rb end ?>
+<?rb member_filter(@children).each do |m| ?>
+<?rb if m.doc ?>
+#{Codegen.block_comment(m.doc)}
+<?rb end ?>
+<?rb if m.init ?>
+#{m.static_decl}#{m.type} #{m.vname} = #{m.init};
+<?rb else ?>
+#{m.static_decl}#{m.type} #{m.vname};
+<?rb end ?>
+<?rb end ?>
+<?rb template_filter(@children).each do |t| ?>
+<?rb if t.doc ?>
+#{Codegen.block_comment(t.doc)}
+<?rb end ?>
+template #{t.name.cap_camel}#{t.template_decl} { 
+<?rb if not t.children.empty? ?>
+<?rb Codegen.indent() ?>
+#{Codegen.indent_absolute_text(@@engine.render('scope_chooser.tmpl', { :children => t.children }))}
+<?rb Codegen.outdent() ?>
+<?rb end ?>
+}
+<?rb end ?>
+<?rb code_block_filter(@children).each do |cb| ?>
+#{Codegen.indent_absolute_text(cb.block, 0)}
+
+<?rb end ?>
+<?rb section_filter(@children).each do |s| ?>
+#{Codegen.protect_block(s.name)}
+
+<?rb end ?>

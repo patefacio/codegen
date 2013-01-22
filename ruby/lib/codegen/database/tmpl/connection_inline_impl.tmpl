@@ -1,0 +1,25 @@
+
+void reset() {
+  otl_connect *result(tss_connection_.get());
+  if(result) {
+    tss_connection_.reset();
+    pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Resetting otl_connect object for #{@me.database_name}: ",
+                   pantheios::hex_ptr(result));
+  }
+}
+
+otl_connect *get_connection() {
+  std::string const dsn("#{@me.database_name}");
+  otl_connect *result(tss_connection_.get());
+  if(0 == result) {
+    result = new otl_connect;
+    Connection_info connection_info(Connection_registry<>::get_instance()->retrieve_connection_info(dsn));
+    result->rlogon(connection_info.connection_string().c_str(), #{@me.auto_commit ? 1 : 0});
+    tss_connection_.reset(result);
+  }  
+
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Retrieving otl_connect for #{@me.database_name}: ",
+                 pantheios::hex_ptr(result));
+
+  return result;
+}

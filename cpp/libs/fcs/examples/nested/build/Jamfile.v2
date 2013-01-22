@@ -1,0 +1,18 @@
+import stage ;
+import package ;
+import os ;
+project fcs_examples_nested_examples
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     outer
+;
+
+lib fcs_examples_nested_examples
+    : $(SOURCES).cpp
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

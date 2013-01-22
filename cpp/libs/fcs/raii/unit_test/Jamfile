@@ -1,0 +1,88 @@
+import os ;
+project fcs_raii_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_raii
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_raii_test_suite : [ test_fcs_raii ] ;
+explicit fcs_raii_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe change_tracker_next_value_unit_test :
+         test_change_tracker_next_value.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=change_tracker_next_value_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit change_tracker_next_value_unit_test ;
+
+exe change_until_end_of_block_unit_test :
+         test_change_until_end_of_block.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=change_until_end_of_block_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit change_until_end_of_block_unit_test ;
+
+
+
+alias fcs_raii_unit_tests :
+   change_tracker_next_value_unit_test
+   change_until_end_of_block_unit_test
+  ;
+
+explicit fcs_raii_unit_tests ;
+
+

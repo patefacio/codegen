@@ -1,0 +1,41 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb ####################################################################### ?>
+<?rb ## Default ctor impl ?>
+<?rb ####################################################################### ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb start_capture :default_ctor_text ?>
+<?rb hide=@cls.hide_default_ctor ?>
+<?rb if @cls.ctor_default_decl ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}();
+<?rb elsif @cls.ctor_default ?>
+<?rb   if @cls.ctor_default_member_init_text.strip().length>0 ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}() :
+#{Codegen.indent_absolute_text(@cls.ctor_default_member_init_text, 1)} 
+<?rb   else ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}()
+<?rb   end ?>
+{
+<?rb   if @cls.log_ctor ?>
+#{i}pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Created #{@cls.name}(", 
+#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)),
+#{i}               pantheios::character(')'));
+<?rb   end ?>
+<?rb   if @cls.ctor_default_init_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} ctor default init")}
+<?rb elsif @cls.ctor_default_init_method or @cls.ctor_default_init_inline_method ?>
+#{i}ctor_default_init();
+<?rb elsif @cls.ctor_name == 'implementation' ?>
+#{Codegen.protect_block("implementation ctor default init")}
+<?rb elsif @cls.pimpl_ptr or @cls.pimpl_value ?>
+#{Codegen.protect_block("User_exposed_type_t ctor default init")}
+<?rb   end ?>
+}
+
+<?rb end ?>
+<?rb stop_capture ?>
+<?rb if !@default_ctor_text.strip().empty? ?>
+#{Codegen.indent_absolute_text(@default_ctor_text, (hide ? 0 : 1), :trim_blank_lines => true)}
+
+<?rb end ?>

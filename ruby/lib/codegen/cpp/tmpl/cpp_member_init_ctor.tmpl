@@ -1,0 +1,48 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb ####################################################################### ?>
+<?rb ## Member init ctor ?>
+<?rb ####################################################################### ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb hide=@cls.hide_member_init_ctor ?>
+<?rb start_capture :member_init_ctor_text ?>
+<?rb if @cls.additional_ctor_parms_come_second ?>
+<?rb ctor_parm_text_lines = @cls.member_ctor_member_parm_text_lines + @cls.additional_ctor_parms_text_lines ?>
+<?rb else ?>
+<?rb ctor_parm_text_lines = @cls.additional_ctor_parms_text_lines + @cls.member_ctor_member_parm_text_lines(hide) ?>
+<?rb end ?>
+<?rb if not @cls.ctor_member_template_decls.empty? ?>
+template < #{@cls.ctor_member_template_decls.join(','+Codegen::NL+'           ')} > 
+<?rb end ?>
+<?rb if ctor_parm_text_lines.length>0 or @cls.ctor_member ?>
+#{@cls.explicit_tag if !hide}#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}(
+#{Codegen.indent_absolute_text(ctor_parm_text_lines.join(','+Codegen::NL), 1)}
+    <?rb if @cls.ctor_member_init_text_lines.length>0 ?>
+) :
+#{Codegen.indent_absolute_text(@cls.ctor_member_init_text_lines.join(','+Codegen::NL), 1)}
+    <?rb else ?>
+)
+    <?rb end ?>
+{
+    <?rb if @cls.log_ctor ?>
+#{i}pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Created #{@cls.name}(", 
+#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)),
+#{i}               pantheios::character(')'));
+    <?rb end ?>
+    <?rb if @cls.ctor_member_init_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} ctor member init")}
+    <?rb elsif @cls.ctor_member_init_method or @cls.ctor_member_init_inline_method ?>
+#{i}ctor_member_init();
+    <?rb elsif @cls.ctor_name == 'implementation' ?>
+#{Codegen.protect_block("implementation ctor member init")}
+    <?rb elsif @cls.is_pimpl ?>
+#{Codegen.protect_block("User_exposed_type_t ctor member init")}
+    <?rb end ?>
+}
+<?rb end ?>
+<?rb stop_capture ?>
+<?rb if !@member_init_ctor_text.strip().empty? ?>
+#{Codegen.indent_absolute_text(@member_init_ctor_text, (hide ? 0 : 1), :trim_blank_lines => true)}
+
+<?rb end ?>

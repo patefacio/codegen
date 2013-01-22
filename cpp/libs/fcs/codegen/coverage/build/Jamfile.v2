@@ -1,0 +1,32 @@
+import stage ;
+import package ;
+project fcs_codegen_coverage_richdata
+    : source-location ../src
+    : requirements
+    ;
+
+SOURCES =
+;
+
+lib fcs_codegen_coverage_richdata
+    : $(SOURCES).cpp
+    : <link>static
+    ;
+
+# stage.install fcs_codegen_coverage_richdata_install_release : 
+#       fcs_codegen_coverage_richdata
+#   :   <link>shared <variant>release <location>$(FCS_INSTALL_PATH)/lib ;
+
+# stage.install fcs_codegen_coverage_richdata_install_debug : 
+#       fcs_codegen_coverage_richdata
+#   :   <link>shared <variant>debug <location>$(FCS_INSTALL_PATH)/lib ;
+
+
+#package.install fcs_codegen_coverage_richdata_install
+#                : <install-default-prefix>$(FCS_INSTALL_PATH)
+#                :
+#                : fcs_codegen_coverage_richdata
+#;
+
+
+# alias fcs_codegen_coverage_richdata_install : fcs_codegen_coverage_richdata_install_debug fcs_codegen_coverage_richdata_install_release ;

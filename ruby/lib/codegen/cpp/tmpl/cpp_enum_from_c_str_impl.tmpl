@@ -1,0 +1,16 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @me.supports_picklist ?>
+#{@me.impl_decorations}void from_c_str(char const* txt, #{@me.scope_to_class(@me.name)} &value) {
+<?rb @me.values.each_with_index do |value,i| ?>
+  if(0 == std::strcmp("#{@me.pick_list_text_values[i]}", txt)) {
+    value = #{@me.scope_to_class(value)};
+    return;
+  }
+<?rb end ?>
+  std::string msg("No #{@me.name} value corresponding to: ");
+  msg += txt;
+  throw std::runtime_error(txt);
+}
+<?rb end ?>

@@ -1,0 +1,1 @@
+ruby ./wad_repository.rb -i -pvimball -ptlib -pcode_complete

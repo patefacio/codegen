@@ -1,0 +1,148 @@
+import os ;
+project fcs_utils_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+
+  /site-config//boost_regex
+
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_utils
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_utils_test_suite : [ test_fcs_utils ] ;
+explicit fcs_utils_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe block_indenter_unit_test :
+         test_block_indenter.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=block_indenter_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit block_indenter_unit_test ;
+
+exe fixed_size_char_array_unit_test :
+         test_fixed_size_char_array.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=fixed_size_char_array_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit fixed_size_char_array_unit_test ;
+
+exe histogram_statistical_unit_test :
+         test_histogram_statistical.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=histogram_statistical_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit histogram_statistical_unit_test ;
+
+exe value_min_max_unit_test :
+         test_value_min_max.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=value_min_max_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit value_min_max_unit_test ;
+
+exe histogram_unit_test :
+         test_histogram.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=histogram_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit histogram_unit_test ;
+
+
+
+alias fcs_utils_unit_tests :
+   block_indenter_unit_test
+   fixed_size_char_array_unit_test
+   histogram_statistical_unit_test
+   value_min_max_unit_test
+   histogram_unit_test
+  ;
+
+explicit fcs_utils_unit_tests ;
+
+

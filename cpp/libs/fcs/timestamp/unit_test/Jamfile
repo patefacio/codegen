@@ -1,0 +1,92 @@
+import os ;
+project fcs_timestamp_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+
+  /site-config//boost_date_time
+  /site-config//boost_filesystem
+
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_timestamp
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_timestamp_test_suite : [ test_fcs_timestamp ] ;
+explicit fcs_timestamp_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe timestamp_unit_test :
+         test_timestamp.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=timestamp_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit timestamp_unit_test ;
+
+exe timestamp_from_file_unit_test :
+         test_timestamp_from_file.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=timestamp_from_file_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit timestamp_from_file_unit_test ;
+
+
+
+alias fcs_timestamp_unit_tests :
+   timestamp_unit_test
+   timestamp_from_file_unit_test
+  ;
+
+explicit fcs_timestamp_unit_tests ;
+
+

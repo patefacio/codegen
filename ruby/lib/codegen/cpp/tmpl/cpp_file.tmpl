@@ -1,0 +1,83 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+#{Codegen.cpp_copyright(@file_details.filename, @file_details.brief)}
+<?rb if @file_details.include_guard ?>
+#ifndef #{@file_details.include_guard}
+#define #{@file_details.include_guard}
+<?rb end ?>
+
+<?rb if 0 != @file_details.pre_include_defines.length ?>
+#{@file_details.pre_include_defines.join("\n")}
+<?rb end ?>
+<?rb if 0 != @file_details.pre_include_additions.length ?>
+#{@file_details.pre_include_additions.join("\n")}
+<?rb end ?>
+<?rb if 0 != @file_details.includes.length ?>
+#{Codegen::Cpp.clean_includes(@file_details.includes)}
+<?rb end ?>
+<?rb if 0 != @file_details.includes.length ?>
+
+<?rb end ?>
+<?rb if 0 != @file_details.pre_namespace_contents.length ?>
+#{@file_details.pre_namespace_contents}
+
+<?rb end ?>
+<?rb if @file_details.pre_namespace_section ?>
+#{Codegen.protect_block("file pre-namespace")}
+<?rb end ?>
+<?rb if 0 != @file_details.include_pre_namespace_custom.length ?>
+#{Codegen.protect_block("#{@file_details.fully_qualified_name} #{@file_details.include_pre_namespace_custom}")}
+
+<?rb end ?>
+<?rb indent_level = 0 ?>
+<?rb @file_details.namespace.each do |ns| ?>
+namespace #{ns} {
+<?rb indent_level = 1 ?>
+<?rb end ?>
+
+<?rb if @impl_classes ?>
+<?rb   @impl_classes.each do |ic| ?>
+#{Codegen.indent_absolute_text(ic.class_definition_wrapper, 1)} 
+
+#{Codegen.indent_absolute_text(ic.impl_contents, 1)} 
+
+<?rb   end ?>
+<?rb end ?>
+<?rb if 0 != @file_details.include_namespace_custom.length ?>
+#{Codegen.indent_text(Codegen.protect_block("#{@file_details.fully_qualified_name} #{@file_details.include_namespace_custom}"), indent_level)}
+
+<?rb end ?>
+<?rb if 0 != @file_details.namespace_contents.length ?>
+
+#{Codegen.indent_text(@file_details.namespace_contents, indent_level)}
+
+
+<?rb end ?>
+<?rb @file_details.namespace.reverse.each do |ns| ?>
+} // namespace #{ns}
+<?rb end ?>
+<?rb (0..indent_level).to_a.each { |x| Codegen.outdent() } ?>
+
+<?rb if @file_details.post_namespace_section ?>
+#{Codegen.protect_block("file post-namespace")}
+<?rb end ?>
+<?rb if 0 != @file_details.post_namespace_contents.length ?>
+#{@file_details.post_namespace_contents}
+<?rb end ?>
+
+<?rb if 0 != @file_details.include_post_namespace_custom.length ?>
+#{Codegen.protect_block("#{@file_details.fully_qualified_name} #{@file_details.include_post_namespace_custom}")}
+
+<?rb end ?>
+<?rb if @file_details.version_control_commit ?>
+namespace {
+  fcs::utils::Version_control_commit::Version_control_commit::Pointer_t 
+    version_control_commit(fcs::utils::Version_control_commit::get_instance());
+}
+<?rb end ?>
+<?rb if @file_details.include_guard ?>
+#endif
+<?rb end ?>

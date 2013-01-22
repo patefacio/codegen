@@ -1,0 +1,9 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb @me.methods.each do |method| ?>
+
+virtual #{method[:return]}
+#{method[:name]}(#{method[:arg_typed_names].join(', ')}) = 0;
+
+<?rb end ?>

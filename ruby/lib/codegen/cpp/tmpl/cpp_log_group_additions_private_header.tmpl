@@ -1,0 +1,21 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+void ctor_default_init() {
+  compound_data_type_id_ = H5Tcreate( H5T_COMPOUND, sizeof(#{@cls.name}) );
+<?rb @group_members.each do |m| ?>
+<?rb if m.cpp_type =~ /Fixed_size_char_array/ ?>
+
+  // space for #{m.cpp_type}
+  #{m.name}_hid_ = H5Tcopy(H5T_C_S1);
+  H5Tset_size(#{m.name}_hid_, #{m.fixed_size_char_array_size});
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Created #{@cls.name} string data type #{m.name}:", pantheios::integer(#{m.name}_hid_));
+  H5Tinsert( compound_data_type_id_, "#{m.name}", HOFFSET( #{@cls.name}, #{m.variable_name} ), #{m.name}_hid_);
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Created #{@cls.name} compound_data_type:", pantheios::integer(compound_data_type_id_));
+
+<?rb else ?>
+  // space for #{m.cpp_type}
+  H5Tinsert( compound_data_type_id_, "#{m.name}", HOFFSET( #{@cls.name}, #{m.variable_name} ), #{@self.h5_type m.cpp_type} );
+<?rb end ?>
+<?rb end ?>
+}

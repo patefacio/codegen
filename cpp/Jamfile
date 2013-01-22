@@ -1,0 +1,268 @@
+import package ;
+import common ;
+import os ;
+import feature : set-default ;
+
+constant CODEGEN_INSTALL_PATH : /home/dbdavidson/open_source/codegen_install ;
+constant TOP : /home/dbdavidson/open_source/codegen/cpp ;
+
+local rule explicit-alias ( id : targets + )
+{
+    alias $(id) : $(targets) ;
+    explicit $(id) ;
+}
+
+#          <cxxflags>/P
+#          <cxxflags>/showIncludes
+#          <toolset>msvc:<linkflags>/VERBOSE:LIB
+
+if [ os.on-windows ] 
+{
+project fcs_projects
+        : requirements 
+          <define>BOOST_ALL_DYN_LINK
+          <define>_SCL_SECURE_NO_WARNINGS
+          <toolset>intel:<define>WIN32
+          <tag>@$(__name__).tag
+          <include>$(BOOST_INCLUDE_PATH)
+          <include>$(TINYJSON_INCLUDE_PATH)
+	  <include>$(HDF5_INCLUDE_PATH)
+	  <include>$(PANTHEIOS_INCLUDE_PATH)
+	  <include>$(STLSOFT_INCLUDE_PATH)
+          <include>$(STL_INCLUDE_PATH)
+          <include>$(OTL_INCLUDE_PATH)
+          <include>.
+          <library-path>$(BOOST_LIB_PATH)
+	  <library-path>$(HDF5_LIB_PATH)
+	  <library-path>$(PANTHEIOS_LIB_PATH)
+          <toolset>msvc:<define>WIN32
+	  <toolset>msvc:<linkflags>/NODEFAULTLIB:libcmt
+	  <toolset>msvc:<linkflags>/NODEFAULTLIB:libcmtd
+          <toolset>msvc:<cxxflags>/wd4100                  
+          <toolset>msvc:<cxxflags>/wd4996
+          <toolset>msvc:<cxxflags>/W3
+# This looked like a good idea but does no work if you want both static
+# and dynamic linked libraries. The problem is, if a library is shared
+# only (no static version) then the dll will be built with proper dll
+# exports, but the client static libs that use that shared lib will have
+# this flag set and thus will not have proper dllimports
+#          <link>static:<define>GLOBAL_STATIC_LINKAGE
+        :
+        : build-dir ../../build-dir
+        ;
+
+} 
+else 
+{
+
+project fcs_projects
+        : requirements 
+          <define>BOOST_ALL_DYN_LINK
+          <define>OTL_ODBC_UNIX 
+          <define>BOOST_FILESYSTEM_VERSION=3
+          <variant>debug:<define>DEBUG
+          <toolset>gcc:<cxxflags>-fPIC
+          <toolset>gcc:<cxxflags>-Wno-invalid-offsetof
+          <toolset>gcc:<cxxflags>-Wno-deprecated-declarations
+          <toolset>gcc:<cxxflags>-std=c++0x
+          <linkflags>-lpthread
+          <include>$(BOOST_INCLUDE_PATH)
+          <tag>@$(__name__).tag
+          <include>.
+          <toolset>intel:<cxxflags>-std=c++0x
+          <toolset>intel:<cxxflags>-Qoption,cpp,--rvalue_ctor_is_not_copy_ctor
+          <toolset>intel:<define>BOOST_CALLBACK_EXPLICIT_COPY_CONSTRUCTOR
+          <toolset>intel:<linkflags>-i-static
+          <toolset>intel:<linkflags>-i-static
+          <library>/site-config//boost_thread
+          <library>/site-config//boost_system
+          <library>/site-config//pantheios_core
+        :
+        : build-dir ../../build-dir
+        ;
+
+}
+
+#layout = versioned ;
+
+# fcs_utils is header-only
+explicit-alias fcs_utils_test : libs/fcs/utils/unit_test ;
+# fcs_utils_exception is header-only
+# fcs_utils_synch is header-only
+# fcs_utils_performance is header-only
+explicit-alias fcs_utils_performance_test : libs/fcs/utils/performance/unit_test ;
+# fcs_utils_streamers_table is header-only
+explicit-alias fcs_utils_streamers_table_test : libs/fcs/utils/streamers/table/unit_test ;
+# fcs_utils is header-only
+# fcs_patterns is header-only
+explicit-alias fcs_patterns_test : libs/fcs/patterns/unit_test ;
+# fcs_dev is header-only
+explicit-alias fcs_dev_test : libs/fcs/dev/unit_test ;
+# fcs_codegen_coverage_richdata is header-only
+explicit-alias fcs_codegen_coverage_richdata_test : libs/fcs/codegen/coverage/unit_test ;
+# fcs_table is header-only
+explicit-alias fcs_table_test : libs/fcs/table/unit_test ;
+# fcs_h5 is header-only
+explicit-alias fcs_h5_test : libs/fcs/h5/unit_test ;
+# fcs_h5_utils is header-only
+explicit-alias fcs_h5_utils_test : libs/fcs/h5/utils/unit_test ;
+# fcs_h5_table is header-only
+explicit-alias fcs_h5_table_test : libs/fcs/h5_table/unit_test ;
+# fcs_gui_environment_selection is static_only
+alias fcs_gui_environment_selection : libs/fcs/gui/environment/build//fcs_gui_environment_selection ;
+explicit-alias fcs_gui_environment_selection_test : libs/fcs/gui/environment/unit_test ;
+# fcs_gui_selection is static_only
+alias fcs_gui_selection : libs/fcs/gui/selection/build//fcs_gui_selection ;
+explicit-alias fcs_gui_selection_test : libs/fcs/gui/selection/unit_test ;
+# fcs_gui_search_selection is static_only
+alias fcs_gui_search_selection : libs/fcs/gui/search/build//fcs_gui_search_selection ;
+# fcs_gui_table is static_only
+alias fcs_gui_table : libs/fcs/gui/table/build//fcs_gui_table ;
+explicit-alias fcs_gui_table_test : libs/fcs/gui/table/unit_test ;
+# fcs_orm is header-only
+explicit-alias fcs_orm_test : libs/fcs/orm/unit_test ;
+# fcs_orm_test is header-only
+# fcs_table_test_table is header-only
+# fcs_environment is header-only
+explicit-alias fcs_environment_test : libs/fcs/environment/unit_test ;
+# fcs_app_sig_handler_application_signal_handler is header-only
+# fcs_linux_specific is header-only
+explicit-alias fcs_linux_specific_test : libs/fcs/linux_specific/unit_test ;
+# fcs_raii is header-only
+explicit-alias fcs_raii_test : libs/fcs/raii/unit_test ;
+# fcs_timestamp is header-only
+explicit-alias fcs_timestamp_test : libs/fcs/timestamp/unit_test ;
+# fcs_mongoid is header-only
+explicit-alias fcs_mongoid_test : libs/fcs/mongoid/unit_test ;
+# fcs_orm_system_table_system is header-only
+# fcs_orm_system is header-only
+# fcs_orm_code_metrics_table_code_metrics is header-only
+# fcs_orm_code_metrics is header-only
+explicit-alias fcs_orm_code_metrics_test : libs/fcs/orm/code_metrics/unit_test ;
+# fcs_orm_code_metrics_query is header-only
+
+################################################################################
+# Install targets
+################################################################################
+package.install fcs_install_libs_debug : <install-default-prefix>$(FCS_INSTALL_PATH) <variant>debug : :
+    fcs_gui_environment_selection
+    fcs_gui_selection
+    fcs_gui_search_selection
+    fcs_gui_table
+    ;
+
+package.install fcs_install_libs_release : <install-default-prefix>$(FCS_INSTALL_PATH) <variant>release : :
+    fcs_gui_environment_selection 
+    fcs_gui_selection 
+    fcs_gui_search_selection 
+    fcs_gui_table 
+    ;
+
+alias fcs_libs : 
+     fcs_gui_environment_selection 
+     fcs_gui_selection 
+     fcs_gui_search_selection 
+     fcs_gui_table 
+     ;
+
+alias fcs_install_libs : fcs_install_libs_debug fcs_install_libs_release ;
+
+# all apps
+alias delimited_file_read_write_test : apps/test/delimited_file_read_write_test//delimited_file_read_write_test ;
+alias h5data_set2csv : apps/h5data_set2csv//h5data_set2csv ;
+alias timing_report : apps/timing_report//timing_report ;
+alias display_csv : apps/display_csv//display_csv ;
+alias cpu_info : apps/cpu_info/cpu_info//cpu_info ;
+alias date_time_converter : apps/date_time_converter//date_time_converter ;
+alias performance_timers : apps/performance/performance_timers//performance_timers ;
+
+alias fcs_apps : 
+     delimited_file_read_write_test 
+     h5data_set2csv 
+     timing_report 
+     display_csv 
+     cpu_info 
+     date_time_converter 
+     performance_timers 
+     ;
+
+
+############ Install apps
+alias fcs_install_apps : 
+    apps/test/delimited_file_read_write_test//install_app
+    apps/h5data_set2csv//install_app
+    apps/timing_report//install_app
+    apps/display_csv//install_app
+    apps/cpu_info/cpu_info//install_app
+    apps/date_time_converter//install_app
+    apps/performance/performance_timers//install_app
+;
+explicit fcs_install_apps ;
+
+
+alias fcs_unit_tests :
+     fcs_install_libs
+     fcs_utils_test
+     fcs_utils_performance_test
+     fcs_utils_streamers_table_test
+     fcs_patterns_test
+     fcs_dev_test
+     fcs_codegen_coverage_richdata_test
+     fcs_table_test
+     fcs_h5_test
+     fcs_h5_utils_test
+     fcs_h5_table_test
+     fcs_gui_environment_selection_test
+     fcs_gui_selection_test
+     fcs_gui_table_test
+     fcs_orm_test
+     fcs_environment_test
+     fcs_linux_specific_test
+     fcs_raii_test
+     fcs_timestamp_test
+     fcs_mongoid_test
+     fcs_orm_code_metrics_test
+;
+
+fcs_headers = [ path.glob-tree fcs : *.hpp *.h *.ipp *.inc ] ;
+package.install fcs_install_headers
+  : 
+  <install-source-root>../cpp 
+  <install-default-prefix>$(FCS_INSTALL_PATH)
+  :
+  :
+  : $(fcs_headers)
+;
+
+alias fcs_install :
+      fcs_install_libs
+      fcs_install_apps
+      fcs_install_headers
+;
+
+alias fcs_install_debug :
+      fcs_install_headers
+      fcs_install_libs_debug
+;
+
+alias fcs_install_release :
+      fcs_install_headers
+      fcs_install_libs_release
+;
+
+alias fcs_tests : 
+      fcs_install
+      fcs_unit_tests
+      tests/singleton
+      tests/api_initializer
+;
+
+alias fcs_all : fcs_libs fcs_tests ;
+
+################################################################################
+# Aliases to pin Qt to shared libraries
+################################################################################
+alias fcs_qt_gui : /qt5//QtGui/<link>shared : : : ;
+alias fcs_qt_core : /qt5//QtCore/<link>shared : : : ;
+alias fcs_qt_widgets : /qt5//QtWidgets/<link>shared : : : ;
+alias fcs_qt : fcs_qt_widgets ;

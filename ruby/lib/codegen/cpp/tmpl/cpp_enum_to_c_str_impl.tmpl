@@ -1,0 +1,22 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{@me.impl_decorations}char const* to_c_str(#{@me.scope_name} e) {
+<?rb if @me.assigned_values ?>
+  switch(e) {
+<?rb @me.values.each_with_index do |value,i| ?>
+    case #{@me.scope_to_class(value)}: return "#{@me.pick_list_text_values[i]}";
+<?rb end ?>
+  }
+  return "INVALID_#{@me.name.upcase}";
+<?rb else ?>
+  char const* values[] = {
+<?rb @me.values.each_with_index do |value,i| ?>
+    "#{@me.pick_list_text_values[i]}"#{',' if i < (@me.values.length - 1)}
+<?rb end ?>
+  };
+  size_t index(e);
+  return ((index < #{@me.scope_to_class @me.size_enum_name})? values[index] : "INVALID_#{@me.name.upcase}");
+<?rb end ?>
+}
+

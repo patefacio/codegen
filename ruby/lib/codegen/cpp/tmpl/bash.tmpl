@@ -1,0 +1,10 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'place' ?>
+export PATH=#{Place['bin']}:$PATH
+export LD_LIBRARY_PATH=#{Place['boost_lib']}:#{Place['fcs_install']}:$LD_LIBRARY_PATH
+export RUBYLIB=#{Place['ruby_lib']}
+export BOOST_BUILD_PATH=#{Place.packages_by_name['boost-build'].install_path}
+export FASTFORMAT_ROOT=#{Place.packages_by_name['pantheios'].install_path}
+export STLSOFT=#{Place.packages_by_name['stlsoft'].install_path}

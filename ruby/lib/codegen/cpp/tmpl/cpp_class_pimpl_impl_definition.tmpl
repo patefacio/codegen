@@ -1,0 +1,12 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+// Class exposed in the header for user consumption
+typedef #{@cls.fully_qualified_name} User_exposed_type_t;
+
+<?rb @cls.pimpl_typedefs.each do |td| ?>
+#{Codegen::Cpp.clean_typedef(td)};
+<?rb end ?>
+
+// Hidden class containing the data fields and actual implementation
+#{@cls.pimpl_impl_class.class_definition_wrapper}

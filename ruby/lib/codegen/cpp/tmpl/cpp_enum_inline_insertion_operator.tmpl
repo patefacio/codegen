@@ -1,0 +1,7 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{"friend " if @me.scope_class}inline std::ostream& operator<<(std::ostream &out, #{@me.scope_name} e) {
+  return out << to_c_str(e);
+}
+

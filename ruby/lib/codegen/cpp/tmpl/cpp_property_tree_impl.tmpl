@@ -1,0 +1,27 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent ?>
+<?rb if @cls.property_tree ?>
+void #{@cls.name}::to_stream_as_property_tree(std::ostream &out) const {
+
+}
+
+void #{@cls.name}::from_stream_as_property_tree(std::istream &in) {
+
+}
+
+void #{@cls.name}::to_property_tree(std::string const& path, boost::property_tree::ptree & out) const {
+<?rb @cls.serializable_members.each do |m| ?>
+#{i}fcs::utils::serialize::put_to_property_tree(path + ".#{m.name}", out, #{m.variable_name});
+<?rb end ?>
+}
+
+void #{@cls.name}::from_property_tree(std::string const& path, boost::property_tree::ptree const& in) {
+<?rb @cls.serializable_members.each do |m| ?>
+#{i}fcs::utils::serialize::get_from_property_tree(path + ".#{m.name}", in, #{m.variable_name});
+<?rb end ?>
+}
+
+
+<?rb end ?>

@@ -1,0 +1,36 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @mod.doc ?>
+#{Codegen.block_comment(@mod.doc)}
+
+<?rb end ?>
+module #{@qualified_name};
+
+<?rb if not @mod.public_imports.empty? ?>
+public import #{@mod.public_imports.join(";#{Codegen::NL}public import ")};
+<?rb end ?>
+<?rb if not @mod.imports.empty? ?>
+import #{@mod.imports.join(";#{Codegen::NL}import ")};
+
+<?rb end ?>
+<?rb if not @mod.debug_imports.empty? ?>
+debug import #{@mod.debug_imports.join(";#{Codegen::NL}debug import ")};
+
+<?rb end ?>
+<?rb if not @mod.children.empty? ?>
+#{@@engine.render('scope_chooser.tmpl', {:owner => @mod, :children => @mod.children }).chomp}
+<?rb end ?>
+<?rb if @mod.unit_test ?>
+#{@@engine.render('unit_test.tmpl', { :me => @mod.unit_test, :owner => @mod })}
+<?rb end ?>
+<?rb if @mod.static_this ?>
+static this { 
+#{Codegen.protect_block('module static this')}
+}
+<?rb end ?>
+<?rb if @mod.open_source ?>
+#{Codegen.block_comment(Codegen.open_source_notice)}
+<?rb else ?>
+#{Codegen.block_comment(Codegen.d_copyright)}
+<?rb end ?>

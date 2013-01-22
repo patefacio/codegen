@@ -1,0 +1,10 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+
+static if(1) unittest { 
+<?rb if not @me.children.empty? ?>
+#{Codegen.indent_absolute_text(@@engine.render('scope_chooser.tmpl', { :children => @me.children, :owner => @me.owner })).chomp}
+<?rb end ?>
+#{Codegen.protect_block(@me.name)}
+}

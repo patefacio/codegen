@@ -1,0 +1,21 @@
+import stage ;
+import package ;
+import os ;
+project fcs_gui_environment_selection
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     q_environment
+     tree_path_model
+;
+
+lib fcs_gui_environment_selection
+    : $(SOURCES).cpp
+      ../../../../../fcs/gui/environment/q_environment.hpp
+      $(TOP)//fcs_qt
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

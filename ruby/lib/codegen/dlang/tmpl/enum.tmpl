@@ -1,0 +1,17 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @enum.doc ?>
+#{Codegen.block_comment(@enum.doc)}
+<?rb end ?>
+enum #{@enum.name.cap_camel} { 
+<?rb start_capture('guts') do ?>
+<?rb @enum.values.each do |v| ?>
+<?rb if v.doc ?>
+#{Codegen.block_comment(v.doc)}
+<?rb end ?>
+#{v.decl},
+<?rb end ?>
+<?rb end ?>
+#{Codegen.indent_absolute_text(Codegen.comma_chop(@guts))}
+}

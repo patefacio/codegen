@@ -1,0 +1,22 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'place' ?>
+CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+project (FCS)
+
+<?rb Place.system_include_macros.keys.sort.each do |var| ?>
+set (#{Place.system_include_macros[var]} #{Place.system_include_paths[var]})
+<?rb end ?>
+
+
+<?rb @all_libs.each do |lib| ?>
+<?rb if lib.header_path_macro ?>
+set (#{lib.header_path_macro} #{lib.header_path.relative_path_from(Place.place['cpp'])})
+<?rb end ?>
+add_subdirectory (#{lib.cpp_path.relative_path_from(Place.place['cpp'])})
+<?rb end ?>
+
+<?rb @all_apps.each do |app| ?>
+add_subdirectory (#{app.cpp_path.relative_path_from(Place.place['cpp'])})
+<?rb end ?>

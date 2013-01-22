@@ -1,0 +1,57 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @cls.streamable_friend_decl_required ?>
+// Support for streaming non-static streamable members of #{@cls.name}
+<?rb if @cls.streamable_inline or @cls.streamable_inline_custom ?>
+#{@cls.template_decl('inline')}
+<?rb end ?>
+#{@cls.api_decl_space}std::ostream& operator<<(std::ostream& out, #{@cls.scoped(@cls.templatized(@cls.name))} const& item) {
+<?rb if @cls.streamers_included ?>
+#{i}using fcs::utils::streamers::operator<<;
+<?rb end ?>
+<?rb if @cls.streamable_custom or @cls.streamable_inline_custom ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} custom streamer")}
+<?rb else ?>
+<?rb if not @cls.no_block_indenter ?>
+#{i}fcs::utils::Block_indenter indenter;
+#{i}char const* indent(indenter.current_indentation_text());
+<?rb else ?>
+#{i}char const* indent("  ");
+<?rb end ?>
+#{i}out << '\n' << indent << "#{@cls.name}:(" << &item << "):{";
+<?rb @cls.streamed_bases.each do |sb| ?>
+#{i}out << '\n' << indent << "  base:" << static_cast<#{sb} const&>(item);
+<?rb end ?>
+<?rb @cls.streamable_members.each do |m| ?>
+<?rb if m.streamable_custom ?>
+#{Codegen.protect_block("#{m.name} custom streamer")}
+<?rb else ?>
+<?rb if m.stream_insert_override ?>
+#{i}out << '\n' << indent << "  #{m.name}:" << #{m.stream_insert_override};
+<?rb elsif m.stream_deref ?>
+#{i}out << '\n' << indent << "  #{m.name}:";
+#{i}if(item.#{m.variable_name}) { 
+#{i}  out << *item.#{m.variable_name};
+#{i}} else { 
+#{i}  out << "(null)";
+#{i}} 
+<?rb elsif m.stream_deref_with_address ?>
+#{i}out << '\n' << indent << "  #{m.name}:(" << item.#{m.variable_name} << ") ";
+#{i}if(item.#{m.variable_name}) { 
+#{i}  out << *item.#{m.variable_name};
+#{i}} else { 
+#{i}  out << "(null)";
+#{i}} 
+<?rb else ?>
+#{i}out << '\n' << indent << "  #{m.name}:" << item.#{m.variable_name};
+<?rb end ?>
+<?rb end ?>
+<?rb end ?>
+#{i}out << indent << "}\n";
+<?rb end ?>
+#{i}return out;
+}
+
+<?rb end ?>

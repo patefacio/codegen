@@ -1,0 +1,23 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb public_children = @owner.public_filter @children ?>
+<?rb if not public_children.empty? ?>
+#{@@engine.render('scoped_decls.tmpl', {:children => public_children, :scope => :public, :owner => @owner}).chomp}
+<?rb end ?>
+<?rb export_children = @owner.export_filter @children ?>
+<?rb if not export_children.empty? ?>
+#{scope(:export, @@engine.render('scoped_decls.tmpl', {:children => export_children, :scope => :export, :owner => @owner}))}
+<?rb end ?>
+<?rb protected_children = @owner.protected_filter @children ?>
+<?rb if not protected_children.empty? ?>
+#{scope(:protected, @@engine.render('scoped_decls.tmpl', {:children => protected_children, :scope => :protected, :owner => @owner}))}
+<?rb end ?>
+<?rb package_children = @owner.package_filter @children ?>
+<?rb if not package_children.empty? ?>
+#{scope(:package, @@engine.render('scoped_decls.tmpl', {:children => package_children, :scope => :package, :owner => @owner}))}
+<?rb end ?>
+<?rb private_children = @owner.private_filter @children ?>
+<?rb if not private_children.empty? ?>
+#{scope(:private, @@engine.render('scoped_decls.tmpl', {:children => private_children, :scope => :private, :owner => @owner}))}
+<?rb end ?>

@@ -1,0 +1,43 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb ####################################################################### ?>
+<?rb ## Copy ctor impl ?>
+<?rb ####################################################################### ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb start_capture :copy_ctor_text ?>
+<?rb hide=@cls.hide_copy_ctor ?>
+<?rb if @cls.ctor_copy_decl ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}(#{@cls.ctor_name} const& other);
+<?rb elsif @cls.ctor_copy ?>
+<?rb   if @cls.ctor_copy_member_init_text.strip().length>0 ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}(#{@cls.ctor_name} const& other) :
+#{Codegen.indent_absolute_text(@cls.ctor_copy_member_init_text, 1)} 
+<?rb   else ?>
+#{hide ? "#{@cls.name}::" : ''}#{@cls.ctor_name}(#{@cls.ctor_name} const& other)
+<?rb   end ?>
+{
+<?rb   if @cls.log_ctor ?>
+#{i}pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Created copy #{@cls.name}(", 
+#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)),
+#{i}               ") of (", 
+#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)), 
+#{i}               pantheios::character(')');
+<?rb   end ?>
+<?rb   if @cls.ctor_copy_init_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} ctor copy init")}
+<?rb elsif @cls.ctor_copy_init_method or @cls.ctor_copy_init_inline_method ?>
+#{i}ctor_copy_init();
+<?rb elsif @cls.ctor_name == 'implementation' ?>
+#{Codegen.protect_block("implementation ctor copy init")}
+<?rb elsif @cls.pimpl_ptr or @cls.pimpl_value ?>
+#{Codegen.protect_block("User_exposed_type_t ctor copy init")}
+<?rb   end ?>
+}
+
+<?rb end ?>
+<?rb stop_capture ?>
+<?rb if !@copy_ctor_text.strip().empty? ?>
+#{Codegen.indent_absolute_text(@copy_ctor_text, (hide ? 0 : 1), :trim_blank_lines => true)}
+
+<?rb end ?>

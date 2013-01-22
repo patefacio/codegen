@@ -1,0 +1,27 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+import stage ;
+import package ;
+import os ;
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+project header_tests
+    : 
+    : 
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+<?rb @sources.each do |s| ?>
+     #{s.basename.to_s.sub(s.extname, '')}
+<?rb end ?>
+;
+
+lib header_tests
+    : $(SOURCES).cpp
+      $(TOP)//fcs_qt
+      /site-config//otl
+      /site-config//hdf5_hl_cpp
+    : <cxxflags>$(ENV_CXXFLAGS) <include>$(TBB_INCLUDE_PATH) <link>static
+    ;
+

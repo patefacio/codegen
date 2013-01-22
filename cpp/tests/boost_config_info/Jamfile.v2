@@ -1,0 +1,12 @@
+ECHO "Processing boost_config_info test" ;
+exe boost_config_info
+    : boost_config_info.cpp
+    :
+    ;
+
+exe boost_math_info
+    : boost_math_info.cpp
+    : 
+    ;
+
+

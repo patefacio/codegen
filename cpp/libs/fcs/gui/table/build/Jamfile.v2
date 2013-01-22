@@ -1,0 +1,21 @@
+import stage ;
+import package ;
+import os ;
+project fcs_gui_table
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     q_table_view
+     q_table_model
+     q_item_data_role_handler
+;
+
+lib fcs_gui_table
+    : $(SOURCES).cpp
+      $(TOP)//fcs_qt
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

@@ -1,0 +1,29 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+
+//! Name of this api
+inline
+char const* api_name() {
+  return "#{@cls.namespace.join('::')}::#{@cls.name}";
+}
+<?rb if !@cls.library.header_only ?>
+
+//! Name of this library
+inline
+char const* library_name() {
+  return "#{@cls.library.name}";
+}
+<?rb end ?>
+
+//! Description of this api
+inline
+char const* api_description() {
+  return #{Codegen::Cpp.make_c_string_literal(@cls.library.descr)};
+}
+
+inline
+std::pair< char const*, char const* >
+api_name_and_description() {
+  return std::pair< char const*, char const* >(api_name(), api_description()); 
+}

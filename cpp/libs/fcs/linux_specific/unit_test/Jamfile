@@ -1,0 +1,92 @@
+import os ;
+project fcs_linux_specific_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+
+   /site-config//boost_regex
+   /site-config//boost_filesystem
+
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_linux_specific
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_linux_specific_test_suite : [ test_fcs_linux_specific ] ;
+explicit fcs_linux_specific_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe cpu_info_unit_test :
+         test_cpu_info.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=cpu_info_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit cpu_info_unit_test ;
+
+exe umask_scoped_set_unit_test :
+         test_umask_scoped_set.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=umask_scoped_set_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit umask_scoped_set_unit_test ;
+
+
+
+alias fcs_linux_specific_unit_tests :
+   cpu_info_unit_test
+   umask_scoped_set_unit_test
+  ;
+
+explicit fcs_linux_specific_unit_tests ;
+
+

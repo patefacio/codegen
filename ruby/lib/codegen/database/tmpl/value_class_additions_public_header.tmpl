@@ -1,0 +1,27 @@
+
+#{@table.value_field_update_class}() {
+}
+
+// Differencing ctor - provides value update which if applied to first yields second
+#{@table.value_field_update_class}(#{@table.value_class} const& first, #{@table.value_class} const& second) {
+<?rb @table.value_columns.each do |column| ?>
+  if(!(first.#{column.name}_ == second.#{column.name}_)) {
+    #{column.name}(second.#{column.name}_);
+  }
+<?rb end ?>
+}
+
+<?rb @table.value_columns.each do |column| ?>
+void #{column.name}(#{column.cpp_type} const& val) {
+  this->operator[](#{column.value_enum_scoped_name}) = val;  
+}
+<?rb end ?>
+
+void dump(std::ostream &out) const {
+  std::map< #{@table.value_enum_scoped_name}, boost::any >::const_iterator found;
+<?rb @table.value_columns.each do |column| ?>
+  if((found = this->find(#{column.value_enum_scoped_name})) != this->end()) {
+    out << "-- #{column.name} => " << boost::any_cast< #{column.cpp_type} const& >(found->second) << '\n';
+  }
+<?rb end ?>
+}

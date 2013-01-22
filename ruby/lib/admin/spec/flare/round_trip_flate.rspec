@@ -1,0 +1,27 @@
+require "spec_helper"
+require "package"
+require "flare"
+require "yaml"
+include Flare
+
+$root = Pathname.new(File.expand_path(__FILE__)).parent.parent.parent
+
+describe Flare do
+  it "understands tar files" do
+    determine_flate_type('/some_dir/some_file.tar').should eq(['some_file', FlateTypes::TAR])
+  end
+  it "understands gz files" do
+    determine_flate_type('/some_dir/some_file.gz').should eq(['some_file', FlateTypes::GZ])
+  end
+  it "understands bz2 files" do
+    determine_flate_type('/some_dir/some_file.bz2').should eq(['some_file', FlateTypes::BZ2])
+  end
+  it "understands tar bz2 files" do
+    determine_flate_type('/some_dir/some_file.tar.bz2').should eq(['some_file', FlateTypes::TAR_BZ2])
+  end
+  it "understands tar lzma files" do
+    determine_flate_type('/some_dir/some_file.tar.lzma').should eq(['some_file', FlateTypes::TAR_LZMA])
+  end
+end
+
+

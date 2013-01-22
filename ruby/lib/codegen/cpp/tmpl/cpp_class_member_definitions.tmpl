@@ -1,0 +1,27 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb ####################################################################### ?>
+<?rb ## Member attributes ?>
+<?rb ####################################################################### ?>
+<?rb [ 
+     [ 'public', @cls.public_members ], 
+     [ 'protected', @cls.protected_members ],  
+     [ 'private', @cls.private_members ] ].each do |access, members| ?>
+<?rb next if members.select {|m| !m.pimpl }.length==0 ?>
+#{access}:
+<?rb members.each do |m| ?>
+<?rb if m.brief ?>
+#{m.ifdef "#{i}//! #{m.brief} <I>#{m.access_text}</I>"}
+<?rb end ?>
+<?rb if m.descr ?>
+#{i}/** 
+#{i}#{Codegen.indent_text(m.descr)}
+#{i} */
+<?rb end ?>
+<?rb static = (m.static)? 'static ' : (m.mutable)? 'mutable ' :  '' ?>
+<?rb store_by_ref_type = (m.store_by_ref)? '& ' : (m.store_by_cref)? 'const & ' : '' ?>
+#{m.ifdef "#{i}#{static}#{m.cvq_type} #{store_by_ref_type}#{m.variable_name};"}
+<?rb end ?>
+<?rb end ?>

@@ -1,0 +1,4 @@
+exe template_static_link_example
+    : template_static_link_example.cpp other_translation_unit.cpp
+    : <link>static 
+    ;

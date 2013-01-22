@@ -1,0 +1,90 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'cpp_paths' ?>
+import project ;
+import feature ;
+import os ;
+
+project.initialize $(__name__) : #{Place['boost-build_install']} ;
+project site-config ;
+
+<?rb Place.jam_place.keys.sort.each do |var| ?>
+path-constant #{var} : #{Place.jam_place[var]} ;
+<?rb end ?>
+path-constant MPI_INCLUDE_PATH : /usr/lib/openmpi/include ;
+path-constant MPI_LIB_PATH : /usr/lib/openmpi/lib ;
+
+alias stlsoft : : : : <include>$(STLSOFT_INCLUDE_PATH) ;
+
+######################################################################
+# PANTHEIOS SUPPORT
+######################################################################
+lib pantheios_util : stlsoft : <name>pantheios.1.util.gcc46.mt : : <include>$(PANTHEIOS_INCLUDE_PATH) <library-path>$(PANTHEIOS_LIB_PATH) ;
+lib pantheios_bec_fprintf : pantheios_util : <name>pantheios.1.bec.fprintf.gcc46.mt : : <include>$(PANTHEIOS_INCLUDE_PATH) ;
+lib pantheios_be_fprintf : pantheios_bec_fprintf : <name>pantheios.1.be.fprintf.gcc46.mt : : <include>$(PANTHEIOS_INCLUDE_PATH) ;
+lib pantheios_fe_all : : <name>pantheios.1.fe.all.gcc46.mt : : <include>$(PANTHEIOS_INCLUDE_PATH) ;
+lib pantheios_core : pantheios_util pantheios_be_fprintf pantheios_fe_all : <name>pantheios.1.core.gcc46.mt : : <include>$(PANTHEIOS_INCLUDE_PATH) ;
+
+constant PANTHEIOS_LIBS :
+      /site-config//pantheios_core
+      /site-config//pantheios_fe_all
+      /site-config//pantheios_be_fprintf
+      /site-config//pantheios_bec_fprintf
+      /site-config//pantheios_util
+;
+
+######################################################################
+# BOOST SUPPORT
+######################################################################
+lib dl : : <file>/usr/lib/x86_64-linux-gnu/libdl.a ;
+lib pthread : dl : <file>/usr/lib/x86_64-linux-gnu/libpthread.a ;
+<?rb libs = [ 'filesystem', 'regex', 'system', 'program_options', 'serialization', 'date_time', 'test_exec_monitor', 'chrono']  ?>
+<?rb libs.each do |lib|  ?>
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt-d.a <variant>debug ;
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt-d.a <variant>profile ;
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt.a <variant>release ;
+<?rb end ?>
+<?rb libs = [ 'thread',  ]  ?>
+<?rb libs.each do |lib|  ?>
+# lib boost_#{lib} : pthread : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt-d.a <variant>debug ;
+# lib boost_#{lib} : pthread : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt.a <variant>release ;
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt-d.a <variant>debug ;
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt-d.a <variant>profile ;
+lib boost_#{lib} : : <file>$(BOOST_LIB_PATH)/libboost_#{lib}-mt.a <variant>release ;
+<?rb end ?>
+
+
+#lib dl   :  : <file>$(USR_LIB_PATH)/libdl.a ;
+#lib ltdl : dl  : <file>$(USR_LIB_PATH)/libltdl.a ;
+lib odbc : : <name>odbc <link>shared <linkflags>-L$(ODBC_LIB_PATH) ;
+alias otl : odbc : : : <include>$(OTL_INCLUDE_PATH) ; 
+lib szip :  : <file>$(SZIP_LIB_PATH)/libsz.a : : <include>$(SZIP_INCLUDE_PATH) ;
+lib zlib :  : <file>$(ZLIB_LIB_PATH)/libz.a : : <include>$(ZLIB_INCLUDE_PATH) ;
+
+######################################################################
+# HDF5 SUPPORT
+######################################################################
+lib mpi : : : : <include>$(MPI_INCLUDE_PATH) ;
+lib hdf5 : szip zlib mpi : <file>$(HDF5_LIB_PATH)/libhdf5.a <variant>release : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5 : szip zlib mpi : <file>$(HDF5_LIB_PATH)/libhdf5.a <variant>debug : : <include>$(HDF5_DEBUG_INCLUDE_PATH) ;
+lib hdf5 : szip zlib mpi : <file>$(HDF5_LIB_PATH)/libhdf5.a <variant>profile : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_hl : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_hl.a <variant>release : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_hl : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_hl.a <variant>debug : : <include>$(HDF5_DEBUG_INCLUDE_PATH) ;
+lib hdf5_hl : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_hl.a <variant>profile : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_cpp.a <variant>release : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_cpp.a <variant>debug : : <include>$(HDF5_DEBUG_INCLUDE_PATH) ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/libhdf5_cpp.a <variant>profile : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_hl_cpp : hdf5_hl hdf5_cpp : <file>$(HDF5_LIB_PATH)/libhdf5_hl_cpp.a <variant>release : : <include>$(HDF5_INCLUDE_PATH) ;
+lib hdf5_hl_cpp : hdf5_hl hdf5_cpp : <file>$(HDF5_LIB_PATH)/libhdf5_hl_cpp.a <variant>debug : : <include>$(HDF5_DEBUG_INCLUDE_PATH) ;
+lib hdf5_hl_cpp : hdf5_hl hdf5_cpp : <file>$(HDF5_LIB_PATH)/libhdf5_hl_cpp.a <variant>profile : : <include>$(HDF5_INCLUDE_PATH) ;
+
+######################################################################
+# R SUPPORT
+######################################################################
+lib r : : <file>$(R_LIB_PATH)/libR.so : : <include>$(R_INCLUDE_PATH) ;
+lib rcpp : r : <file>$(RCPP_LIB_PATH)/libRcpp.a : : <include>$(RCPP_INCLUDE_PATH) ;
+lib rcpp_armadillo : r : <file>$(RCPP_ARMADILLO_LIB_PATH)/RcppArmadillo.so : : <include>$(RCPP_ARMADILLO_INCLUDE_PATH) ;
+lib mongoclient : boost_filesystem : <name>mongoclient : : <include>$(MONGO_INCLUDE_PATH) <library-path>$(MONGO_LIB_PATH) ;
+
+lib protobuf : : <file>$(PROTOBUF_LIB_PATH)/libprotobuf.a : : <include>$(PROTOBUF_INCLUDE_PATH) ;

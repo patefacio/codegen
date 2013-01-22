@@ -1,0 +1,22 @@
+import stage ;
+import package ;
+import os ;
+project fcs_examples_enums_static
+    : source-location ../src
+    : requirements
+    <link>static:<define>FCS_EXAMPLES_ENUMS_STATIC_API_STATIC_LIB=1
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     api_header
+     some_class
+     some_other_class
+;
+
+lib fcs_examples_enums_static
+    : $(SOURCES).cpp
+      $(PANTHEIOS_LIBS)
+    : <link>shared <define>FCS_EXAMPLES_ENUMS_STATIC_API_EXPORTS 
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

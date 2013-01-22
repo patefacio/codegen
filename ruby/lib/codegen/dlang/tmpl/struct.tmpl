@@ -1,0 +1,23 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{@struct.static_decl}struct #{@struct.name.cap_camel}#{@struct.template_decl} { 
+<?rb if not @struct.ctor_members.empty? ?>
+<?rb parms = @struct.ctor_members.map {|m| "#{m.ref ? 'ref ' : ''}const(#{m.type}) #{m.name.camel}#{m.ctor_default ? %Q{ = }+(m.init ? m.init : %Q{#{m.type}.init}) : ''}" } ?>
+<?rb assignments = @struct.ctor_members.map {|m| "this.#{m.vname} = #{m.name.camel}#{m.ref ? '.gdup':''};" } ?>
+
+  //! #{@struct.name.cap_camel} member initializing ctor
+  this(#{parms.join(','+Codegen::NL+'       ')}) { 
+    #{assignments.join(Codegen::NL+'    ')}
+  }
+
+<?rb end ?>
+<?rb if not @struct.children.empty? ?>
+<?rb Codegen.indent() ?>
+#{Codegen.indent_absolute_text(@@engine.render('scope_chooser.tmpl', { :children => @struct.children }))}
+<?rb Codegen.outdent() ?>
+<?rb end ?>
+<?rb if @struct.unit_test ?>
+#{Codegen.indent_absolute_text(@@engine.render('unit_test.tmpl', { :me => @struct.unit_test, :owner => @struct }))}
+<?rb end ?>
+}

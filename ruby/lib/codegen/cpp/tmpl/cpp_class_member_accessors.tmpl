@@ -1,0 +1,47 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if not @cls.readable_members.empty? or not @cls.writable_members.empty? ?>
+#{i}/////////////////////////////////////////////////////////////////
+#{i}// member accessors
+#{i}/////////////////////////////////////////////////////////////////
+<?rb end ?>
+<?rb @cls.members.each do |m| ?>
+<?rb start_capture :member_accessors ?>
+    <?rb if @cls.readable_members.include? m ?>
+        <?rb if m.brief and @cls.accessor_docs ?>
+//! reader for #{m.name} <B>#{m.brief}</B>
+        <?rb end ?>
+        <?rb if m.hide_impl ?>
+#{m.reader_decl}
+        <?rb else ?>        
+#{m.reader_impl}
+        <?rb end ?>
+    <?rb end ?>
+    <?rb if @cls.writable_members.include? m ?>
+            <?rb if m.brief and @cls.accessor_docs ?>
+//! writer for #{m.name} <B>#{m.brief}</B>
+            <?rb end ?>
+        <?rb if m.hide_impl ?>
+#{m.writer_decl}
+        <?rb else ?>        
+#{m.writer_impl}
+        <?rb end ?>
+        <?rb if m.pass_by_ref ?>
+            <?rb if m.brief and @cls.accessor_docs ?>
+//! non-const reader for #{m.name} <B>#{m.brief}</B>
+            <?rb end ?>
+          <?rb if m.hide_impl ?>
+#{m.reader_decl_non_const}
+          <?rb else ?>        
+#{m.reader_impl_non_const}
+          <?rb end ?>
+        <?rb end ?>
+    <?rb end ?>
+<?rb stop_capture ?>
+<?rb   if @member_accessors and (@member_accessors.length > 0) ?>
+#{m.ifdef(Codegen.indent_text(@member_accessors, 0))}
+
+<?rb   end ?>
+<?rb end ?>

@@ -1,0 +1,30 @@
+################################################################################
+# Copyright (c) by Daniel Davidson                                    
+################################################################################
+# License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>.
+################################################################################
+require 'fcs/cpp/lib_utils'
+require 'fcs/cpp/lib_utils_exception'
+require 'fcs/cpp/lib_utils_synch'
+require 'fcs/cpp/lib_utils_performance'
+require 'fcs/cpp/lib_utils_streamers_table'
+require 'fcs/cpp/lib_utils_log'
+require 'fcs/cpp/lib_patterns'
+require 'fcs/cpp/lib_place'
+require 'fcs/cpp/lib_richdata'
+require 'fcs/cpp/lib_table'
+require 'fcs/cpp/lib_h5'
+require 'fcs/cpp/lib_h5_utils'
+require 'fcs/cpp/lib_h5_table'
+require 'fcs/cpp/lib_gui_environment'
+require 'fcs/cpp/lib_gui_selection'
+require 'fcs/cpp/lib_gui_search'
+require 'fcs/cpp/lib_gui_table_view'
+require 'fcs/cpp/lib_orm'
+require 'fcs/cpp/lib_table_test'
+require 'fcs/cpp/lib_environment'
+require 'fcs/cpp/lib_app_sig_handler'
+require 'fcs/cpp/lib_linux'
+require 'fcs/cpp/lib_raii'
+require 'fcs/cpp/lib_timestamp'
+require 'fcs/cpp/lib_mongoid'

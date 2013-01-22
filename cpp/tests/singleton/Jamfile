@@ -1,0 +1,22 @@
+project fcs_utils_singleton_test
+    :
+    :
+    ;
+
+import testing ;
+
+rule test_fcs_utils_singleton
+{
+      all_rules += [ run singleton_test.cpp singleton_second_translation_unit.cpp
+         $(PANTHEIOS_LIBS)
+      : 
+      :  # test-files
+      :  # requirements
+         <define>DEBUG_FCS_STARTUP  
+         <toolset>msvc:<asynch-exceptions>on         
+      ] ;
+}
+
+test-suite fcs_utils_singleton_test_suite : [ test_fcs_utils_singleton ] ;
+
+

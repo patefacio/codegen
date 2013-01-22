@@ -1,0 +1,112 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+import os ;
+project #{@lib.name}_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+#{Codegen.protect_block("additional src", ['# custom', '# end'])}
+;
+
+ADDITIONAL_REQUIREMENTS =
+#{Codegen.protect_block("additional requirements", ['# custom', '# end'])}
+;
+
+<?rb if @lib.unit_tests.size() > 0 ?>
+import testing ;
+
+rule test_#{@lib.name}
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+<?rb if !@lib.header_only ?>
+         ../build//#{@lib.name}
+<?rb end ?>
+         $(ADDITIONAL_SRC)
+<?rb requirements = Array.new @lib.jam_requirements ?>
+<?rb requirements.push '$(PANTHEIOS_LIBS)' ?>
+<?rb requirements = Codegen::Cpp.clean_ordered(requirements) ?>
+<?rb requirements.each do |req| ?>
+         #{req}
+<?rb end ?>
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+<?rb @lib.build_cpp_includes.each do |incl| ?>
+         <include>#{incl}
+<?rb end ?>
+<?rb @lib.build_cpp_defines.each do |define| ?>
+         <define>#{define}
+<?rb end ?>
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite #{@lib.name}_test_suite : [ test_#{@lib.name} ] ;
+explicit #{@lib.name}_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+<?rb unit_tests = @lib.all_classes.select {|c| c.include_unit_test }.sort {|x,y| x.name <=> y.name } ?>
+<?rb unit_tests.each do |c| ?>
+<?rb unit_test_name = c.name.downcase + '_unit_test' ?>
+exe #{unit_test_name} :
+         test_#{c.impl_filename}
+<?rb if !@lib.header_only ?>
+         ../build//#{@lib.name}
+<?rb end ?>
+         $(ADDITIONAL_SRC)
+<?rb requirements = Array.new @lib.jam_requirements ?>
+<?rb requirements.push '$(PANTHEIOS_LIBS)' ?>
+<?rb requirements = Codegen::Cpp.clean_ordered(requirements) ?>
+<?rb requirements.each do |req| ?>
+         #{req}
+<?rb end ?>
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+<?rb @lib.build_cpp_includes.each do |incl| ?>
+         <include>#{incl}
+<?rb end ?>
+<?rb @lib.build_cpp_defines.each do |define| ?>
+         <define>#{define}
+<?rb end ?>
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=#{unit_test_name}.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit #{unit_test_name} ;
+
+<?rb end ?>
+
+
+<?rb if unit_tests.length > 0 ?>
+alias #{@lib.name}_unit_tests :
+<?rb unit_tests.each do |c| ?>
+   #{c.name.downcase}_unit_test
+<?rb end ?>
+  ;
+
+explicit #{@lib.name}_unit_tests ;
+<?rb end ?>
+
+<?rb else ?>
+ECHO "NO UNIT TESTS FOR #{@lib.name}" ;
+<?rb end ?>
+

@@ -1,0 +1,16 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @me.mask ?>
+//! Fills ostream with comma separated list of mask entries set in #{@me.name}
+#{@me.scope_class and 'static' or 'extern'}
+void #{@me.dump_name}(std::ostream &out, int e);
+
+<?rb else ?>
+//! Returns char array correpsonding to value of #{@me.name}
+#{@me.proto_decorations}char const* to_c_str(#{@me.name} e);
+
+//! Assigns to value the entry associated with text in char array or "INVALID_#{@me.name.upcase}" if not valid
+#{@me.proto_decorations}void from_c_str(char const* txt, #{@me.name} &value);
+
+<?rb end ?>

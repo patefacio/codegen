@@ -1,0 +1,37 @@
+
+<?rb substitute_parts = @select[:parsed].substitute_parts ?>
+<?rb if @query_requires_args ?>
+void ctor_member_init() {
+<?rb else ?>
+void ctor_default_init() {
+<?rb end ?>
+<?rb if @select[:parsed].presubstitute_members.empty? ?>
+  otl_stream stream(50, query_.c_str(), *Connection_#{@database_name}::get_instance()->get_connection());
+<?rb else ?>
+<?rb member_names = @select[:parsed].presubstitute_members.map {|pm| "#{pm[:quoted_name]}"} ?>
+  using boost::format;
+  using boost::io::group;
+  std::ostringstream query_text;
+  query_text << format(query_.c_str()) % #{member_names.join(' % ')};
+  otl_stream stream(
+    50, query_text.str().c_str(),
+    *Connection_#{@database_name}::get_instance()->get_connection());
+<?rb end ?>
+<?rb if substitute_parts.length > 0 ?>
+  stream 
+    << #{substitute_parts.map { |c,v| "#{v}_" }.join('
+    << ')}
+  ;
+<?rb end ?>
+  while(!stream.eof()) {
+<?rb var_name = @query_business_name.downcase ?>
+    #{@query_business_name} #{var_name};
+    stream
+      >> #{var_name}.#{@select[:parsed].qualified_columns.map { |qc| "#{qc[:qualified_as_variable]}_" }.join("
+      >> #{var_name}.")}
+    ;
+    query_result_.push_back(#{var_name});
+  }
+}
+
+

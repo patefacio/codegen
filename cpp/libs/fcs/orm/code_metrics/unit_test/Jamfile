@@ -1,0 +1,76 @@
+import os ;
+project fcs_orm_code_metrics_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+
+  /site-config//boost_regex
+
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_orm_code_metrics
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         /site-config//otl
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_orm_code_metrics_test_suite : [ test_fcs_orm_code_metrics ] ;
+explicit fcs_orm_code_metrics_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe block_tracker_orm_unit_test :
+         test_block_tracker_orm.cpp
+         $(ADDITIONAL_SRC)
+         /site-config//otl
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=block_tracker_orm_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit block_tracker_orm_unit_test ;
+
+
+
+alias fcs_orm_code_metrics_unit_tests :
+   block_tracker_orm_unit_test
+  ;
+
+explicit fcs_orm_code_metrics_unit_tests ;
+
+

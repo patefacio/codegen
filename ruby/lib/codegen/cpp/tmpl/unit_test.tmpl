@@ -1,0 +1,29 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent ?>
+<?rb if @cls.unit_test_includes.length>0 ?>
+#{Codegen::Cpp.clean_includes(@cls.unit_test_includes)}
+
+<?rb end ?>
+#undef BOOST_ALL_DYN_LINK
+#include <boost/test/included/unit_test.hpp>
+
+#{Codegen.protect_block("pre-test")}
+
+extern "C" const char PANTHEIOS_FE_PROCESS_IDENTITY[] = "test_#{@cls.name}";
+
+namespace {
+  void test_#{@cls.name.downcase}() {
+#{Codegen.protect_block("test-detail")}
+  }
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int , char*[]) {
+#{i}pantheios::log(PANTHEIOS_SEV_DEBUG, "Running Unit Test: test_#{@cls.name}");
+#{i}using namespace boost::unit_test;
+#{i}unit_test_log.set_threshold_level( log_messages );
+#{i}test_suite* test= BOOST_TEST_SUITE( "Unit test <#{@cls.name.downcase}>" );
+#{i}test->add( BOOST_TEST_CASE( &::test_#{@cls.name.downcase} ) );
+#{i}return test;
+}

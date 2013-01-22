@@ -1,0 +1,73 @@
+import os ;
+project fcs_examples_enums_static_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_examples_enums_static
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         ../build//fcs_examples_enums_static
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_examples_enums_static_test_suite : [ test_fcs_examples_enums_static ] ;
+explicit fcs_examples_enums_static_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe api_header_unit_test :
+         test_api_header.cpp
+         ../build//fcs_examples_enums_static
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=api_header_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit api_header_unit_test ;
+
+
+
+alias fcs_examples_enums_static_unit_tests :
+   api_header_unit_test
+  ;
+
+explicit fcs_examples_enums_static_unit_tests ;
+
+

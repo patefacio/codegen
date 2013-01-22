@@ -1,0 +1,42 @@
+exe play
+    : play.cpp /site-config//boost_date_time
+    :
+    ;
+
+exe file_operations
+    : file_operations.cpp /site-config//boost_system /site-config//boost_filesystem
+    : <toolset>intel:<cxxflags>-Qoption,cpp,--rvalue_ctor_is_not_copy_ctor
+    ;
+
+exe gil_sample
+    : gil_sample.cpp /usr/lib/x86_64-linux-gnu/libjpeg.a
+    :
+    ;
+
+exe mandelbrot
+    : mandelbrot.cpp /usr/lib/x86_64-linux-gnu/libjpeg.a
+    :
+    ;
+
+exe binder
+    : binder.cpp /site-config//boost_date_time
+    :
+    ;
+
+exe graph
+    : graph.cpp
+    :
+    ;
+
+
+#exe timers
+#    : timers.cpp 
+#    : <link>static <define>GLOBAL_STATIC_LINKAGE
+#    ;
+
+exe template_method_requirement
+    : template_method_requirement.cpp
+    : <link>static <define>GLOBAL_STATIC_LINKAGE
+    ;
+
+

@@ -1,0 +1,18 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+module FcsCppPlace
+
+  @@fcs_libs = {
+<?rb require 'place' ?>
+<?rb @all_libs.each do |lib| ?>
+    '#{lib.name}_cpp'=> '#{lib.cpp_path}',
+    '#{lib.name}_include'=> '#{lib.header_path}',
+<?rb end ?>
+  }
+
+  def fcs_libs() 
+    return @@fcs_libs
+  end
+
+end

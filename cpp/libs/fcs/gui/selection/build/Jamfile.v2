@@ -1,0 +1,20 @@
+import stage ;
+import package ;
+import os ;
+project fcs_gui_selection
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     q_multiple_pick_list
+;
+
+lib fcs_gui_selection
+    : $(SOURCES).cpp
+      ../../../../../fcs/gui/selection/q_multiple_pick_list.hpp
+      $(TOP)//fcs_qt
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

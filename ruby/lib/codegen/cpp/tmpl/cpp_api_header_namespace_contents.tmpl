@@ -1,0 +1,17 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen/cpp' ?>
+<?rb if @cls.enums.length > 0 ?>
+// Library enumerations
+    <?rb @cls.enums.each do |enum| ?>
+#{enum.enum_header_contents}
+    <?rb end ?>
+<?rb end ?>
+<?rb if @cls.public_typedefs.length > 0 ?>
+// Library typedefs
+    <?rb @cls.public_typedefs.each do |td| ?>
+#{Codegen::Cpp.clean_typedef(td)};
+    <?rb end ?>
+<?rb end ?>
+<?rb import('cpp_library_description_methods.tmpl') if !@cls.library.descr.empty? ?>

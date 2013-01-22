@@ -1,0 +1,13 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb ####################################################################### ?>
+<?rb ## Member init ctor decl ?>
+<?rb ####################################################################### ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @cls.ctor_parm_text_lines.length>0 or @cls.ctor_member ?>
+#{i}#{@cls.explicit_tag}#{@cls.ctor_name}(
+#{Codegen.indent_absolute_text(@cls.ctor_parm_text_lines.join(','+Codegen::NL), 2)}
+#{i});
+
+<?rb end ?>

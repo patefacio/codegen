@@ -1,0 +1,13 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{@cls.static_decl}class #{@cls.name.cap_camel}#{@cls.template_decl} { 
+<?rb if not @cls.children.empty? ?>
+<?rb Codegen.indent() ?>
+#{Codegen.indent_absolute_text(@@engine.render('scope_chooser.tmpl', { :children => @cls.children, :owner => @cls }))}
+<?rb Codegen.outdent() ?>
+<?rb end ?>
+<?rb if @cls.unit_test ?>
+#{Codegen.indent_absolute_text(@@engine.render('unit_test.tmpl', { :me => @cls.unit_test, :owner => @cls }))}
+<?rb end ?>
+}

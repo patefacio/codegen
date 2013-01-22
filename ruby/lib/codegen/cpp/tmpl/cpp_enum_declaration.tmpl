@@ -1,0 +1,21 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @me.brief ?> 
+//! #{@me.brief}
+<?rb end ?>
+enum #{@me.name} {
+<?rb if @me.assigned_values ?>
+<?rb assigned_value_lines = [] ?>
+<?rb @me.values.each_with_index do |value, i| ?>
+<?rb   assigned_value_lines << "#{value} = #{@me.assigned_values[i]}" ?>
+<?rb end ?>
+  #{assigned_value_lines.join(%Q/,#{Codegen::NL}  /)}
+<?rb else ?>
+  #{@me.values.join(%Q/,#{Codegen::NL}  /)}
+<?rb end ?>
+};
+
+// Number of entries in #{@me.name}
+enum { #{@me.size_enum_name} = #{@me.values.length} };
+

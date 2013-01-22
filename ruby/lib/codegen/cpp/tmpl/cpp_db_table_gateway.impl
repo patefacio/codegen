@@ -1,0 +1,155 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb cls=@db_lib.table_class ?>
+<?rb table_name=@db_lib.table.name ?>
+
+class #{cls}_impl : 
+  public #{cls},
+  public fcs::utils::Singleton< #{cls}_impl >
+ {
+ public:
+   typedef fcs::utils::Singleton< #{cls}_impl > Singleton_base_t;
+ private:
+   std::string table_name();
+   void select_all_rows(Row_list_t& found);
+   bool find_row(Pkey_t const& desideratum, Value_t & found);
+   int find_rows(Pkey_list_t const& desideratum, Value_list_t & found);
+   void insert(Row_list_t const& nascent);
+   void update(Row_list_t const& changing);
+   bool update(Pkey_t const& changing, Field_id_to_update_map_t const& update_map);
+   void delete_row(Pkey_t const& moribund);
+   void delete_rows(Pkey_list_t const& moribund);
+   void delete_all_rows();
+
+   typedef boost::shared_ptr< otl_stream > Stream_ptr;
+
+   void create_insert_stream() {
+     if(!insert_stream_) {
+       Guard_t guard(lock_);
+       if(!insert_stream_) {
+         create_insert_stream_impl();
+       }
+     }
+   }
+
+   void create_select_all_stream() {
+     if(!select_all_stream_) {
+       Guard_t guard(lock_);
+       if(!select_all_stream_) {
+         create_select_all_stream_impl();
+       }
+     }
+   }
+
+   void create_select_by_key_stream() {
+     if(!select_by_key_stream_) {
+       Guard_t guard(lock_);
+       if(!select_by_key_stream_) {
+         create_select_by_key_stream_impl();
+       }
+     }
+   }
+
+   void create_update_stream() {
+     if(!update_stream_) {
+       Guard_t guard(lock_);
+       if(!update_stream_) {
+         create_update_stream_impl();
+       }
+     }
+   }
+
+   void create_delete_stream() {
+     if(!update_stream_) {
+       Guard_t guard(lock_);
+       if(!update_stream_) {
+         create_delete_stream_impl();
+       }
+     }
+   }
+
+   void create_insert_stream_impl();
+   void create_select_all_stream_impl();
+   void create_select_by_key_stream_impl();
+   void create_update_stream_impl();
+   void create_delete_stream_impl();
+
+   Stream_ptr insert_stream_;
+   Stream_ptr select_all_stream_;
+   Stream_ptr select_by_key_stream_;
+   Stream_ptr update_stream_;
+   Stream_ptr delete_stream_;
+   Lock_t lock_;
+
+};
+
+#{cls}_ptr #{cls}::get_instance() { return #{cls}_impl::Singleton_base_t::get_instance(); }
+
+std::string #{cls}_impl::table_name() { return "#{table_name}"; }
+
+void #{cls}_impl::create_insert_stream_impl() {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Creating insert statement");
+}
+
+void #{cls}_impl::create_select_all_stream_impl() {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Creating select all");
+
+}
+otl_connect db;
+void #{cls}_impl::create_select_by_key_stream_impl() {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Creating select by key");
+  select_by_key_stream_ = Stream_ptr(new otl_stream(10, "", db));
+
+}
+
+void #{cls}_impl::create_update_stream_impl() {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Creating update");
+
+}
+
+void #{cls}_impl::create_delete_stream_impl() {
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Creating delete");
+
+}
+
+void #{cls}_impl::select_all_rows(Row_list_t& found) {
+  create_select_all_stream();
+}
+
+bool #{cls}_impl::find_row(Pkey_t const& desideratum, Value_t & found) {
+  create_select_by_key_stream();
+  return false;
+}
+
+int #{cls}_impl::find_rows(Pkey_list_t const& desideratum, Value_list_t & found) { 
+  create_select_by_key_stream();
+  return 0;
+}
+
+void #{cls}_impl::insert(Row_list_t const& nascent) {
+  create_insert_stream();
+}
+
+void #{cls}_impl::update(Row_list_t const& changing) {
+  create_update_stream();
+}
+
+bool #{cls}_impl::update(Pkey_t const& changing, Field_id_to_update_map_t const& update_map) { 
+  create_update_stream();
+  return false;
+}
+
+void #{cls}_impl::delete_row(Pkey_t const& moribund) {
+  create_delete_stream();
+}
+
+void #{cls}_impl::delete_rows(Pkey_list_t const& moribund) {
+  create_delete_stream();
+}
+
+void #{cls}_impl::delete_all_rows() {
+  
+}
+
+

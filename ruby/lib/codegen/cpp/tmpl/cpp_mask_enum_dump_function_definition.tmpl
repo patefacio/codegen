@@ -1,0 +1,6 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+#{@me.dump_impl_decorations}void #{@me.scope_to_class(@me.dump_name)}(std::ostream &out, int e) {
+<?rb import('cpp_mask_enum_dump_function_impl.tmpl') ?>
+}

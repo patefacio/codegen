@@ -1,0 +1,11 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+union #{@union.name.cap_camel} { 
+<?rb if not @union.children.empty? ?>
+<?rb Codegen.indent() ?>
+#{Codegen.indent_absolute_text(@@engine.render('scope_chooser.tmpl', { :children => @union.children }))}
+<?rb Codegen.outdent() ?>
+<?rb end ?>
+}
+

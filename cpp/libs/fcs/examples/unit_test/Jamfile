@@ -1,0 +1,75 @@
+import os ;
+project fcs_examples_sample_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_examples_sample
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         ../build//fcs_examples_sample
+         $(ADDITIONAL_SRC)
+         /site-config//boost_serialization
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_examples_sample_test_suite : [ test_fcs_examples_sample ] ;
+explicit fcs_examples_sample_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe sample_unit_test :
+         test_sample.cpp
+         ../build//fcs_examples_sample
+         $(ADDITIONAL_SRC)
+         /site-config//boost_serialization
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=sample_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit sample_unit_test ;
+
+
+
+alias fcs_examples_sample_unit_tests :
+   sample_unit_test
+  ;
+
+explicit fcs_examples_sample_unit_tests ;
+
+

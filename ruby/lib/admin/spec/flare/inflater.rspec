@@ -1,0 +1,77 @@
+require "spec_helper"
+require "package"
+require "flare"
+require "yaml"
+include Flare
+
+$root = Pathname.new(File.expand_path(__FILE__)).parent.parent.parent
+
+describe Inflater do
+  it "inflates tar files" do
+    target = "/tmp/admin.tar"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR, :target_path => target)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_r inflater.target_path, :verbose => false
+  end
+  it "inflates tar gz files" do
+    target = "/tmp/admin.tgz"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_GZ, :target_path => target)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_rf inflater.target_path, :verbose => false
+  end
+  it "inflates tar bz2 files" do
+    target = "/tmp/admin.tar.bz2"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_BZ2, :target_path => target, :verbose => false)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true, true, true)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_rf inflater.target_path, :verbose => false
+  end
+  it "inflates tar lzma files" do
+    target = "/tmp/admin.tar.lzma"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_LZMA, :target_path => target, :verbose => false)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target, :verbose => false)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true, true, false)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_rf inflater.target_path, :verbose => false
+  end
+  it "inflates 7z files" do
+    target = "/tmp/admin.7z"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::SEVEN_ZIP, :target_path => target, :verbose => true)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target, :verbose => true)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_rf inflater.target_path, :verbose => true
+  end
+  it "inflates tar 7z files" do
+    target = "/tmp/admin.tar.7z"
+    deflater = Deflater.new(:source_path => $root, :flate_type => FlateTypes::TAR_SEVEN_ZIP, :target_path => target)
+    deflater.deflate
+    inflater = Inflater.new(:source_path => target, :verbose => false)
+    inflater.inflate
+    output = Commands.run_commands(["diff -r #{$root} #{inflater.target_path + 'admin'}"], true)
+    output.join.should =~ /^\s*$/
+    FileUtils.rm target
+    FileUtils.rm_rf inflater.target_path, :verbose => false
+  end
+end
+    

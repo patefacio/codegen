@@ -1,0 +1,52 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+<?rb require 'cpp_paths' ?>
+PACKAGES = #{@installations.map {|cpp| "#{cpp.name}" }.join(' \'+NL+TAB)}
+STLSOFT = #{Place['stlsoft_include'].parent}
+PYTHON_INCLUDE_PATH = /usr/include/python2.7
+PYTHON_LIB_PATH = /usr/lib/python2.7
+
+all : $(PACKAGES)
+
+#{Codegen.protect_block("top additional", BUILD_PROTECT_BLOCK_DELIMITERS)}
+
+<?rb @installations.each do |cpp| ?>
+<?rb vn = "#{cpp.name.upcase}_VERSION" ?>
+<?rb staged_source = "#{cpp.name.upcase}_SOURCE" ?>
+<?rb install_path = "#{cpp.name.upcase}_INSTALL" ?>
+<?rb bn = cpp.standard_pull_path.basename ?>
+#{vn} = #{cpp.versioned_name}
+#{staged_source} = $(STAGED_SOURCE_PATH)/$(#{vn}).staged_source
+#{install_path} = $(INSTALL_PATH)/$(#{vn})
+
+<?rb end ?>
+
+<?rb @installations.each do |cpp| ?>
+<?rb vn = "#{cpp.name.upcase}_VERSION" ?>
+<?rb staged_source = "#{cpp.name.upcase}_SOURCE" ?>
+<?rb install_path = "#{cpp.name.upcase}_INSTALL" ?>
+<?rb bn = cpp.standard_pull_path.basename ?>
+
+#{bn}.flate_log $(#{staged_source}) :
+### Inflate the pulled source for building
+#{TAB}inflate.rb -s $(PULLED_SOURCE_PATH)/#{bn} \
+#{TAB}-t $(#{staged_source}) -r > #{bn}.flate_log 2>&1
+#{Codegen.protect_block("#{cpp.name} patch source", BUILD_PROTECT_BLOCK_DELIMITERS)}
+
+#{cpp.name}_clean_flate :
+#{TAB}rm -rf #{bn}.flate_log
+clean: #{cpp.name}_clean_source
+#{cpp.name}_clean_source : #{cpp.name}_clean_flate
+#{TAB}rm -rf $(#{staged_source}); rm -rf $(#{install_path})
+#{cpp.name} : #{bn}.build_log
+#{bn}.build_log: #{bn}.flate_log
+#{TAB}@echo "BUILDING #{cpp.name}"
+#{Codegen.protect_block("#{cpp.name} recipe", BUILD_PROTECT_BLOCK_DELIMITERS)}
+
+
+<?rb end ?>
+
+#{Codegen.protect_block("Global section", BUILD_PROTECT_BLOCK_DELIMITERS)}

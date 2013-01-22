@@ -1,0 +1,48 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+import stage ;
+import package ;
+import os ;
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+project #{@lib.name}
+    : source-location ../src
+    : requirements
+<?rb if not @lib.static_only and not @lib.shared_only ?>
+    <link>static:<define>#{@lib.api_decl}_STATIC_LIB=1
+<?rb end ?>
+<?rb @lib.build_cpp_includes.each do |incl| ?>
+      <include>#{incl}
+<?rb end ?>
+<?rb @lib.build_cpp_defines.each do |define| ?>
+      <define>#{define}
+<?rb end ?>
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+<?rb @lib.impl_classes.each do |c| ?>
+     #{c.jamfile_impl_src_name}
+<?rb end ?>
+<?rb @lib.hand_coded_impls.each do |hc| ?>
+     #{hc}
+<?rb end ?>
+;
+
+lib #{@lib.name}
+    : $(SOURCES).cpp
+<?rb required_moc_headers = @lib.impl_classes.select {|c| c.q_object }.map {|c| c.fqpath_header.relative_path_from(@lib.build_path) } ?>
+<?rb Set.new(required_moc_headers).each do |moc_header| ?>
+      #{moc_header}
+<?rb end ?>
+<?rb @lib.jam_requirements.each do |req| ?>
+      #{req}
+<?rb end ?>
+<?rb if @lib.static_only ?>
+    : <link>static
+<?rb else ?>
+    : <link>shared <define>#{@lib.api_decl}_EXPORTS 
+<?rb end ?>
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

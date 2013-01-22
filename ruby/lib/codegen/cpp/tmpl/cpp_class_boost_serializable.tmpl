@@ -1,0 +1,132 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @cls.boost_serializable ?>
+#{i}friend class boost::serialization::access;
+#{i}template< class Archive >
+#{i}void serialize(Archive & ar, const unsigned int version)
+#{i}{
+<?rb @cls.serialized_bases.each do |sb| ?>
+#{i}#{i}ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(#{sb});
+<?rb end ?>
+<?rb @cls.non_static_members.each do |m| ?>
+<?rb if m.serializable ?>
+<?rb if m.serializable_custom ?>
+#{Codegen.protect_block(m.ifdef "#{m.name} custom serializer")}
+<?rb else ?>
+#{i}#{i}// TODO: LOGGING_BOOST_SERIALIZATION_NVP(ar, #{m.variable_name}, "#{@cls.name}::#{m.name}");
+#{i}#{i}#{m.ifdef "ar & boost::serialization::make_nvp(BOOST_PP_STRINGIZE(#{m.variable_name}), #{m.variable_name});"}
+<?rb end ?>
+<?rb else ?>
+#{i}#{i}// #{m.variable_name} not boost_serializable
+<?rb end ?>
+<?rb end ?>
+<?rb if @cls.serialize_followup_section ?>
+
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.protect_block_tag} serialize followup section"))}
+<?rb end ?>
+  
+#{i}}
+
+<?rb if @cls.xml_serializable ?>
+#{i}template < typename T >
+#{i}void serializeTo(T &out_archive) const {
+#{i}#{i}out_archive << boost::serialization::make_nvp("#{@cls.name}", *this);
+#{i}}
+
+#{i}template < typename T >
+#{i}void serializeFrom(T &in_archive) {
+#{i}#{i}in_archive >> boost::serialization::make_nvp("#{@cls.name}", *this);
+#{i}}
+     
+<?rb end ?>
+<?rb if @cls.xml_serializable ?>
+
+#{i}//! serialize instance as xml to an std::ostream 
+#{i}void serializeToXml(std::ostream &out) const {
+#{i}#{i}boost::archive::xml_oarchive out_archive(out);
+#{i}#{i}serializeTo(out_archive);
+#{i}}
+
+#{i}//! serialize instance as xml to named file 
+#{i}void serializeToXmlFile(std::string const& fileName) const {
+#{i}#{i}std::ofstream ofs(fileName.c_str());
+#{i}#{i}serializeToXml(ofs);
+#{i}#{i}ofs.close();
+#{i}}
+
+#{i}//! serialize instance in as xml from an std::istream
+#{i}void serializeFromXml(std::istream &in) {
+#{i}#{i}boost::archive::xml_iarchive in_archive(in);
+#{i}#{i}serializeFrom(in_archive);
+#{i}}
+
+#{i}//! serialize instance as xml from named file
+#{i}void serializeFromXmlFile(std::string const& fileName) {
+#{i}#{i}std::ifstream ifs(fileName.c_str());
+#{i}#{i}serializeFromXml(ifs);
+#{i}#{i}ifs.close();
+#{i}}
+
+<?rb end ?>
+<?rb if @cls.text_serializable ?>
+
+#{i}//! serialize instance as text to an std::ostream 
+#{i}void serializeToText(std::ostream &out) const {
+#{i}#{i}boost::archive::text_oarchive out_archive(out);
+#{i}#{i}serializeTo(out_archive);
+#{i}}
+
+#{i}//! serialize instance as text to named file 
+#{i}void serializeToTextFile(std::string const& fileName) const {
+#{i}#{i}std::ofstream ofs(fileName.c_str());
+#{i}#{i}serializeToText(ofs);
+#{i}#{i}ofs.close();
+#{i}}
+
+#{i}//! serialize instance in as text from an std::istream
+#{i}void serializeFromText(std::istream &in) {
+#{i}#{i}boost::archive::text_iarchive in_archive(in);
+#{i}#{i}serializeFrom(in_archive);
+#{i}}
+
+#{i}//! serialize instance as text from named file
+#{i}void serializeFromTextFile(std::string const& fileName) {
+#{i}#{i}std::ifstream ifs(fileName.c_str());
+#{i}#{i}serializeFromText(ifs);
+#{i}#{i}ifs.close();
+#{i}}
+
+<?rb end ?>
+<?rb if @cls.binary_serializable ?>
+
+#{i}//! serialize instance as binary to an std::ostream 
+#{i}void serializeToBinary(std::ostream &out) const {
+#{i}#{i}boost::archive::binary_oarchive out_archive(out);
+#{i}#{i}serializeTo(out_archive);
+#{i}}
+
+#{i}//! serialize instance as binary to named file 
+#{i}void serializeToBinaryFile(std::string const& fileName) const {
+#{i}#{i}std::ofstream ofs(fileName.c_str());
+#{i}#{i}serializeToBinary(ofs);
+#{i}#{i}ofs.close();
+#{i}}
+
+#{i}//! serialize instance in as binary from an std::istream
+#{i}void serializeFromBinary(std::istream &in) {
+#{i}#{i}boost::archive::binary_iarchive in_archive(in);
+#{i}#{i}serializeFrom(in_archive);
+#{i}}
+
+#{i}//! serialize instance as binary from named file
+#{i}void serializeFromBinaryFile(std::string const& fileName) {
+#{i}#{i}std::ifstream ifs(fileName.c_str());
+#{i}#{i}serializeFromBinary(ifs);
+#{i}#{i}ifs.close();
+#{i}}
+
+<?rb end ?>
+
+<?rb end ?>

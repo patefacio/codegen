@@ -1,0 +1,32 @@
+import stage ;
+import package ;
+project fcs_utils
+    : source-location ../src
+    : requirements
+    ;
+
+SOURCES =
+;
+
+lib fcs_utils
+    : $(SOURCES).cpp
+    : <link>static
+    ;
+
+# stage.install fcs_utils_install_release : 
+#       fcs_utils
+#   :   <link>shared <variant>release <location>$(FCS_INSTALL_PATH)/lib ;
+
+# stage.install fcs_utils_install_debug : 
+#       fcs_utils
+#   :   <link>shared <variant>debug <location>$(FCS_INSTALL_PATH)/lib ;
+
+
+#package.install fcs_utils_install
+#                : <install-default-prefix>$(FCS_INSTALL_PATH)
+#                :
+#                : fcs_utils
+#;
+
+
+# alias fcs_utils_install : fcs_utils_install_debug fcs_utils_install_release ;

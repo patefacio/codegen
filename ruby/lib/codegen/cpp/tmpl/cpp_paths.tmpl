@@ -1,0 +1,20 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+require 'pathname'
+class Place
+  @@jam_place = { }
+<?rb @installations.each do |cpp| ?>
+  @@place['#{cpp.name}_include'] = Pathname.new '#{cpp.cpp_installation.include_path}'
+  @@jam_place['#{cpp.name}_include'.upcase + '_PATH'] = @@place['#{cpp.name}_include']
+<?rb if !cpp.cpp_installation.header_only ?>
+  @@place['#{cpp.name}_lib'] = Pathname.new '#{cpp.cpp_installation.lib_path}'
+  @@jam_place['#{cpp.name}_lib'.upcase + '_PATH'] = @@place['#{cpp.name}_lib']
+<?rb end ?>
+<?rb end ?>
+  @@place['stlsoft'] = @@place['stlsoft_include'].parent
+  @@place['boost-build_install'] = @@place['boost_include'].parent
+  ENV['STLSOFT'] = @@place['stlsoft'].to_s
+end

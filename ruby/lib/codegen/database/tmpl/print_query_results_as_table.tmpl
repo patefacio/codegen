@@ -1,0 +1,14 @@
+inline
+void print_query_results_as_table(std::ostream &out) const {
+  String_table_t string_table;
+  String_list_t header;
+  #{@query_business_name}::member_names_list(header);
+  Row_list_t::const_iterator it(query_result_.begin());
+  Row_list_t::const_iterator end(query_result_.end());
+  for(; it != end; ++it) {
+    String_list_t row_text;
+    it->to_string_list(row_text);
+    string_table.push_back(row_text);
+  }
+  out << fcs::utils::streamers::table::Table_streamer< String_table_t >(string_table, header);
+}

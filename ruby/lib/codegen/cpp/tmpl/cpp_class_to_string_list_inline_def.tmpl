@@ -1,0 +1,22 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @cls.to_string_list ?>
+<?rb start_capture(:guts) ?>
+static inline
+void member_names_list(String_list_t &out) {
+<?rb @cls.streamable_members.each do |m| ?>
+#{i}out.push_back("#{m.variable_name}");
+<?rb end ?>
+}
+
+inline 
+void to_string_list(String_list_t &out) const {
+<?rb @cls.streamable_members.each do |m| ?>
+#{i}out.push_back(boost::lexical_cast< std::string >(#{m.variable_name}));
+<?rb end ?>
+}
+<?rb stop_capture() ?>
+#{Codegen.indent_absolute_text(@guts, 1)}
+<?rb end ?>

@@ -1,0 +1,52 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+import os ;
+project #{@app.name}
+    : 
+    : 
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+SOURCES =
+<?rb @app.impl_classes.each do |c| ?>
+     #{c.name.downcase}
+<?rb end ?>
+;
+
+exe #{@app.name}
+    : #{@app.main_cpp}
+      $(SOURCES).cpp
+<?rb @app.jam_requirements.each do |req| ?>
+      #{req}
+<?rb end ?>
+    : <define>DEBUG_FCS_STARTUP
+      <cxxflags>$(ENV_CXXFLAGS)
+      <linkflags>$(ENV_LINKFLAGS)
+<?rb @app.build_cpp_defines.each do |define| ?>
+      <define>#{define}
+<?rb end ?>
+      <variant>debug:<define>DEBUG
+      <variant>release:<define>NDEBUG
+<?rb @app.jam_cpp_include_directives.each do |include| ?>
+      #{include}
+<?rb end ?>
+    ;
+
+install install_app : #{@app.name} :
+   <link>static
+      <variant>debug:<location>$(FCS_INSTALL_PATH)/static/debug
+      <variant>release:<location>$(FCS_INSTALL_PATH)/static/release
+;
+
+install install_app : #{@app.name} :
+   <link>shared
+      <variant>debug:<location>$(FCS_INSTALL_PATH)/shared/debug
+      <variant>release:<location>$(FCS_INSTALL_PATH)/shared/release
+;
+
+explicit install_app ;
+
+

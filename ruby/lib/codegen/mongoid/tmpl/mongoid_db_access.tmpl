@@ -1,0 +1,54 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb if @collection_support.insert ?>
+void insert(#{@pod.name} const& pod) {
+  connection_->insert(#{@collection_var_name}_, pod.to_bson());
+}
+
+<?rb end ?>
+<?rb if @collection_support.remove_all ?>
+void remove_all() {
+  mongo::BSONObj empty;
+  connection_->remove(#{@collection_var_name}_, empty);
+}
+
+<?rb end ?>
+<?rb if @collection_support.find_all ?>
+
+void find_all(#{@pod.list_of_type} &found) {
+  mongo::BSONObj empty_where;
+  find_all(found, empty_where);
+}
+
+void find_all(#{@pod.list_of_type} &found, mongo::BSONObj const& where) {
+  std::auto_ptr< mongo::DBClientCursor > cursor(connection_->query(#{@collection_var_name}_, where));
+
+  while(cursor->more()) {
+    mongo::BSONObj next(cursor->next());
+    try {
+      #{@pod.name} pod;
+      pod.from_bson(next);
+      found.push_back(pod);
+    } catch(std::exception const& excp) {
+      pantheios::log(PANTHEIOS_SEV_ERROR, 
+                     "ERROR: Skipping mongoid of type #{@pod.name} with error: ", 
+                     excp.what(),
+                     "\nand contents:\n",
+                     next.jsonString().c_str());
+    }
+  }
+}
+<?rb end ?>
+<?rb @pod.entries.select {|pe| pe.index }.each do |pod_entry| ?>
+bool ensure_index_on_#{pod_entry.name}() {
+  return connection_->ensureIndex(#{@collection_var_name}_, BSON( "#{pod_entry.name}" << 1 ));
+}
+<?rb end ?>
+<?rb @pod.entries.select {|pe| pe.unique_index }.each do |pod_entry| ?>
+bool ensure_unique_index_on_#{pod_entry.name}() {
+  bool const unique(true);
+  return connection_->ensureIndex(#{@collection_var_name}_, BSON( "#{pod_entry.name}" << 1 ), unique);
+}
+<?rb end ?>

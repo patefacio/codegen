@@ -1,0 +1,17 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb if @me.brief ?>
+//! #{@me.brief}
+<?rb end ?>
+enum #{@me.name} {
+<?rb i=1 ?>
+<?rb for v in @me.values[0..@me.values.length-2] ?>
+  #{v} = #{i},
+<?rb i<<=1 ?>
+<?rb end ?>
+  #{@me.values[-1]} = #{i}
+};
+
+enum { #{@me.size_enum_name} = #{@me.values.length} };
+

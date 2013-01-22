@@ -1,0 +1,112 @@
+import os ;
+project fcs_utils_performance_unit_tests
+    :
+    :
+    ;
+
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+ENV_LINKFLAGS = [ os.environ LINKFLAGS ] ;
+
+ADDITIONAL_SRC =
+
+# custom <additional src>
+
+  /site-config//boost_regex
+
+# end <additional src>
+;
+
+ADDITIONAL_REQUIREMENTS =
+
+# custom <additional requirements>
+# end <additional requirements>
+;
+
+import testing ;
+
+rule test_fcs_utils_performance
+{
+   for local fileb in [ glob *.cpp ]
+   {
+      all_rules += [ run $(fileb) 
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+      :  # test-files
+      :  # requirements
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <toolset>msvc:<asynch-exceptions>on         
+         <debug-symbols>on
+      ] ;
+   }
+}
+
+test-suite fcs_utils_performance_test_suite : [ test_fcs_utils_performance ] ;
+explicit fcs_utils_performance_test_suite ;
+
+# Targets to build unit tests that stay around for debugging
+exe block_performance_counter_tracker_unit_test :
+         test_block_performance_counter_tracker.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=block_performance_counter_tracker_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit block_performance_counter_tracker_unit_test ;
+
+exe block_rusage_tracker_unit_test :
+         test_block_rusage_tracker.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=block_rusage_tracker_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit block_rusage_tracker_unit_test ;
+
+exe block_tick_tracker_unit_test :
+         test_block_tick_tracker.cpp
+         $(ADDITIONAL_SRC)
+         $(PANTHEIOS_LIBS)
+      :  # additional args
+         <cxxflags>$(ENV_CXXFLAGS)
+         <linkflags>$(ENV_LINKFLAGS)
+         $(ADDITIONAL_REQUIREMENTS)
+         <include>$(TBB_INCLUDE_PATH)
+         <define>RUN_NON_BOOST_UNIT_TEST
+         # <linkflags>-Xlinker --Map=block_tick_tracker_unit_test.map
+         # <define>DEBUG_FCS_STARTUP
+      :  # test-files
+      :  # requirements
+;
+explicit block_tick_tracker_unit_test ;
+
+
+
+alias fcs_utils_performance_unit_tests :
+   block_performance_counter_tracker_unit_test
+   block_rusage_tracker_unit_test
+   block_tick_tracker_unit_test
+  ;
+
+explicit fcs_utils_performance_unit_tests ;
+
+

@@ -1,0 +1,273 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb ## PREFIX ANY CLASS TEMPLATE DEFINITIONS ?>
+<?rb if(0 != @cls.template_decls.length) ?>
+#{@cls.template_decls_text}
+<?rb end ?>
+<?rb if @cls.base_classes.length > 0 ?>
+#{@cls.cpp_class_type} #{@cls.api_decl_space}#{@cls.name} :
+#{Codegen.indent_absolute_text(@cls.base_classes.join(',' + Codegen::NL), 1)} 
+{
+<?rb if @cls.q_object ?>
+  Q_OBJECT
+
+<?rb end ?>
+public:
+
+<?rb else ?>
+#{@cls.cpp_class_type} #{@cls.api_decl_space}#{@cls.class_def_name} 
+{
+public:
+
+<?rb end ?>
+<?rb Codegen.indent() ?>
+<?rb i=Codegen.single_indent() ?>
+<?rb ####################################################################### ?>
+<?rb ## Public static consts ?>
+<?rb ####################################################################### ?>
+<?rb if @cls.public_static_consts.length > 0 ?>
+#{i}// Public static consts
+<?rb @cls.public_static_consts.each do |sc| ?>
+#{Codegen.indent_absolute_text(sc, 1)};
+<?rb end ?>
+<?rb end ?>
+<?rb ####################################################################### ?>
+<?rb ## Public enums ?>
+<?rb ####################################################################### ?>
+<?rb if @cls.enums.length > 0 ?>
+#{i}// Class enumerations
+<?rb @cls.enums.each do |enum| ?>
+#{Codegen.indent_absolute_text(enum.enum_header_contents, 1)}
+
+<?rb end ?>
+<?rb end ?>
+<?rb ####################################################################### ?>
+<?rb ## Nested classes ?>
+<?rb ####################################################################### ?>
+<?rb if @cls.nested_classes.length > 0 ?>
+#{i}// Nested classes
+<?rb @cls.nested_classes.each do |nc| ?>
+#{Codegen.indent_absolute_text(nc.class_definition_wrapper, 1)}
+
+<?rb end ?>
+<?rb end ?>
+<?rb ####################################################################### ?>
+<?rb ## Public typedefs ?>
+<?rb ####################################################################### ?>
+<?rb if @cls.public_typedefs.length > 0 ?>
+#{i}// Class typedefs
+<?rb @cls.public_typedefs.each do |td| ?>
+#{Codegen.indent_absolute_text(td, 1)};
+<?rb end ?>
+
+<?rb end ?>
+<?rb if @cls.ctor_default_is_private ?>
+private:
+
+<?rb end ?>
+<?rb if @cls.ctor_default_is_protected ?>
+protected:
+
+<?rb end ?>
+<?rb ######## MEMBER INIT CTOR ######## ?>
+<?rb if @cls.hide_member_init_ctor ?>
+<?rb import('cpp_member_init_ctor_decl.tmpl') ?>
+<?rb else ?>
+<?rb import('cpp_member_init_ctor.tmpl') ?>
+<?rb end ?>
+<?rb ######## DEFAULT CTOR ######## ?>
+<?rb if @cls.ctor_default_decl or @cls.hide_default_ctor ?>
+#{i}#{@cls.name}();
+
+<?rb else ?>
+<?rb import('cpp_default_ctor.tmpl') ?>
+<?rb end ?>
+<?rb ######## COPY CTOR ######## ?>
+<?rb if @cls.ctor_copy_decl or @cls.hide_copy_ctor ?>
+#{i}#{@cls.name}(@cls.name const&);
+
+<?rb else ?>
+<?rb import('cpp_copy_ctor.tmpl') ?>
+<?rb end ?>
+<?rb if @cls.ctor_default_is_private or @cls.ctor_default_is_protected ?>
+public:
+
+<?rb end ?>
+<?rb if @cls.dtor_virtual_decl ?>
+#{i}virtual ~#{@cls.name}();
+
+<?rb elsif @cls.dtor_virtual_inline_noop ?>
+#{i}virtual ~#{@cls.name}() = 0;
+
+<?rb elsif @cls.dtor_decl ?>
+#{i}~#{@cls.name}();
+
+<?rb elsif (@cls.log_dtor and !@cls.dtor_impl) ?>
+#{i}~#{@cls.name}() {
+#{i}#{i}pantheios::log(PANTHEIOS_SEV_INFORMATIONAL, "Destroyed #{@cls.name}(", 
+#{i}#{i}               pantheios::hex_ptr(reinterpret_cast<void*>(this)),
+#{i}#{i}               pantheios::character(')'));
+#{i}}
+
+<?rb end ?>
+<?rb if @cls.comparable ?>
+<?rb if @cls.hide_comparable ?>
+#{Codegen.indent_absolute_text(@cls.op_less_than_decl, 1)}
+<?rb else ?>
+#{Codegen.indent_absolute_text(@cls.op_less_than_text, 1)}
+<?rb end ?>
+
+<?rb end ?>
+<?rb if @cls.op_equal ?>
+<?rb if @cls.hide_op_equal ?>
+#{Codegen.indent_absolute_text(@cls.op_eq_decl, 1)}
+<?rb else ?>
+#{Codegen.indent_absolute_text(@cls.op_eq_text, 1)}
+<?rb end ?>
+
+<?rb end ?>
+<?rb import('cpp_class_to_string_list_inline_def.tmpl') ?>
+<?rb if @cls.streamable_friend_decl_required ?>
+#{Codegen.indent_absolute_text(%Q{#{@cls.friend_template_decl("#{@cls.api_decl_space}friend std::ostream& operator<<(std::ostream& out, #{@cls.friend_templatized(@cls.name)} const& item);")}}, 1)}
+
+<?rb end ?>
+<?rb if @cls.property_tree ?>
+
+#{i}/// Support for writing members as property tree
+#{i}void to_stream_as_property_tree(std::ostream &out) const;
+
+#{i}/// Support for reading members previously written as property tree
+#{i}void from_stream_as_property_tree(std::istream &in);
+
+#{i}/// Support for writing members to a property tree
+#{i}void to_property_tree(std::string const& path, boost::property_tree::ptree &out) const;
+
+#{i}/// Support for reading members previously written from property tree
+#{i}void from_property_tree(std::string const& path, boost::property_tree::ptree const& in);
+
+
+<?rb end ?>
+<?rb import('cpp_class_boost_serializable.tmpl') ?>
+<?rb if @cls.observer_of.length>0 ?>
+#{i}/////////////////////////////////////////////////////////////////
+#{i}// Observer methods
+#{i}/////////////////////////////////////////////////////////////////
+<?rb @cls.observer_of.each do |observer| ?>
+#{i}void observe(#{observer} const& observed);
+
+<?rb end ?>
+<?rb end ?>
+<?rb if @cls.observer_of_inline.length>0 ?>
+#{i}/////////////////////////////////////////////////////////////////
+#{i}// Observer inline methods
+#{i}/////////////////////////////////////////////////////////////////
+<?rb @cls.observer_of_inline.each do |observer| ?>
+#{i}void observe(#{observer} const& observed) {
+#{Codegen.protect_block("#{@cls.protect_block_tag} #{observer} observe")}
+#{i}}
+
+<?rb end ?>
+<?rb end ?>
+<?rb import('cpp_class_member_accessors.tmpl') ?>
+<?rb if @cls.public_header_section ?>
+public:
+#{Codegen.protect_block("#{@cls.protect_block_tag} public header section")}
+
+<?rb end ?>
+<?rb if @cls.additions_public_header.length>0 ?>
+public:
+
+#{Codegen.indent_text(@cls.additions_public_header, 0)}
+<?rb end ?>
+<?rb if @cls.protected_header_section ?>
+protected:
+
+#{Codegen.protect_block("#{@cls.protect_block_tag} protected header section")}
+
+<?rb end ?>
+<?rb if @cls.additions_protected_header.length>0 ?>
+protected:
+
+#{Codegen.indent_text(@cls.additions_protected_header)}
+<?rb end ?>
+<?rb if @cls.private_header_section ?>
+private:
+
+#{Codegen.protect_block("#{@cls.protect_block_tag} private header section")}
+
+<?rb end ?>
+<?rb if @cls.reconstitute_method ?>
+private:
+#{i}void reconstitute() {
+#{i}  new (this) #{@cls.ctor_name}();
+#{i}}
+
+<?rb end ?>
+<?rb if @cls.additions_private_header.length>0 ?>
+private:
+
+#{Codegen.indent_text(@cls.additions_private_header, 0)}
+<?rb end ?>
+<?rb if @cls.declare_ctor_member_init ?>
+private:
+
+#{i}//! Initialize the instance
+#{i}void ctor_member_init();
+<?rb elsif @cls.declare_ctor_member_init_inline ?>
+private:
+
+#{i}//! Initialize the instance
+#{i}inline void ctor_member_init() {
+<?rb if @cls.time_ctor_init ?>
+#{i}  fcs::utils::performance::Block_performance_counter_tracker time_block(&std::cout, "#{@cls.name} init");
+<?rb end ?>
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.name}::init"), 1)}
+#{i}}
+<?rb end ?>
+<?rb if @cls.declare_ctor_default_init ?>
+private:
+
+#{i}//! Initialize the instance
+#{i}void ctor_default_init();
+<?rb elsif @cls.declare_ctor_default_init_inline ?>
+private:
+
+#{i}//! Initialize the instance
+#{i}inline void ctor_default_init() {
+<?rb if @cls.time_ctor_init ?>
+#{i}  fcs::utils::performance::Block_performance_counter_tracker time_block(&std::cout, "#{@cls.name} ctor_default_init");
+<?rb end ?>
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.name}::ctor_default_init"), 1)}
+#{i}}
+<?rb end ?>
+<?rb if @cls.q_object ?>
+
+#{Codegen.indent_text(Codegen.protect_block("#{@cls.name}::slots"), 1)}
+
+<?rb end ?>
+<?rb import('cpp_class_member_definitions.tmpl') ?>
+<?rb if @cls.hdf5_log_group_manager and !@cls.struct ?>
+<?rb @cls.hdf5_log_group_manager.logging_classes.each do |logging_class| ?>
+
+#{i}friend class #{@cls.namespace.join('::')}::#{logging_class.name};
+#{i}typedef #{$shared_ptr_type}< #{logging_class.name} > #{logging_class.name}_ptr;
+
+<?rb end ?>
+<?rb end ?>
+<?rb @cls.friend_decls.each do |friend_decl| ?>
+#{i}#{friend_decl};
+<?rb end ?>
+<?rb if @cls.singleton ?>
+#{i}friend class fcs::patterns::Singleton_impl< #{@cls.name} >;
+<?rb end ?>
+<?rb if @cls.debug_dump ?>
+
+#{i}DEBUG_DUMP_METHOD()
+<?rb end ?>
+<?rb i=Codegen.outdent() ?>
+};
+<?rb if @cls.debug_dump ?>
+
+DEFINE_DEBUG_DUMP(#{@cls.name})
+<?rb end ?>

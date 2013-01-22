@@ -1,0 +1,20 @@
+import stage ;
+import package ;
+import os ;
+project fcs_gui_search_selection
+    : source-location ../src
+    : requirements
+    ;
+ENV_CXXFLAGS = [ os.environ CXXFLAGS ] ;
+SOURCES =
+     q_search_request
+;
+
+lib fcs_gui_search_selection
+    : $(SOURCES).cpp
+      ../../../../../fcs/gui/search/q_search_request.hpp
+      $(TOP)//fcs_qt
+    : <link>static
+    : <cxxflags>$(ENV_CXXFLAGS)
+    ;
+

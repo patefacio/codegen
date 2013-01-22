@@ -1,0 +1,51 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+import project ;
+import feature ;
+import os ;
+
+project.initialize $(__name__) ;
+project site-config ;
+
+<?rb Place.jam_place.keys.sort.each do |var| ?>
+path-constant #{var} : #{Place.jam_place[var]} ;
+<?rb end ?>
+
+lib pantheios_core : : <name>pantheios.1.core.vc9.dll.debug ;
+lib pantheios_fe_all : : <name>pantheios.1.fe.all.vc9.dll.debug ;
+lib pantheios_be_fprintf : : <name>pantheios.1.be.fprintf.vc9.dll.debug ;
+lib pantheios_bec_fprintf : : <name>pantheios.1.bec.fprintf.vc9.dll.debug ;
+lib pantheios_util : : <name>pantheios.1.util.vc9.dll.debug ;
+
+lib szip :  : <file>$(SZIP_LIB_PATH)/szlib.lib ;
+lib zlib :  : <file>$(ZLIB_LIB_PATH)/zlib.lib ;
+lib hdf5 : szip zlib : <file>$(HDF5_LIB_PATH)/hdf5.lib <variant>release ;
+lib hdf5 : szip zlib : <file>$(HDF5_LIB_PATH)/hdf5d.lib <variant>debug ;
+lib hdf5 : szip zlib : <file>$(HDF5_LIB_PATH)/hdf5.lib <variant>profile ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/hdf5_cpp.lib <variant>release ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/hdf5_cppd.lib <variant>debug ;
+lib hdf5_cpp : hdf5 : <file>$(HDF5_LIB_PATH)/hdf5_cpp.lib <variant>profile ;
+
+lib kernel32 : : <name>kernel32 ;
+lib user32 : : <name>user32 ;
+lib advapi32 : : <name>advapi32 ;
+lib uuid : : <name>uuid ;
+lib wininet : : <name>wininet ;
+lib ole32 : : <name>ole32 ;
+lib oleaut32 : : <name>oleaut32 ;
+
+constant PANTHEIOS_LIBS :
+      /site-config//pantheios_core
+      /site-config//pantheios_fe_all
+      /site-config//pantheios_be_fprintf
+      /site-config//pantheios_bec_fprintf
+      /site-config//pantheios_util
+      /site-config//kernel32
+      /site-config//user32
+      /site-config//advapi32
+      /site-config//uuid
+      /site-config//wininet
+      /site-config//ole32
+      /site-config//oleaut32 ;
+         

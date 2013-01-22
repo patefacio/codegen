@@ -1,0 +1,12 @@
+
+SOURCES =
+     codegen_coverage_api
+     all_types
+     all_types_hdf5_logger
+;
+
+lib fcs_recordset
+    : $(SOURCES).cpp
+    : <define>FCS_CODEGEN_COVERAGE_API_EXPORTS 
+      <linkflags>/VERBOSE:LIB
+    ;

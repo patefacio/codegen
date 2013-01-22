@@ -1,0 +1,97 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb o="#{@copg.name.downcase}_options_description_s" ?>
+<?rb description_method_name=@copg.description_method_name ?>
+<?rb i=Codegen.single_indent ?>
+using namespace boost::program_options;
+
+namespace {
+<?rb option_decl=%Q{
+options_description #{o}(
+#{Codegen::Cpp.make_c_string_literal(
+"#{@copg.brief}\n\n#{@copg.descr}\n\nAllowed Options", i)});
+} ?>
+#{Codegen.indent_absolute_text(option_decl, 1)}
+}
+
+options_description const& #{description_method_name}() {
+#{i}if(#{o}.options().empty()) {
+#{i}#{i}#{o}.add_options()
+<?rb @copg.options.each do |opt| ?>
+<?rb   if opt.cpp_type == 'bool' ?>
+<?rb     if opt.short_name ?>
+#{i}#{i}("#{opt.long_name},#{opt.short_name}", "#{opt.descr}")
+<?rb     else ?>
+#{i}#{i}("#{opt.long_name}", "#{opt.descr}")
+<?rb     end ?>
+<?rb   else ?>
+<?rb     if opt.is_multiple ?>
+<?rb       opt_type_text = "value< std::vector< #{opt.cpp_type} > >()" ?>
+<?rb     else ?>
+<?rb       opt_type_text = "value< #{opt.cpp_type} >()" ?>
+<?rb     end ?>
+<?rb     opt_type_text += "->default_value(#{opt.default_value})" if opt.default_value ?>
+<?rb     if opt.short_name ?>
+#{i}#{i}("#{opt.long_name},#{opt.short_name}", 
+#{i}#{i}#{opt_type_text}, 
+#{i}#{i}"#{opt.descr} <#{opt.cpp_type}>")
+<?rb     else ?>
+#{i}#{i}("#{opt.long_name}", 
+#{i}#{i}#{opt_type_text}, 
+#{i}#{i}"#{opt.descr} <#{opt.cpp_type}>")
+<?rb     end ?>
+<?rb   end ?>
+<?rb end ?>
+#{i}#{i};
+#{i}}
+#{i}return #{o};
+}
+
+void read_parameters(#{@copg.cpp_class.name}& results, int argc, char **argv) {
+#{i}// ensure it is initialized
+#{i}#{description_method_name}();
+#{i}store(parse_command_line(argc, argv, #{o}), results.parsed_program_options_);
+#{i}if(results.parsed_program_options_.count("help") > 0) {
+#{i}#{i}results.help_ = true;
+#{i}#{i}return;
+#{i}}
+
+#{i}notify(results.parsed_program_options_);
+<?rb @copg.options.each do |opt| ?>
+<?rb if opt.cpp_type == 'bool' ?>
+#{i}results.#{opt.name}_ = results.parsed_program_options_.count("#{opt.name}") > 0;
+<?rb else ?>
+<?rb   if opt.is_multiple ?>
+#{i}if(results.parsed_program_options_.count("#{opt.name}")) {
+#{i}#{i}results.#{opt.name}_ = results.parsed_program_options_["#{opt.name}"].as<
+#{i}#{i}#{i}#{@copg.cpp_class.name}::#{opt.cpp_member_type} >();
+#{i}} else {
+<?rb     if opt.opt_required ?>
+#{i}#{i}std::ostringstream msg;
+#{i}#{i}msg << "List Error: #{@copg.cpp_class.name} option #{opt.name} is required\n"
+#{i}#{i}    << #{description_method_name}();
+#{i}#{i}throw std::runtime_error(msg.str());
+<?rb     else ?>
+#{i}#{i}// #{opt.name} not present, but not required
+<?rb     end ?> 
+#{i}}
+<?rb   else ?> 
+#{i}if(results.parsed_program_options_.count("#{opt.name}")) {
+#{i}#{i}results.#{opt.name}_ = results.parsed_program_options_["#{opt.name}"].as<
+#{i}#{i}#{i}#{opt.cpp_member_type} >();
+#{i}} else {
+<?rb     if opt.opt_required ?>
+#{i}#{i}std::ostringstream msg;
+#{i}#{i}msg << "Scalar Error: #{@copg.cpp_class.name} option #{opt.name} is required\n"
+#{i}#{i}    << #{description_method_name}();
+#{i}#{i}throw std::runtime_error(msg.str());
+<?rb     else ?>
+#{i}#{i}// #{opt.name} not present, but not required
+<?rb     end ?> 
+#{i}}
+<?rb     end ?> 
+<?rb   end ?> 
+<?rb end ?> 
+}
+

@@ -1,0 +1,18 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb @me.methods.each do |method| ?>
+<?rb arg_list_with_object = ["#{@me.name}_dispatcher &dispatcher"] + method[:arg_typed_names] ?>
+
+inline #{method[:return]}
+#{method[:name]}(#{arg_list_with_object.join(', ')}) {
+  switch(dispatcher.id_) {
+<?rb @me.classes.each do |klass| ?>
+    case #{klass.name}::#{@me.name.upcase}_ID: {
+      reinterpret_cast< #{klass.name} * >(dispatcher.object_)->#{method[:name]}(#{method[:arg_names].join(', ')});
+      break;
+    }
+<?rb end ?>
+  }
+}
+<?rb end ?>

@@ -1,0 +1,126 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb require 'codegen' ?>
+<?rb require 'codegen/cpp' ?>
+<?rb require 'place' ?>
+<?rb i=Codegen.single_indent ?>
+#{Codegen.cpp_copyright(@cls.header_filename, @cls.brief)}
+#ifndef #{@cls.include_guard}
+#define #{@cls.include_guard}
+
+<?rb if 0 != @cls.additions_pre_include_header.length ?>
+#{@cls.additions_pre_include_header.join(Codegen::NL)}
+<?rb end ?>
+<?rb if @cls.header_includes.length ?>
+#{@cls.clean_header_includes}
+
+<?rb end ?>
+<?rb if @cls.is_api_header and !@cls.library.header_only and !@cls.library.static_only ?>
+#{@cls.windows_api_decl}
+<?rb end ?>
+<?rb if 0 != @cls.forward_class_decls_parsed.length ?>
+// Forward class declarations
+#{@cls.forward_class_decls_parsed.join(Codegen::NL)}
+
+<?rb end ?>
+<?rb if !@cls.additions_pre_namespace_header.empty? ?>
+#{@cls.additions_pre_namespace_header.join(Codegen::NL)}
+<?rb end ?>
+<?rb if @cls.global_header_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} global header section")}
+<?rb end ?>
+<?rb if @cls.describe_api ?>
+<?rb import('cpp_library_description_methods.tmpl') if !@cls.library.descr.empty? ?>
+<?rb end ?>
+<?rb if @cls.is_api_header ?>
+<?rb guts = @cls.api_header_namespace_contents ?>
+<?rb else ?>
+<?rb guts = @cls.class_definition_wrapper ?>
+<?rb end ?>
+<?rb additional_classes_text = "" ?>
+<?rb @cls.additional_classes.each do |ac| ?>
+<?rb additional_classes_text += "\n#{ac.class_definition_wrapper}\n" ?>
+<?rb end ?>
+<?rb if !additional_classes_text.empty? ?>
+<?rb if @cls.additional_classes_come_first ?>
+<?rb guts = additional_classes_text + guts ?>
+<?rb else ?>
+<?rb guts += additional_classes_text ?>
+<?rb end ?>
+<?rb end ?>
+<?rb if @cls.header_pre_namespace_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} pre namespace section")}
+<?rb end ?>
+<?rb @cls.namespace.each do |ns| ?>
+namespace #{ns} {
+<?rb end ?>
+<?rb if @cls.header_namespace_begin_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} namespace begin section")}
+<?rb end ?>
+<?rb if 0 != @cls.additions_header_namespace.length ?>
+#{Codegen.align_preprocessor(Codegen.indent_absolute_text(@cls.additions_header_namespace.join(Codegen::NL), 1))}
+<?rb end ?>
+<?rb if @cls.pre_class_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} pre class section")}
+<?rb end ?>
+<?rb if @cls.file_level_consts.length > 0 ?>
+
+#{i}// Public constants
+<?rb @cls.file_level_consts.each do |const| ?>
+#{Codegen.indent_absolute_text(const, 1)};
+<?rb end ?>
+<?rb end ?>
+<?rb if 0 != @cls.namespace_forward_class_decls.length ?>
+
+#{i}// Forward class declarations
+<?rb @cls.namespace_forward_class_decls.each do |decl| ?>
+#{i}class #{decl};
+<?rb end ?>
+<?rb end ?>
+<?rb if guts ?>
+
+#{Codegen.align_preprocessor(Codegen.indent_absolute_text(guts, 1))}
+
+<?rb end ?>
+<?rb @cls.nested_classes.each do |nc| ?>
+<?rb if (@cls.streamable_inline or @cls.streamable_inline_custom) ?>
+#{i}// Nested class #{nc.name} streamer
+#{Codegen.indent_absolute_text(nc.streamable_impl().chomp, 1)} 
+<?rb end ?>   
+<?rb end ?>   
+<?rb if @cls.header_namespace_end_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} namespace end section")}
+<?rb end ?>
+<?rb @cls.namespace.reverse.each do |ns| ?>
+} // namespace #{ns}
+<?rb end ?>
+<?rb if @cls.header_post_namespace_section ?>
+#{Codegen.protect_block("#{@cls.protect_block_tag} post namespace section")}
+<?rb end ?>
+<?rb if @cls.property_tree ?>
+
+namespace fcs {
+namespace utils {
+namespace serialize {
+
+#{i}template<>
+#{i}inline 
+#{i}void put_to_property_tree(std::string const& path, boost::property_tree::ptree & tree, 
+#{i}                          #{@cls.fully_qualified_name} const& item_to_put) {
+#{i}#{i}item_to_put.to_property_tree(path, tree);
+#{i}}
+
+#{i}template<>
+#{i}inline 
+#{i}void get_from_property_tree(std::string const& path, boost::property_tree::ptree const& tree, 
+#{i}                            #{@cls.fully_qualified_name} & item_to_get) {
+#{i}#{i}item_to_get.from_property_tree(path, tree);
+#{i}}
+
+}
+}
+}
+
+<?rb end ?>
+#endif // #{@cls.include_guard}

@@ -1,0 +1,158 @@
+<?rb ################################################################################ ?>
+<?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
+<?rb ################################################################################ ?>
+<?rb i=Codegen.single_indent() ?>
+bson::bo to_bson(bool exclude_oid = false) const {
+  bson::bob builder;
+  to_bson(builder, exclude_oid);
+  return builder.obj();
+}
+
+// Support for serializing non-static members of #{@pod.name} to bson
+void to_bson(bson::bob &builder, bool exclude_oid = false) const {
+
+<?rb if @pod.oid_pod_entry ?>
+  if(!exclude_oid) {
+    if(!#{@pod.oid_pod_entry.name}_.isSet()) {
+      #{@pod.oid_pod_entry.name}_.init();
+    }
+    builder << "#{@pod.oid_pod_entry.bson_name}" << #{@pod.oid_pod_entry.name}_;
+  }
+
+<?rb end ?>
+<?rb if @pod.version_pod_entry ?>
+  builder << "#{@pod.version_pod_entry.bson_name}" << #{@pod.version_pod_entry.name}_;
+<?rb end ?>
+<?rb @pod.entries.each do |pod_entry| ?>
+<?rb next if (pod_entry.is_oid or pod_entry.is_version) ?>
+<?rb if !pod_entry.is_array ?>
+<?rb if pod_entry.is_nested_pod ?>
+  {
+    bson::bob element_builder;
+    #{pod_entry.name}_.to_bson(element_builder);
+    builder.append("#{pod_entry.bson_name}", element_builder.obj());
+  }
+<?rb elsif pod_entry.is_enum ?>
+  builder << "#{pod_entry.bson_name}" << to_c_str(#{pod_entry.name}_);
+<?rb else ?>
+  builder << "#{pod_entry.name}" << #{pod_entry.name}_;
+<?rb end ?>
+<?rb else ?>
+  {
+    #{pod_entry.type}_list_t::const_iterator it(#{pod_entry.name}_.begin());
+    #{pod_entry.type}_list_t::const_iterator end(#{pod_entry.name}_.end());
+    mongo::BSONArrayBuilder array_builder(builder.subarrayStart("#{pod_entry.name}"));
+    for(; it != end; ++it) {
+<?rb if pod_entry.is_nested_pod ?>
+      bson::bob element_builder;
+      it->to_bson(element_builder);
+      array_builder.append(element_builder.obj());
+<?rb else ?>
+      array_builder.append(*it);
+<?rb end ?>
+    }
+    array_builder.done();
+  }
+<?rb end ?> 
+<?rb end ?>  
+}
+
+std::string to_bson_text(bool exclude_oid = false) const {
+  const int pretty(1);
+  std::string result(to_bson(exclude_oid).jsonString(mongo::Strict, pretty));
+  pantheios::log(PANTHEIOS_SEV_DEBUG, "Obj to_bson_text() : ", result.c_str());
+  return result;
+}
+
+// Support for serializing non-static members of #{@pod.name} to bson
+void from_bson(bson::bo const& bson_object) {
+  bson::be bson_element;
+
+  try {
+<?rb if @pod.oid_pod_entry ?>
+    bson_element = bson_object.getField("#{@pod.oid_pod_entry.bson_name}");
+    if(bson_element.ok()) {
+      bson_element.Val(#{@pod.oid_pod_entry.name}_);
+    }
+
+<?rb end ?>
+<?rb if @pod.version_pod_entry ?>
+    bson_element = bson_object.getField("#{@pod.version_pod_entry.bson_name}");
+    if(bson_element.ok()) {
+      bson_element.Val(#{@pod.version_pod_entry.name}_);
+    }
+
+<?rb end ?>
+<?rb @pod.entries.each do |pod_entry| ?>
+<?rb start_capture :read_in_pod_entry ?>
+<?rb next if (pod_entry.is_oid or pod_entry.is_version) ?>
+<?rb if !pod_entry.is_array ?>
+<?rb ####### BEGIN NOT ARRAY ########## ?>
+    bson_element = bson_object.getField("#{pod_entry.bson_name}");
+<?rb   if pod_entry.type == :Float ?>
+    if(bson_element.ok()) {
+      #{pod_entry.name}_ = bson_element.numberDouble();
+    }
+<?rb   elsif pod_entry.type == :Long ?>
+    if(bson_element.ok()) {
+      #{pod_entry.name}_ = bson_element.numberLong();
+    }
+<?rb   elsif pod_entry.is_nested_pod ?>
+    {
+      #{pod_entry.name}_.from_bson(bson_element.Obj());
+    }
+<?rb   elsif pod_entry.is_enum ?>
+    if(bson_element.ok()) {
+      std::string val;
+      bson_element.Val(val);
+      from_c_str(val.c_str(), #{pod_entry.name}_);
+    }
+<?rb   elsif pod_entry.name == "oid" ?>
+<?rb   else ?>
+    if(bson_element.ok()) {
+      bson_element.Val(#{pod_entry.name}_);
+    }
+<?rb   end ?>
+<?rb else ?>
+<?rb ####### BEGIN ARRAY ########## ?>
+    {
+      #{pod_entry.name}_.clear();
+      bson_element = bson_object.getField("#{pod_entry.bson_name}");
+      std::vector< mongo::BSONElement > elements(bson_element.Array());
+      std::vector< mongo::BSONElement >::const_iterator it(elements.begin());
+      std::vector< mongo::BSONElement >::const_iterator end(elements.end());
+      for(; it != end; ++it) {
+<?rb if pod_entry.is_nested_pod ?>
+        #{pod_entry.type}_list_t::value_type element;
+        element.from_bson(it->Obj());
+        #{pod_entry.name}_.push_back(element);
+<?rb else ?>
+        #{pod_entry.name}_.push_back(it->#{Podule::From_bson_method[pod_entry.type.to_sym]});
+<?rb end ?>
+      }
+    }
+<?rb end ?>  
+<?rb stop_capture ?>
+<?rb if pod_entry.version > 0 ?>
+    if(#{@pod.version_pod_entry.name}_ >= #{pod_entry.version}) {
+#{Codegen.indent_text(@read_in_pod_entry.chomp, 1)}
+    }
+
+<?rb else ?>  
+#{@read_in_pod_entry}
+<?rb end ?>  
+<?rb end ?>  
+  } catch(std::exception const& excp) {
+    pantheios::log(PANTHEIOS_SEV_ERROR,
+                   "Failed to parse #{@pod.name} with exception: ",
+                   excp.what(),
+                   "\nlast read bson_element:\n",
+                   bson_element.jsonString(mongo::Strict, 1).c_str());
+    throw;
+  }
+}
+
+void from_bson_text(std::string const& text) {
+  mongo::BSONObj obj(mongo::fromjson(text));
+  from_bson(obj);
+}

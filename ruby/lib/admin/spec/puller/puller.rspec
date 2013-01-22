@@ -1,0 +1,38 @@
+require "spec_helper"
+require "package"
+require "flare"
+require "yaml"
+include Package
+include Package::Identifier
+
+$sample_url = 'http://www.vim.org/scripts/download_script.php?src_id=12751'
+
+describe UrlPuller do
+  it "Pulls simple url to temporary location" do
+    puller = UrlPuller.new(:source_uri => $sample_url)
+    puller.pull
+    puller.pulled_file.should_not be_nil
+    puller.pulled_file.exist?.should == true
+    puller.pulled_file.size.should_not == 0
+  end
+  it "Pulls simple url to specified location" do
+    target_path = Pathname.new("/tmp/sample_location")
+    puller = UrlPuller.new(:source_uri => $sample_url, :target_path => target_path)
+    puller.pull
+    puller.pulled_file.basename.to_s.should == 'sample_location'
+    puller.pulled_file.should_not be_nil
+    puller.pulled_file.exist?.should == true
+    puller.pulled_file.size.should_not == 0
+  end
+  it "Can clean up previously pulled items first when target specified" do
+    target_path = Pathname.new("/tmp/sample_location")
+    puller = UrlPuller.new(:source_uri => $sample_url, :target_path => target_path)
+    puller.pull
+    puller = UrlPuller.new(:source_uri => $sample_url, :target_path => target_path, 
+                           :already_exist_action => AlreadyExistAction::CLEAN_FIRST)
+    puller.pull
+    puller.target_cleaned_first.should == true
+    puller.pulled_file.size.should_not == 0
+  end
+end
+
