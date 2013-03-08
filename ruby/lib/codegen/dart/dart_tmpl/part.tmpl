@@ -1,0 +1,9 @@
+/** #{@part.id} */
+part of #{@part.owner.id.abbrev};
+
+<?rb @part.classes.each do |c| ?>
+#{@@engine.render('class.tmpl', {:c => c,} )}
+<?rb end ?>
+
+#{Codegen.protect_block("#{@part.id} top level")}
+

@@ -1,0 +1,12 @@
+library #{@lib.id.abbrev};
+
+<?rb @lib.parts.each do |part| ?>
+part "src/#{@lib.id.abbrev}/#{part.id}.dart";
+<?rb end ?>
+
+main() { 
+  print("Main for lib #{@lib.id}");
+#{Codegen.protect_block("#{@lib.id} main")}
+}
+
+#{Codegen.protect_block("#{@lib.id} top level")}
