@@ -1,10 +1,14 @@
 /** #{@part.id} */
 part of #{@part.owner.name};
 
+<?rb @part.enums.each do |e| ?>
+#{@@engine.render('enum.tmpl', {:e => e,} )}
+
+<?rb end ?>
 <?rb @part.classes.each do |c| ?>
 #{@@engine.render('class.tmpl', {:c => c,} )}
-<?rb end ?>
 
+<?rb end ?>
 <?rb if not @part.generated.empty? ?>
 
 #{@part.generated.join(Codegen::NL)}

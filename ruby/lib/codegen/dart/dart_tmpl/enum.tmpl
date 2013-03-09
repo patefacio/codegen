@@ -1,0 +1,22 @@
+<?rb NL=Codegen::NL if not NL ?>
+class #{@e.name} { 
+<?rb @e.values.to_enum.with_index(1) do |v,i| ?>
+  static const #{v} = const #{@e.name}._(#{i});
+<?rb end ?>
+
+  static get values => [
+    #{@e.values.join(","+NL+'    ')}
+  ];
+
+  final int value;
+
+  const #{@e.name}._(this.value);
+
+  String toString() { 
+    switch(this) { 
+<?rb @e.values.to_enum.with_index(1) do |v,i| ?>
+      case #{v}: return "#{v}";
+<?rb end ?>
+    }
+  }
+}

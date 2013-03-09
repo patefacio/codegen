@@ -78,6 +78,27 @@ module Codegen::Dart
     
   end
 
+  class Enum
+    extend Attributes
+    include Accessible
+    
+    attribute_defaults({ 
+                         :id => nil, 
+                         :name => nil,
+                         :public => true, 
+                         :values => [],
+                       })
+    def initialize(opts={ })
+      set_attributes(opts)
+      @id = instantiate(method(:make_id), id)
+      @name = id.cap_camel
+      if not @public
+        @name = '_'+@name
+      end
+      @values = values.map { |v| make_id(v).shout }
+    end
+  end
+
   class DClass
     extend Attributes
     include Accessible
@@ -101,9 +122,7 @@ module Codegen::Dart
       @members = instantiate(Member, members)
       @id = instantiate(method(:make_id), id)
       @name = id.cap_camel
-      if @public
-        @name = @name
-      else
+      if not @public
         @name = '_'+@name
       end
       ctor_map = Hash.new {|h,k| h[k] = { :args => [], :opt_args => [], :named_args => [] } }
@@ -149,6 +168,7 @@ module Codegen::Dart
                          :members => [], 
                          :classes => [],
                          :generated => [],
+                         :enums => [],
                        })
 
     def initialize(opts={ })
@@ -156,6 +176,7 @@ module Codegen::Dart
       required_attributes([:id])
       @members = instantiate(Member, members)
       @classes = instantiate(DClass, classes)
+      @enums = instantiate(Enum, enums)
       @id = instantiate(method(:make_id), id)
     end
   end
@@ -165,6 +186,7 @@ module Codegen::Dart
     include Accessible
     attribute_defaults({ 
                          :id => nil, :members => [], 
+                         :public_constants => [],
                          :imports => [],
                          :parts => [], 
                          :name => nil,
@@ -201,6 +223,7 @@ module Codegen::Dart
       namespace.each do |name|
         @outpath = @outpath + name
       end
+      @public_constants = public_constants.map {|t,n,v| [ t, make_id(n).shout, v] }
       @outpath = @outpath
     end
 

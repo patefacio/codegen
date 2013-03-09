@@ -6,6 +6,12 @@ import "#{imp}";
 <?rb @lib.parts.each do |part| ?>
 part "src/#{@lib.name}/#{part.id}.dart";
 <?rb end ?>
+<?rb if not @lib.public_constants.empty? ?>
+
+<?rb @lib.public_constants.each do |t,n,val| ?>
+const #{t} #{n} = #{val};
+<?rb end ?>
+<?rb end ?>
 <?rb if not @lib.generated.empty? ?>
 
 #{@lib.generated.join(Codegen::NL)}

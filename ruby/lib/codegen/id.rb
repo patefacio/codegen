@@ -37,6 +37,10 @@ module Codegen
       hyphenated
     end
 
+    def shout
+      words.map{|w| w.upcase }.join('_')
+    end
+
     def title
       words.map {|w| w.capitalize }.join(' ')
     end
