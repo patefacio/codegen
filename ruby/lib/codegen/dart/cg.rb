@@ -92,6 +92,7 @@ module Codegen::Dart
                          :ctor_named => false,
                          :ctor_opt => false,
                          :pp => false,
+                         :generated => [],
                        })
 
     def initialize(opts={ })
@@ -100,6 +101,11 @@ module Codegen::Dart
       @members = instantiate(Member, members)
       @id = instantiate(method(:make_id), id)
       @name = id.cap_camel
+      if @public
+        @name = @name
+      else
+        @name = '_'+@name
+      end
       ctor_map = Hash.new {|h,k| h[k] = { :args => [], :opt_args => [], :named_args => [] } }
       members.each do |m|
         if m.ctor
@@ -137,7 +143,13 @@ module Codegen::Dart
     attr_accessor :owner
     extend Attributes
     include Accessible
-    attribute_defaults({ :id => nil, :owner => nil, :members => [], :classes => [] })
+    attribute_defaults({ 
+                         :id => nil, 
+                         :owner => nil, 
+                         :members => [], 
+                         :classes => [],
+                         :generated => [],
+                       })
 
     def initialize(opts={ })
       set_attributes(opts)
@@ -157,9 +169,11 @@ module Codegen::Dart
                          :parts => [], 
                          :name => nil,
                          :namespace => [],
+                         :generated => [],
+                         :generated_main => [],
                          :root_path => 
                          Place['dart'] ? Place['dart'] : 
-                         Codegen::Dart::HERE + '../../../../../dart'
+                         Codegen::Dart::HERE + '../../../../../dart',
                        })
 
     def initialize(opts={ })

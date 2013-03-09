@@ -71,5 +71,9 @@ class #{@c.name} {
     return result;
   }
 <?rb end ?>
+<?rb if not @c.generated.empty? ?>
+
+#{@c.generated.join(Codegen::NL)}
+<?rb end ?>
 #{Codegen.protect_block("#{@c.id} impl")}
 }

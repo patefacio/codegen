@@ -4,11 +4,19 @@ library #{@lib.name};
 import "#{imp}";
 <?rb end ?>
 <?rb @lib.parts.each do |part| ?>
-part "src/#{@lib.id.abbrev}/#{part.id}.dart";
+part "src/#{@lib.name}/#{part.id}.dart";
+<?rb end ?>
+<?rb if not @lib.generated.empty? ?>
+
+#{@lib.generated.join(Codegen::NL)}
 <?rb end ?>
 
 main() { 
   print("Main for lib #{@lib.id}");
+<?rb if not @lib.generated_main.empty? ?>
+
+#{@lib.generated_main.join(Codegen::NL)}
+<?rb end ?>
 #{Codegen.protect_block("#{@lib.id} main")}
 }
 

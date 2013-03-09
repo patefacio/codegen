@@ -5,5 +5,9 @@ part of #{@part.owner.name};
 #{@@engine.render('class.tmpl', {:c => c,} )}
 <?rb end ?>
 
+<?rb if not @part.generated.empty? ?>
+
+#{@part.generated.join(Codegen::NL)}
+<?rb end ?>
 #{Codegen.protect_block("#{@part.id} top level")}
 
