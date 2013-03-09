@@ -1,3 +1,4 @@
+<?rb NL=Codegen::NL if not NL ?>
 class #{@c.name} { 
 <?rb @c.members.each do |m| ?>
 <?rb if m.init.nil? ?>
@@ -14,13 +15,60 @@ class #{@c.name} {
   #{m.type} set #{m.name}(#{m.type} #{m.name}) => #{m.vname} = #{m.name};
 <?rb end ?>
 <?rb end ?>
-<?rb @c.ctors_to_members.keys.sort.each do |ctor| ?>
+<?rb @c.ctors.keys.sort.each do |ctor| ?>
 
 <?rb ctor_name = (ctor=='default' and @c.name or "#{@c.name}.#{ctor}") ?>
-<?rb type_value_pairs = @c.ctors_to_members[ctor].map {|m| "      #{m.type} #{m.name}" } ?>
-<?rb assignments = @c.ctors_to_members[ctor].map {|m| "    #{m.vname} = #{m.name}" } ?>
-  #{ctor_name}(#{type_value_pairs.join(','+Codegen::NL).strip}) :  
-#{assignments.join(','+Codegen::NL)} { 
+<?rb args = @c.ctors[ctor][:args].map {|m| "#{m.type} #{m.name}" } ?>
+<?rb opt_args = @c.ctors[ctor][:opt_args].map {|m| "#{m.type} #{m.name}" } ?>
+<?rb named_args = @c.ctors[ctor][:named_args].map {|m| "#{m.type} #{m.name}" } ?>
+<?rb initializers = @c.ctors[ctor][:args].map {|m| "#{m.vname} = #{m.name}" } ?>
+<?rb # initializers = initializers + @c.ctors[ctor][:opt_args].select{|m| m.init.nil? }.map {|m| "#{m.vname} = #{m.name}" } ?>
+<?rb # initializers = initializers + @c.ctors[ctor][:named_args].select{|m| m.init.nil? }.map {|m| "#{m.vname} = #{m.name}" } ?>
+<?rb uses_initializers = (initializers.empty? and "" or " :") ?>
+<?rb if not opt_args.empty? ?>
+  #{ctor_name}(
+<?rb if args.empty? ?>
+      [
+<?rb else ?>
+      #{args.join(','+NL+' '*6)}, [
+<?rb end ?>
+        #{opt_args.join(','+NL+' '*8)}
+      ])#{uses_initializers}
+<?rb elsif not named_args.empty? ?>
+  #{ctor_name}(
+<?rb if args.empty? ?>
+      {
+<?rb else ?>
+      #{args.join(','+NL+' '*6)}, { 
+<?rb end ?>
+        #{named_args.join(','+NL+' '*8)}
+      })#{uses_initializers}
+<?rb else ?>
+  #{ctor_name}(#{args.join(','+NL+' '*6)})#{uses_initializers}
+<?rb end ?>
+<?rb if not initializers.empty? ?>
+    #{initializers.join(','+NL+' '*4)} 
+<?rb end ?>
+  { 
+<?rb @c.ctors[ctor][:opt_args].each do |m| ?>
+    if(?#{m.name}) { #{m.vname} = #{m.name}; }
+<?rb end ?>
+<?rb @c.ctors[ctor][:named_args].each do |m| ?>
+    if(?#{m.name}) { #{m.vname} = #{m.name}; }
+<?rb end ?>
+<?rb if @c.custom_ctors.include? ctor ?>
+#{Codegen.protect_block("#{@c.name}.#{ctor} ctor")}
+<?rb end ?>
+  }
+<?rb end ?>
+<?rb if @c.pp ?>
+<?rb i = '$'+'{_i_}' ?>
+  String pp() { 
+    String _i_ = indent();
+    String result = """#{i}#{@c.name} {
+#{@c.members.map {|m| "#{i}  #{m.name}: $#{m.vname}" }.join(','+NL)}
+#{i}}""";
+    return result;
   }
 <?rb end ?>
 #{Codegen.protect_block("#{@c.id} impl")}

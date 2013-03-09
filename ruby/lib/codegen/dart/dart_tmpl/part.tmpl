@@ -1,5 +1,5 @@
 /** #{@part.id} */
-part of #{@part.owner.id.abbrev};
+part of #{@part.owner.name};
 
 <?rb @part.classes.each do |c| ?>
 #{@@engine.render('class.tmpl', {:c => c,} )}

@@ -1,5 +1,8 @@
-library #{@lib.id.abbrev};
+library #{@lib.name};
 
+<?rb @lib.imports.each do |imp| ?>
+import "#{imp}";
+<?rb end ?>
 <?rb @lib.parts.each do |part| ?>
 part "src/#{@lib.id.abbrev}/#{part.id}.dart";
 <?rb end ?>

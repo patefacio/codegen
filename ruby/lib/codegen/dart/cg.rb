@@ -13,6 +13,19 @@ module Codegen::Dart
   HERE = Pathname.new(File.expand_path(__FILE__)).parent
   @@engine = Tenjin::Engine.new(:path => [ HERE + 'dart_tmpl' ])
 
+  def name_ctor(ctor_name)
+    case ctor_name
+    when String
+      make_id(ctor_name)
+    when Symbol
+      make_id(ctor_name)
+    when TrueClass
+      make_id(:full)
+    else
+      raise ArgumentError, "ctor name must be one of [String, Symbol, true] not #{ctor_name} of #{ctor_name.class}"
+    end
+  end      
+
   module Accessible
     extend Attributes
     attr_accessor :public
@@ -34,20 +47,6 @@ module Codegen::Dart
     def writable()
       return access == :rw
     end
-
-    def name_ctor(ctor_name)
-      case ctor_name
-      when String
-        make_id(ctor_name)
-      when Symbol
-        make_id(ctor_name)
-      when TrueClass
-        make_id(:full)
-      else
-        raise ArgumentError, "ctor name must be one of [String, Symbol, true] not #{ctor_name} of #{ctor_name.class}"
-      end
-    end      
-
 
     def initialize(opts={ })
       set_attributes(opts)
@@ -87,7 +86,12 @@ module Codegen::Dart
                          :public => false, 
                          :members => [], 
                          :name => nil,
-                         :ctors_to_members => nil
+                         :custom_ctors => [],
+                         :ctors => nil,
+                         :ctor => false,
+                         :ctor_named => false,
+                         :ctor_opt => false,
+                         :pp => false,
                        })
 
     def initialize(opts={ })
@@ -96,18 +100,36 @@ module Codegen::Dart
       @members = instantiate(Member, members)
       @id = instantiate(method(:make_id), id)
       @name = id.cap_camel
-      ctor_map = Hash.new {|h,k| h[k] = [] }
+      ctor_map = Hash.new {|h,k| h[k] = { :args => [], :opt_args => [], :named_args => [] } }
       members.each do |m|
         if m.ctor
           m.ctor.each do |ctor|
-            ctor_map[ctor.camel] << m
+            ctor_map[ctor.camel][:args] << m
+          end
+        end
+        if m.ctor_opt
+          m.ctor_opt.each do |ctor|
+            ctor_map[ctor.camel][:opt_args] << m
+          end
+        end
+        if m.ctor_named
+          m.ctor_named.each do |ctor|
+            ctor_map[ctor.camel][:named_args] << m
           end
         end
       end
-      @ctors_to_members = { }
-      ctor_map.each_pair do |k,v|
-        @ctors_to_members[k] = v
+      if ctor
+        ctor_map['default'] = { :args => members, :opt_args => [], :named_args => [] }
       end
+      if ctor_opt
+        ctor_map['default'] = { :args => [], :opt_args => members, :named_args => [] }
+      end
+      if ctor_named
+        ctor_map['default'] = { :args => [], :opt_args => [], :named_args => members }
+      end
+      @ctors = ctor_map
+      @custom_ctors = [ @custom_ctors ] if @custom_ctors.class != Array
+      @custom_ctors = Set.new(custom_ctors.map{|c| name_ctor(c).camel })
     end
   end
 
@@ -116,6 +138,7 @@ module Codegen::Dart
     extend Attributes
     include Accessible
     attribute_defaults({ :id => nil, :owner => nil, :members => [], :classes => [] })
+
     def initialize(opts={ })
       set_attributes(opts)
       required_attributes([:id])
@@ -130,21 +153,36 @@ module Codegen::Dart
     include Accessible
     attribute_defaults({ 
                          :id => nil, :members => [], 
+                         :imports => [],
                          :parts => [], 
+                         :name => nil,
                          :namespace => [],
                          :root_path => 
                          Place['dart'] ? Place['dart'] : 
                          Codegen::Dart::HERE + '../../../../../dart'
                        })
+
     def initialize(opts={ })
       set_attributes(opts)
       required_attributes([:id])
       @members = instantiate(Member, members)
       @parts = instantiate(Part, parts)
       @id = instantiate(method(:make_id), id)
+      @name = ((id.words.length >= 3) and id.abbrev or id.to_s)
+      pp_required = false
       parts.each do |part|
         part.owner = self
+        part.classes.each do |cls|
+          if cls.pp
+            pp_required = true 
+            break
+          end
+        end
       end
+      if pp_required
+        @imports << 'pprint.dart' 
+      end
+      @imports = clean_imports(@imports)
       @outpath = root_path
       namespace.each do |name|
         @outpath = @outpath + name
@@ -158,11 +196,6 @@ module Codegen::Dart
                                                            :lib => self,
                                                          }))
 
-      # output = @@engine.render('lib.tmpl', 
-      #                                                    { 
-      #                                                      :lib => self,
-      #                                                    })
-
       Codegen.merge(output, @outpath + (id.to_s + '.dart'))
 
       parts.each do |part|
@@ -172,12 +205,7 @@ module Codegen::Dart
                                                            }
                                                            ))
 
-        # output = @@engine.render('part.tmpl',
-        #                                                    { 
-        #                                                      :part => part
-        #                                                    }
-        #                                                    )
-        Codegen.merge(output, @outpath + 'src' + id.abbrev + (part.id.to_s + '.dart'))
+        Codegen.merge(output, @outpath + 'src' + name + (part.id.to_s + '.dart'))
       end
     end
   end
