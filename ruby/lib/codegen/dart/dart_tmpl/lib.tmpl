@@ -6,6 +6,12 @@ import "#{imp}";
 <?rb @lib.parts.each do |part| ?>
 part "src/#{@lib.name}/#{part.id}.dart";
 <?rb end ?>
+<?rb if not @lib.public_typedefs.empty? ?>
+
+<?rb @lib.public_typedefs.each do |src,target| ?>
+typedef #{src} #{target};
+<?rb end ?>
+<?rb end ?>
 <?rb if not @lib.public_constants.empty? ?>
 
 <?rb @lib.public_constants.each do |t,n,val| ?>

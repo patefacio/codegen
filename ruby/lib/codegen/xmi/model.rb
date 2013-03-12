@@ -20,13 +20,14 @@ module Codegen
         "xmi:idref" => :xmi_idref,
       }
 
-      attr_reader :element_type, :xmi_id, :xmi_type, :name, :parent, :children
+      attr_reader :data, :element_type, :xmi_id, :xmi_type, :name, :parent, :children
 
       def to_s
         "(#{self.class}, '#{name}', #{element_type}, #{xmi_type}, #{xmi_id})"
       end
 
       def initialize(item_data, parent = nil, element_type = nil)
+        @data = item_data
         @parent = parent
         @element_type = element_type
         @children = { }
@@ -66,8 +67,16 @@ module Codegen
 
     class Klass < ModelItem
 
-      def members()
+      def members
         return (children["ownedAttribute"] or [])
+      end
+
+      def descr
+        if children["ownedComment"]
+          return children["ownedComment"][0].data["body"].gsub('',"\n")
+        else
+          return nil
+        end
       end
 
       def initialize(data, parent, uml_key)
@@ -81,6 +90,25 @@ module Codegen
           end
         end
       end
+    end
+
+    class Member < ModelItem
+      attr_reader :descr
+
+      def initialize(data, parent, uml_key)
+        super(data, parent, uml_key)
+        @type = data['type']
+        if children["ownedComment"]
+          @descr =  children["ownedComment"][0].data["body"].gsub('',"\n") 
+        else
+          @descr = nil
+        end
+      end
+
+      def type
+        return $modeled_types[@type]
+      end
+
     end
 
     class TemplateBinding < ModelItem
@@ -99,6 +127,9 @@ module Codegen
     class Enumeration < ModelItem
       def initialize(data, parent, uml_key)
         super(data, parent, uml_key)
+      end
+      def values
+        return (children["ownedAttribute"] or [])
       end
     end
 
@@ -119,9 +150,6 @@ module Codegen
         super(data, parent, uml_key)
         @type = data['type']
       end
-      def type
-        return $modeled_types[@type]
-      end
     end
 
 
@@ -134,6 +162,8 @@ module Codegen
         else
           result = Klass.new(data, parent, uml_key)
         end
+      when "uml:Property"
+        result = Member.new(data, parent, uml_key)
       when "uml:TemplateBinding"
         result = TemplateBinding.new(data, parent, uml_key)
       when "uml:TemplateSignature"
@@ -142,8 +172,6 @@ module Codegen
         result = Association.new(data, parent, uml_key)
       when "uml:Enumeration"
         result = Enumeration.new(data, parent, uml_key)
-      when "uml:Property"
-        result = Property.new(data, parent, uml_key)
       else
         result = ModelItem.new(data, parent, uml_key)
       end
@@ -172,6 +200,10 @@ module Codegen
 
       def classes()
         items.select {|k,v| v.class == Klass }.map { |k,v| v }
+      end
+
+      def enums()
+        items.select {|k,v| v.class == Enumeration }.map { |k,v| v }
       end
 
       def process_model

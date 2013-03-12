@@ -37,7 +37,7 @@ module Codegen::Dart
     attribute_defaults({ :public => false, :id => nil, :type => nil, 
                          :access => :ia, :vname => nil, :name => nil,
                          :init => nil, :ctor => nil, :ctor_opt => nil,
-                         :ctor_named => nil
+                         :ctor_named => nil, :descr => nil,
                        })
 
     def readable()
@@ -47,6 +47,23 @@ module Codegen::Dart
     def writable()
       return access == :rw
     end
+
+    def json_out()
+      if type=='DateTime'
+        return "'${#{vname}.toString()}'"
+      else
+        return vname
+      end
+    end
+
+    def json_in()
+      if type=='DateTime'
+        return %Q{DateTime.parse(jsonMap["#{name}"])}
+      else
+        return %Q{jsonMap["#{name}"]}
+      end
+    end
+
 
     def initialize(opts={ })
       set_attributes(opts)
@@ -104,15 +121,19 @@ module Codegen::Dart
     include Accessible
     attribute_defaults({
                          :id => nil, 
+                         :name => nil,
+                         :descr => nil,
+                         :tname => nil,
+                         :template_parms => [],
                          :public => false, 
                          :members => [], 
-                         :name => nil,
                          :custom_ctors => [],
                          :ctors => nil,
                          :ctor => false,
                          :ctor_named => false,
                          :ctor_opt => false,
                          :pp => false,
+                         :json => false,
                          :generated => [],
                        })
 
@@ -124,6 +145,12 @@ module Codegen::Dart
       @name = id.cap_camel
       if not @public
         @name = '_'+@name
+      end
+      if not template_parms.empty?
+        @template_parms = template_parms.map{ |p| make_id(p).shout }
+        @tname = "#{name}<#{template_parms.join(', ')}>"
+      else
+        @tname = @name
       end
       ctor_map = Hash.new {|h,k| h[k] = { :args => [], :opt_args => [], :named_args => [] } }
       members.each do |m|
@@ -187,6 +214,7 @@ module Codegen::Dart
     attribute_defaults({ 
                          :id => nil, :members => [], 
                          :public_constants => [],
+                         :public_typedefs => [],
                          :imports => [],
                          :parts => [], 
                          :name => nil,
@@ -209,7 +237,7 @@ module Codegen::Dart
       parts.each do |part|
         part.owner = self
         part.classes.each do |cls|
-          if cls.pp
+          if cls.pp or cls.json
             pp_required = true 
             break
           end
@@ -224,6 +252,7 @@ module Codegen::Dart
         @outpath = @outpath + name
       end
       @public_constants = public_constants.map {|t,n,v| [ t, make_id(n).shout, v] }
+      @public_typedefs = public_typedefs.map {|src,target| [ src, make_id(target).cap_camel ] }
       @outpath = @outpath
     end
 

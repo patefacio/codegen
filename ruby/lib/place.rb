@@ -27,7 +27,7 @@ class Place
   @@place['ruby_lib'] = Pathname.new(File.expand_path(__FILE__)).parent
 
   # Find ruby gems
-  @@place['ruby_gems'] = Pathname.new($:.grep(/\/ruby\/gems/)[0].clone.gsub(/(.*gems\/).*/) { $1 })
+  @@place['ruby_gems'] = Pathname.new(ENV['GEM_PATH'].split(/:/).grep(/\/(?:ruby|\.rvm)\/gems/)[0].clone.gsub(/(.*gems\/).*/) { $1 })
 
   root_path = Place['ruby_lib'].parent.parent
   TOP = root_path.basename.to_s

@@ -1,11 +1,16 @@
 <?rb NL=Codegen::NL if not NL ?>
-class #{@c.name} { 
+<?rb if @c.descr ?>
+#{Codegen.block_comment(@c.descr)}
+<?rb end ?>
+class #{@c.tname} { 
 <?rb @c.members.each do |m| ?>
 <?rb if m.init.nil? ?>
 
+#{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
   #{m.type} #{m.vname};
 <?rb else ?>
 
+#{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
   #{m.type} #{m.vname} = #{m.init};
 <?rb end ?>
 <?rb if m.readable ?>
@@ -62,6 +67,7 @@ class #{@c.name} {
   }
 <?rb end ?>
 <?rb if @c.pp ?>
+
 <?rb i = '$'+'{_i_}' ?>
   String pp() { 
     String _i_ = indent();
@@ -70,6 +76,31 @@ class #{@c.name} {
 #{i}}""";
     return result;
   }
+<?rb end ?>
+<?rb if @c.json ?>
+
+<?rb i = '$'+'{_i_}' ?>
+  Map toJson() { 
+    return { 
+      #{@c.members.map {|m| %Q{ "#{m.name}" : #{m.json_out}}}.join(','+NL+'      ')}
+    };
+  }
+
+  #{@c.name}.fromJson(String json) {
+    Map map = parse(json);
+    _fromJsonMapImpl(map);
+  }
+
+  #{@c.name}.fromJsonMap(Map jsonMap) {
+     _fromJsonMapImpl(map);
+  }
+
+  void _fromJsonMapImpl(Map jsonMap) {
+<?rb @c.members.each do |m| ?>
+    #{m.vname} = #{m.json_in};
+<?rb end ?>
+  }
+
 <?rb end ?>
 <?rb if not @c.generated.empty? ?>
 
