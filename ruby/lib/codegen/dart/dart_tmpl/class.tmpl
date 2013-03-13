@@ -56,10 +56,10 @@ class #{@c.tname} {
 <?rb end ?>
   { 
 <?rb @c.ctors[ctor][:opt_args].each do |m| ?>
-    if(?#{m.name}) { #{m.vname} = #{m.name}; }
+    if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
 <?rb end ?>
 <?rb @c.ctors[ctor][:named_args].each do |m| ?>
-    if(?#{m.name}) { #{m.vname} = #{m.name}; }
+    if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
 <?rb end ?>
 <?rb if @c.custom_ctors.include? ctor ?>
 #{Codegen.protect_block("#{@c.name}.#{ctor} ctor")}
@@ -86,13 +86,17 @@ class #{@c.tname} {
     };
   }
 
-  #{@c.name}.fromJson(String json) {
-    Map map = parse(json);
-    _fromJsonMapImpl(map);
+  static #{@c.name} fromJson(String json) {
+    Map jsonMap = parse(json);
+    #{@c.name} result = new #{@c.name}();
+    result._fromJsonMapImpl(jsonMap);
+    return result;
   }
 
-  #{@c.name}.fromJsonMap(Map jsonMap) {
-     _fromJsonMapImpl(map);
+  static #{@c.name} fromJsonMap(Map jsonMap) {
+    #{@c.name} result = new #{@c.name}();
+    result._fromJsonMapImpl(jsonMap);
+    return result;
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
