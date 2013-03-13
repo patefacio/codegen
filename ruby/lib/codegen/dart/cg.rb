@@ -49,10 +49,19 @@ module Codegen::Dart
       return access == :rw
     end
 
+    def class_map
+      return owner.class_map
+    end
+
+    def enum_map
+      return owner.enum_map
+    end
+
     def json_out()
       if type=='DateTime'
         return "'${#{vname}.toString()}'"
-      elsif owner.owner.owner.class_map.include?[type]
+      elsif class_map.include? type
+        return "#{vname}.toJson()"
       else
         return vname
       end
@@ -61,6 +70,10 @@ module Codegen::Dart
     def json_in()
       if type=='DateTime'
         return %Q{DateTime.parse(jsonMap["#{name}"])}
+      elsif class_map.include?(type) 
+        return %Q{#{type}.fromJsonMap(jsonMap["#{name}"])}
+      elsif enum_map.include?(type)
+        return %Q{#{type}.fromJson(jsonMap["#{name}"])}
       else
         return %Q{jsonMap["#{name}"]}
       end
@@ -121,7 +134,7 @@ module Codegen::Dart
   class DClass
     extend Attributes
     include Accessible
-    attr_accessor :owner
+    attr_reader :owner
     attribute_defaults({
                          :id => nil, 
                          :owner => nil,
@@ -149,6 +162,21 @@ module Codegen::Dart
                                  :lib => owner.owner,
                                })
     end  
+
+    def owner=(parent)
+      @owner = parent
+      members.each do |m|
+        m.owner = self
+      end
+    end
+
+    def class_map
+      return owner.class_map
+    end
+
+    def enum_map
+      return owner.enum_map
+    end
 
     def initialize(opts={ })
       require 'yaml'
@@ -199,7 +227,7 @@ module Codegen::Dart
   end
 
   class Part
-    attr_accessor :owner
+    attr_reader :owner
     extend Attributes
     include Accessible
     attribute_defaults({ 
@@ -218,6 +246,22 @@ module Codegen::Dart
       @classes = instantiate(DClass, classes)
       @enums = instantiate(Enum, enums)
       @id = instantiate(method(:make_id), id)
+    end
+
+    def owner=(parent)
+      puts "Part owner set #{parent.name}"
+      @owner = parent
+      classes.each do |cls|
+        cls.owner = self
+      end
+    end
+
+    def class_map
+      return owner.class_map
+    end
+
+    def enum_map
+      return owner.enum_map
     end
 
     def find_classes(regex)
@@ -261,7 +305,6 @@ module Codegen::Dart
       parts.each do |part|
         part.owner = self
         part.classes.each do |cls|
-          cls.owner = part
           class_map[cls.name] = cls
           if cls.pp or cls.json
             pp_required = true 
