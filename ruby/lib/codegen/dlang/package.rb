@@ -511,6 +511,7 @@ static this() {
                                             :const => nil,
                                             :access => nil,
                                             :init => nil,
+                                            :dup_init => nil,
                                             :vname => nil,
                                             :ctor => nil,
                                             :ctor_default => nil,
