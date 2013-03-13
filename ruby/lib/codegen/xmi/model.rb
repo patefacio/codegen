@@ -60,7 +60,7 @@ module Codegen
             mi.visit(functor)
           end
         end
-        #puts "Visited #{self.name} elm_type => #{self.element_type}, class => #{self.class} type => #{self.xmi_type} parent => #{!parent.nil? and parent.name or nil}"
+        #puts "Visited #{self.name} elm_type => #{self.element_type}, class => #{self.class} type => #{self.xmi_type}"
         functor.call(self)
       end
     end
@@ -84,7 +84,6 @@ module Codegen
         if !children["templateBinding"].nil?
           template_items = children["templateBinding"] 
           @template = template_items[0]
-          #puts "Template found for #{name}" 
           if template_items.size > 1
             puts "WARNING: multiple templates for #{name}"
           end
@@ -213,7 +212,6 @@ module Codegen
       end
     end
   end
-
 end
 
 
