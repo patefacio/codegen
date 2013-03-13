@@ -1,0 +1,9 @@
+{ 
+<?rb kv_list = [] ?>
+<?rb @c.members.each do |m| ?>
+<?rb kv_list << %Q{"#{m.name}" : #{@lib.random_json(m.type, "#{@c.name}.#{m.name}")}} ?>
+<?rb end ?>
+<?rb Codegen.indent ?>
+#{Codegen.indent_text(kv_list.join(','+Codegen::NL))}
+<?rb Codegen.outdent ?>
+}
