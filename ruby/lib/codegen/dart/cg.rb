@@ -34,10 +34,11 @@ module Codegen::Dart
   class Member
     extend Attributes
     include Accessible
+    attr_accessor :owner
     attribute_defaults({ :public => false, :id => nil, :type => nil, 
                          :access => :ia, :vname => nil, :name => nil,
                          :init => nil, :ctor => nil, :ctor_opt => nil,
-                         :ctor_named => nil, :descr => nil,
+                         :ctor_named => nil, :descr => nil,                         
                        })
 
     def readable()
@@ -51,6 +52,7 @@ module Codegen::Dart
     def json_out()
       if type=='DateTime'
         return "'${#{vname}.toString()}'"
+      elsif owner.owner.owner.class_map.include?[type]
       else
         return vname
       end
@@ -119,8 +121,10 @@ module Codegen::Dart
   class DClass
     extend Attributes
     include Accessible
+    attr_accessor :owner
     attribute_defaults({
                          :id => nil, 
+                         :owner => nil,
                          :name => nil,
                          :descr => nil,
                          :tname => nil,
@@ -133,9 +137,18 @@ module Codegen::Dart
                          :ctor_named => false,
                          :ctor_opt => false,
                          :pp => false,
-                         :json => false,
                          :generated => [],
+                         :json => false,
                        })
+
+    def json_sample(map_rand_range=(1..5))
+      output = @@engine.render('json_sample.tmpl', 
+                               { 
+                                 :c => self,
+                                 :range => map_rand_range,
+                                 :lib => owner.owner,
+                               })
+    end  
 
     def initialize(opts={ })
       require 'yaml'
@@ -206,6 +219,15 @@ module Codegen::Dart
       @enums = instantiate(Enum, enums)
       @id = instantiate(method(:make_id), id)
     end
+
+    def find_classes(regex)
+      result = []
+      classes.each do |c|
+        result << c if regex.match(c.name)
+      end
+      return result
+    end
+
   end
 
   class Lib
@@ -224,6 +246,8 @@ module Codegen::Dart
                          :root_path => 
                          Place['dart'] ? Place['dart'] : 
                          Codegen::Dart::HERE + '../../../../../dart',
+                         :class_map => { },
+                         :enum_map => { },
                        })
 
     def initialize(opts={ })
@@ -237,10 +261,14 @@ module Codegen::Dart
       parts.each do |part|
         part.owner = self
         part.classes.each do |cls|
+          cls.owner = part
+          class_map[cls.name] = cls
           if cls.pp or cls.json
             pp_required = true 
-            break
           end
+        end
+        part.enums.each do |enum|
+          enum_map[enum.name] = enum
         end
       end
       if pp_required
@@ -273,6 +301,46 @@ module Codegen::Dart
 
         Codegen.merge(output, @outpath + 'src' + name + (part.id.to_s + '.dart'))
       end
+
+      def find_classes(regex)
+        result = []
+        parts.each do |part|
+          result = result + part.find_classes(regex)
+        end
+        return result
+      end
+
+      def random_json(type, field_name=nil)
+        #puts "Creating random #{type} #{field_name} #{class_map.has_key?(type)} #{class_map.keys}"
+        case type
+        when "String"
+          return (field_name and %Q{"#{field_name}-#{rand(10)}"} or "???-#{rand(100)}")
+        when "int"
+          return rand(100000)
+        when "double"
+          return rand(100000) + rand()
+        when "DateTime"
+          return %Q{"#{DateTime.new(1929,10,29) + rand(40000)}"}
+        when /Map<String,\s*(\w+)/
+          return @@engine.render('json_map.tmpl', { :v => $1, :lib => self })
+        when /List<(\w+)/
+          return @@engine.render('json_list.tmpl', { :v => $1, :lib => self })
+        else
+          if class_map.has_key?(type)
+            return @@engine.render('json_sample.tmpl', 
+                               { 
+                                 :c => class_map[type],
+                                 :lib => self,
+                               })
+          elsif enum_map.has_key?(type)
+            e = enum_map[type]
+            return %Q{"#{e.values[rand(e.values.length)]}"}
+          else
+            return %Q{"Nothing for #{type}"}
+          end
+        end
+      end
+
     end
   end
 

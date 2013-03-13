@@ -23,4 +23,12 @@ class #{@e.name} {
   String toJson() { 
     return toString();
   }
+
+  static #{@e.name} fromJson(String json) { 
+    switch(json) { 
+<?rb @e.values.to_enum.with_index(1) do |v,i| ?>
+      case "#{v}": return #{v};
+<?rb end ?>
+    }
+  }
 }
