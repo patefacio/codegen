@@ -38,52 +38,17 @@ module Codegen::Dart
     attribute_defaults({ :public => false, :id => nil, :type => nil, 
                          :access => :ia, :vname => nil, :name => nil,
                          :init => nil, :ctor => nil, :ctor_opt => nil,
-                         :ctor_named => nil, :descr => nil,                         
+                         :ctor_named => nil, :descr => nil, :final => nil,
+                         :map_value_type => nil, :list_value_type => nil,
                        })
-
-    def readable()
-      return ((access == :ro) or (access == :rw))
-    end
-
-    def writable()
-      return access == :rw
-    end
-
-    def class_map
-      return owner.class_map
-    end
-
-    def enum_map
-      return owner.enum_map
-    end
-
-    def json_out()
-      if type=='DateTime'
-        return "'${#{vname}.toString()}'"
-      elsif class_map.include? type
-        return "#{vname}.toJson()"
-      else
-        return vname
-      end
-    end
-
-    def json_in()
-      if type=='DateTime'
-        return %Q{DateTime.parse(jsonMap["#{name}"])}
-      elsif class_map.include?(type) 
-        return %Q{#{type}.fromJsonMap(jsonMap["#{name}"])}
-      elsif enum_map.include?(type)
-        return %Q{#{type}.fromJson(jsonMap["#{name}"])}
-      else
-        return %Q{jsonMap["#{name}"]}
-      end
-    end
-
 
     def initialize(opts={ })
       set_attributes(opts)
       @id = instantiate(method(:make_id), id)
       @type = 'dynamic' if not @type
+      @map_value_type = $2 if type =~ /Map<\s*(\w+),\s*(\w+)\s*>/
+      @list_value_type = $1 if type =~ /List<\s*(\w+)\s*>/
+
       @name = id.camel
       if @public
         @vname = @name
@@ -107,7 +72,88 @@ module Codegen::Dart
       @ctor_opt = ctor_maker(@ctor_opt)
       @ctor_named = ctor_maker(@ctor_named)
     end
+
+    def final_tag
+      final ? "final " : ""
+    end
+
+    def readable
+      return ((access == :ro) or (access == :rw))
+    end
+
+    def writable
+      return access == :rw
+    end
+
+    def class_map
+      return owner.class_map
+    end
     
+    def as_arg
+      return "#{type} #{name}"
+    end
+
+    def as_opt_arg
+      return init_is_const? ? "#{type} this.#{vname}=#{init}" : (init.nil? ? "#{type} this.#{vname}":"#{type} #{name}")
+    end
+
+    def as_named_arg
+      return init_is_const? ? "#{type} this.#{vname}:#{init}" : (init.nil? ? "#{type} this.#{vname}":"#{type} #{name}")
+    end
+
+    def arg_requires_check?
+      return ((not init.nil?) and (not init_is_const?))
+    end
+
+
+    def init_is_const?
+      return false if init.nil?
+      case init
+      when Float
+        return true
+      when Fixnum
+        return true
+      when Bignum
+        return true
+      when /['"].*['"]/
+        return true
+      else
+        return false
+      end
+    end
+
+    def enum_map
+      return owner.enum_map
+    end
+
+    def json_out()
+      puts "Outputting type #{type}"
+      if type=='DateTime'
+        return "'${#{vname}.toString()}'"
+      elsif class_map.include? type
+        return "#{vname}.toJson()"
+      else
+        return vname
+      end
+    end    
+
+    def json_in()
+      if type=='DateTime'
+        return %Q{DateTime.parse(jsonMap["#{name}"])}
+      elsif class_map.include?(type) 
+        return %Q{#{type}.fromJsonMap(jsonMap["#{name}"])}
+      elsif enum_map.include?(type)
+        return %Q{#{type}.fromJson(jsonMap["#{name}"])}
+      elsif type =~ /Map<\s*(\w+),\s*(\w+)\s*>/
+        key, value = $1, $2
+        #return "#{vname}.forEach((k,v) => #{key} => #{value})"
+        return "makeJsonMap(#{vname})"
+      elsif type =~ /List<\s*(\w+)\s*>/
+        key = $1
+      else
+        return %Q{jsonMap["#{name}"]}
+      end
+    end    
   end
 
   class Enum
@@ -363,7 +409,8 @@ module Codegen::Dart
         when "double"
           return rand(100000) + rand()
         when "DateTime"
-          return %Q{"#{DateTime.new(1929,10,29) + rand(40000)}"}
+          d = DateTime.new(1929,10,29) + rand(40000)
+          return d.strftime('"%Y-%m-%d %H:%M:%S"')
         when /Map<String,\s*(\w+)/
           return @@engine.render('json_map.tmpl', { :v => $1, :lib => self })
         when /List<(\w+)/

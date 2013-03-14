@@ -2,6 +2,7 @@ require 'codegen/id'
 require 'xmlsimple'
 require 'pp'
 require 'set'
+require 'pathname'
 
 $modeled_types = { }
 $all_types = Set.new
@@ -11,7 +12,6 @@ module Codegen
   module Xmi
 
     class ModelItem
-      extend Attributes
 
       @@renames = { 
         "xmi:id" => :xmi_id, 
@@ -20,7 +20,8 @@ module Codegen
         "xmi:idref" => :xmi_idref,
       }
 
-      attr_reader :data, :element_type, :xmi_id, :xmi_type, :name, :parent, :children
+      attr_reader :data, :element_type, :xmi_id, :xmi_type, \
+      :name, :parent, :children, :uml_package_path
 
       def to_s
         "(#{self.class}, '#{name}', #{element_type}, #{xmi_type}, #{xmi_id})"
@@ -28,6 +29,7 @@ module Codegen
 
       def initialize(item_data, parent = nil, element_type = nil)
         @data = item_data
+        @uml_package_path = (parent and parent.uml_package_path) ? parent.uml_package_path.dup : Pathname.new('/') if uml_package_path.nil?
         @parent = parent
         @element_type = element_type
         @children = { }
@@ -60,7 +62,7 @@ module Codegen
             mi.visit(functor)
           end
         end
-        #puts "Visited #{self.name} elm_type => #{self.element_type}, class => #{self.class} type => #{self.xmi_type}"
+        #puts "Visited #{self.name} elm_type => #{self.element_type}, class => #{self.class} type => #{self.xmi_type} path => #{self.uml_package_path}"
         functor.call(self)
       end
     end
@@ -144,13 +146,20 @@ module Codegen
       end
     end
 
+    class UmlPackage < ModelItem
+      def initialize(data, parent, uml_key)
+        @uml_package_path = (parent and parent.uml_package_path) ? parent.uml_package_path.dup : Pathname.new('/')
+        @uml_package_path += data['name']
+        super(data, parent, uml_key)
+      end
+    end
+
     class Property < ModelItem
       def initialize(data, parent, uml_key)
         super(data, parent, uml_key)
         @type = data['type']
       end
     end
-
 
     def create_item(data, parent, uml_key)
       result = nil
@@ -171,6 +180,8 @@ module Codegen
         result = Association.new(data, parent, uml_key)
       when "uml:Enumeration"
         result = Enumeration.new(data, parent, uml_key)
+      when "uml:Package"
+        result = UmlPackage.new(data, parent, uml_key)
       else
         result = ModelItem.new(data, parent, uml_key)
       end
@@ -184,32 +195,40 @@ module Codegen
       attribute_defaults({ 
                            :file_path => nil,
                            :root_item => nil,
+                           :packages => ['/'],
                            :items => { }
                          })
 
       def initialize(opts={ })
         set_attributes(opts)
+        if packages.class != Array
+          @packages = [ packages ]
+        end
         process_model
-      end
-
-      def process_node(node)
-        data = node["packagedElement"]
-        data = packaged_element(data) if data
-      end
-
-      def classes()
-        items.select {|k,v| v.class == Klass }.map { |k,v| v }
-      end
-
-      def enums()
-        items.select {|k,v| v.class == Enumeration }.map { |k,v| v }
       end
 
       def process_model
         xml_data = XmlSimple.xml_in(file_path)
+        puts xml_data.keys
         @root_item = ModelItem.new xml_data["Model"][0]
-        @root_item.visit(lambda {|mi| items[mi.xmi_id] = mi })
+        @root_item.visit(lambda {|mi| items[mi.xmi_id] = mi if within_packages? mi })
       end
+
+      def classes
+        items.select {|k,v| v.class == Klass }.map { |k,v| v }
+      end
+
+      def enums
+        items.select {|k,v| v.class == Enumeration }.map { |k,v| v }
+      end
+
+      def within_packages?(item)
+        packages.each do |p|
+          return true if item.uml_package_path.to_s.include? p
+        end
+        return false
+      end
+
     end
   end
 end

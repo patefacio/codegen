@@ -7,11 +7,11 @@ class #{@c.tname} {
 <?rb if m.init.nil? ?>
 
 #{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
-  #{m.type} #{m.vname};
+  #{m.final_tag}#{m.type} #{m.vname};
 <?rb else ?>
 
 #{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
-  #{m.type} #{m.vname} = #{m.init};
+  #{m.final_tag}#{m.type} #{m.vname} = #{m.init};
 <?rb end ?>
 <?rb if m.readable ?>
   #{m.type} get #{m.name} => #{m.vname};
@@ -23,12 +23,10 @@ class #{@c.tname} {
 <?rb @c.ctors.keys.sort.each do |ctor| ?>
 
 <?rb ctor_name = (ctor=='default' and @c.name or "#{@c.name}.#{ctor}") ?>
-<?rb args = @c.ctors[ctor][:args].map {|m| "#{m.type} #{m.name}" } ?>
-<?rb opt_args = @c.ctors[ctor][:opt_args].map {|m| "#{m.type} #{m.name}" } ?>
-<?rb named_args = @c.ctors[ctor][:named_args].map {|m| "#{m.type} #{m.name}" } ?>
+<?rb args = @c.ctors[ctor][:args].map {|m| m.as_arg } ?>
+<?rb opt_args = @c.ctors[ctor][:opt_args].map {|m| m.as_opt_arg } ?>
+<?rb named_args = @c.ctors[ctor][:named_args].map {|m| m.as_named_arg } ?>
 <?rb initializers = @c.ctors[ctor][:args].map {|m| "#{m.vname} = #{m.name}" } ?>
-<?rb # initializers = initializers + @c.ctors[ctor][:opt_args].select{|m| m.init.nil? }.map {|m| "#{m.vname} = #{m.name}" } ?>
-<?rb # initializers = initializers + @c.ctors[ctor][:named_args].select{|m| m.init.nil? }.map {|m| "#{m.vname} = #{m.name}" } ?>
 <?rb uses_initializers = (initializers.empty? and "" or " :") ?>
 <?rb if not opt_args.empty? ?>
   #{ctor_name}(
@@ -55,10 +53,10 @@ class #{@c.tname} {
     #{initializers.join(','+NL+' '*4)} 
 <?rb end ?>
   { 
-<?rb @c.ctors[ctor][:opt_args].each do |m| ?>
+<?rb @c.ctors[ctor][:opt_args].select {|m| m.arg_requires_check? }.each do |m| ?>
     if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
 <?rb end ?>
-<?rb @c.ctors[ctor][:named_args].each do |m| ?>
+<?rb @c.ctors[ctor][:named_args].select {|m| m.arg_requires_check? }.each do |m| ?>
     if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
 <?rb end ?>
 <?rb if @c.custom_ctors.include? ctor ?>
@@ -101,7 +99,26 @@ class #{@c.tname} {
 
   void _fromJsonMapImpl(Map jsonMap) {
 <?rb @c.members.each do |m| ?>
+<?rb   if val_type = m.map_value_type ?>
+<?rb     if @c.class_map.has_key? val_type ?>
+    jsonMap["#{m.name}"].forEach((k,v) { 
+      #{m.vname}[k] = #{val_type}.fromJsonMap(v);
+    });
+<?rb     else ?>
+    // #{m.name} is good
+<?rb     end ?>
+<?rb   elsif val_type = m.list_value_type ?>
+<?rb     if @c.class_map.has_key? val_type ?>
+    #{m.vname} = new #{m.type}();
+    jsonMap["#{m.name}"].forEach((v) { 
+      #{m.vname}.add(#{val_type}.fromJsonMap(v));
+    });
+<?rb     else ?>
+    // #{m.name} is good
+<?rb     end ?>
+<?rb else ?>
     #{m.vname} = #{m.json_in};
+<?rb end ?>
 <?rb end ?>
   }
 
