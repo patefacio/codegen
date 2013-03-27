@@ -1,6 +1,6 @@
 <?rb NL=Codegen::NL if not NL ?>
 class #{@e.name} { 
-<?rb @e.values.to_enum.with_index(1) do |v,i| ?>
+<?rb @e.values.to_enum.with_index(0) do |v,i| ?>
   static const #{v} = const #{@e.name}._(#{i});
 <?rb end ?>
 
@@ -20,12 +20,20 @@ class #{@e.name} {
     }
   }
 
-  String toJson() { 
-    return toString();
+  int toJson() { 
+    return this.value;
   }
 
-  static #{@e.name} fromJson(String json) { 
-    switch(json) { 
+  static #{@e.name} fromJson(int v) { 
+    switch(v) { 
+<?rb @e.values.to_enum.with_index(1) do |v,i| ?>
+      case #{v}.value: return #{v};
+<?rb end ?>
+    }
+  }
+
+  static #{@e.name} fromString(String s) { 
+    switch(s) { 
 <?rb @e.values.to_enum.with_index(1) do |v,i| ?>
       case "#{v}": return #{v};
 <?rb end ?>

@@ -13,5 +13,7 @@ part of #{@part.owner.name};
 
 #{@part.generated.join(Codegen::NL)}
 <?rb end ?>
+<?rb if not @part.no_part_impl ?>
 #{Codegen.protect_block("#{@part.id} top level")}
+<?rb end ?>
 

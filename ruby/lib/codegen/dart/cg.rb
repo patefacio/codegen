@@ -93,6 +93,14 @@ module Codegen::Dart
       return "#{type} #{name}"
     end
 
+    def opt_initializer?
+      return (has_init? and not init_is_const?)
+    end
+
+    def has_init?
+      return (not init.nil?)
+    end
+
     def as_opt_arg
       return init_is_const? ? "#{type} this.#{vname}=#{init}" : (init.nil? ? "#{type} this.#{vname}":"#{type} #{name}")
     end
@@ -127,7 +135,6 @@ module Codegen::Dart
     end
 
     def json_out()
-      puts "Outputting type #{type}"
       if type=='DateTime'
         return "'${#{vname}.toString()}'"
       elsif class_map.include? type
@@ -198,6 +205,7 @@ module Codegen::Dart
                          :pp => false,
                          :generated => [],
                          :json => false,
+                         :no_class_impl => false,
                        })
 
     def json_sample(map_rand_range=(1..5))
@@ -222,6 +230,10 @@ module Codegen::Dart
 
     def enum_map
       return owner.enum_map
+    end
+
+    def has_ctors?
+      ctors.length > 0
     end
 
     def initialize(opts={ })
@@ -283,6 +295,7 @@ module Codegen::Dart
                          :classes => [],
                          :generated => [],
                          :enums => [],
+                         :no_part_impl => false,
                        })
 
     def initialize(opts={ })
@@ -406,11 +419,11 @@ module Codegen::Dart
           return (field_name and %Q{"#{field_name}-#{rand(10)}"} or "???-#{rand(100)}")
         when "int"
           return rand(100000)
-        when "double"
+        when /double/i
           return rand(100000) + rand()
         when "DateTime"
           d = DateTime.new(1929,10,29) + rand(40000)
-          return d.strftime('"%Y-%m-%d %H:%M:%S"')
+          return d.strftime('"%Y-%m-%dT%H:%M:%S"')
         when /Map<String,\s*(\w+)/
           return @@engine.render('json_map.tmpl', { :v => $1, :lib => self })
         when /List<(\w+)/
@@ -424,7 +437,7 @@ module Codegen::Dart
                                })
           elsif enum_map.has_key?(type)
             e = enum_map[type]
-            return %Q{"#{e.values[rand(e.values.length)]}"}
+            return rand(e.values.length)
           else
             return %Q{"Nothing for #{type}"}
           end

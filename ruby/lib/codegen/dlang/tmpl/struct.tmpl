@@ -3,8 +3,8 @@
 <?rb ################################################################################ ?>
 #{@struct.static_decl}struct #{@struct.name.cap_camel}#{@struct.template_decl} { 
 <?rb if not @struct.ctor_members.empty? ?>
-<?rb parms = @struct.ctor_members.map {|m| "#{m.ref ? 'ref ' : ''}const(#{m.type}) #{m.name.camel}#{m.ctor_default ? %Q{ = }+(m.init ? m.init : %Q{#{m.type}.init}) : ''}" } ?>
-<?rb assignments = @struct.ctor_members.map {|m| "this.#{m.vname} = #{m.name.camel}#{(m.ref or m.dup_init) ? '.gdup':''};" } ?>
+<?rb parms = @struct.ctor_members.map {|m| "#{m.ref ? 'ref ' : ''}#{m.ctor_arg_type} #{m.name.camel}#{m.ctor_arg_init}" } ?>
+<?rb assignments = @struct.ctor_members.map {|m| "#{m.ctor_arg_dup};" } ?>
 
   //! #{@struct.name.cap_camel} member initializing ctor
   this(#{parms.join(','+Codegen::NL+'       ')}) { 

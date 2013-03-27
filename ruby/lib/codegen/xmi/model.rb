@@ -11,6 +11,22 @@ module Codegen
 
   module Xmi
 
+    def patch_enum_name(e)
+      if e =~ /^\d/
+        e = 'e_'+e
+      end
+      return e
+    end
+
+    def packages_contains_item?(packages, item)
+      path = item.uml_package_path.to_s
+      #puts "Checking containment on #{item.name} #{path} in #{packages}"
+      packages.each do |pkg|
+        return true if path =~ /#{pkg}/
+      end
+      return false
+    end
+
     class ModelItem
 
       @@renames = { 
@@ -69,6 +85,8 @@ module Codegen
 
     class Klass < ModelItem
 
+      attr_reader :template_signature, :template_binding
+
       def members
         return (children["ownedAttribute"] or [])
       end
@@ -81,16 +99,29 @@ module Codegen
         end
       end
 
+      def is_template_class?
+        return ! template_signature.nil?
+      end
+
+      def is_templated_class?
+        return ! template_binding.nil?
+      end
+
       def initialize(data, parent, uml_key)
         super(data, parent, uml_key)
         if !children["templateBinding"].nil?
           template_items = children["templateBinding"] 
-          @template = template_items[0]
+          @template_binding = template_items[0].xmi_id
           if template_items.size > 1
             puts "WARNING: multiple templates for #{name}"
           end
         end
+        if !children["ownedTemplateSignature"].nil?
+          signature = children["ownedTemplateSignature"]
+          @template_signature = signature[0].xmi_id
+        end
       end
+
     end
 
     class Member < ModelItem
@@ -113,9 +144,14 @@ module Codegen
     end
 
     class TemplateBinding < ModelItem
+      attr_reader :signature, :parameter_substitutions
       def initialize(data, parent, uml_key)
         super(data, parent, uml_key)
-        #@signature = children[""]
+        @signature = data["signature"]
+        @parameter_substitutions = []
+        children["parameterSubstitution"].each do |ps|
+          @parameter_substitutions << { :formal => ps.data['formal'], :actual => ps.data['actual'] }
+        end
       end
     end
 
@@ -209,7 +245,7 @@ module Codegen
 
       def process_model
         xml_data = XmlSimple.xml_in(file_path)
-        puts xml_data.keys
+        #puts xml_data.keys
         @root_item = ModelItem.new xml_data["Model"][0]
         @root_item.visit(lambda {|mi| items[mi.xmi_id] = mi if within_packages? mi })
       end
@@ -218,17 +254,29 @@ module Codegen
         items.select {|k,v| v.class == Klass }.map { |k,v| v }
       end
 
+      def template_classes
+        items.select {|k,v| v.class == Klass and ! v.template_signature.nil? }.map { |k,v| v }
+      end
+
+      def templated_classes
+        items.select {|k,v| v.class == Klass and ! v.template_binding.nil? }.map { |k,v| v }
+      end
+
       def enums
         items.select {|k,v| v.class == Enumeration }.map { |k,v| v }
       end
 
       def within_packages?(item)
+        result = false
         packages.each do |p|
-          return true if item.uml_package_path.to_s.include? p
+          if item.uml_package_path.to_s.include? p
+            result = true
+            break
+          end
         end
-        return false
+        #puts "#{result} => #{item.name} Is #{item.uml_package_path} within #{packages}"
+        return result
       end
-
     end
   end
 end

@@ -4,13 +4,13 @@
 <?rb end ?>
 class #{@c.tname} { 
 <?rb @c.members.each do |m| ?>
-<?rb if m.init.nil? ?>
+<?rb if m.descr ?>
 
 #{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
+<?rb end ?>
+<?rb if m.init.nil? or @c.has_ctors? ?>
   #{m.final_tag}#{m.type} #{m.vname};
 <?rb else ?>
-
-#{Codegen.indent_absolute_text(Codegen.block_comment(m.descr),1) if m.descr}
   #{m.final_tag}#{m.type} #{m.vname} = #{m.init};
 <?rb end ?>
 <?rb if m.readable ?>
@@ -24,9 +24,13 @@ class #{@c.tname} {
 
 <?rb ctor_name = (ctor=='default' and @c.name or "#{@c.name}.#{ctor}") ?>
 <?rb args = @c.ctors[ctor][:args].map {|m| m.as_arg } ?>
-<?rb opt_args = @c.ctors[ctor][:opt_args].map {|m| m.as_opt_arg } ?>
-<?rb named_args = @c.ctors[ctor][:named_args].map {|m| m.as_named_arg } ?>
+<?rb oargs = @c.ctors[ctor][:opt_args] ?>
+<?rb opt_args = oargs.map {|m| m.as_opt_arg } ?>
+<?rb nargs = @c.ctors[ctor][:named_args] ?>
+<?rb named_args = nargs.map {|m| m.as_named_arg } ?>
 <?rb initializers = @c.ctors[ctor][:args].map {|m| "#{m.vname} = #{m.name}" } ?>
+<?rb initializers += oargs.select {|m| m.opt_initializer? }.map { |m| "this.#{m.vname} = ?#{m.name}? #{m.name} : #{m.init}" } ?>
+<?rb initializers += nargs.select {|m| m.opt_initializer? }.map { |m| "this.#{m.vname} = ?#{m.name}? #{m.name} : #{m.init}" } ?>
 <?rb uses_initializers = (initializers.empty? and "" or " :") ?>
 <?rb if not opt_args.empty? ?>
   #{ctor_name}(
@@ -53,12 +57,6 @@ class #{@c.tname} {
     #{initializers.join(','+NL+' '*4)} 
 <?rb end ?>
   { 
-<?rb @c.ctors[ctor][:opt_args].select {|m| m.arg_requires_check? }.each do |m| ?>
-    if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
-<?rb end ?>
-<?rb @c.ctors[ctor][:named_args].select {|m| m.arg_requires_check? }.each do |m| ?>
-    if(?#{m.name}) { #{m.vname==m.name and 'this.' or ''}#{m.vname} = #{m.name}; }
-<?rb end ?>
 <?rb if @c.custom_ctors.include? ctor ?>
 #{Codegen.protect_block("#{@c.name}.#{ctor} ctor")}
 <?rb end ?>
@@ -127,5 +125,7 @@ class #{@c.tname} {
 
 #{@c.generated.join(Codegen::NL)}
 <?rb end ?>
+<?rb if not @c.no_class_impl ?>
 #{Codegen.protect_block("#{@c.id} impl")}
+<?rb end ?>
 }

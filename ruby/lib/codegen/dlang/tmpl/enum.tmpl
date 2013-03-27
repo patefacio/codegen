@@ -1,10 +1,11 @@
 <?rb ################################################################################ ?>
 <?rb # License: <a href="http://www.boost.org/LICENSE_1_0.txt">Boost License 1.0</a>. ?>
 <?rb ################################################################################ ?>
+<?rb name = @enum.name.cap_camel ?>
 <?rb if @enum.doc ?>
 #{Codegen.block_comment(@enum.doc)}
 <?rb end ?>
-enum #{@enum.name.cap_camel} { 
+enum #{name} { 
 <?rb start_capture('guts') do ?>
 <?rb @enum.values.each do |v| ?>
 <?rb if v.doc ?>
@@ -15,3 +16,25 @@ enum #{@enum.name.cap_camel} {
 <?rb end ?>
 #{Codegen.indent_absolute_text(Codegen.comma_chop(@guts))}
 }
+<?rb if @enum.json_support ?>
+
+void fromJson(ref #{name} value, Json src) {
+  string s = cast(string)src;
+  final switch(s) { 
+<?rb @enum.values.each do |v| ?>
+  case "#{v.name.shout}": { value = #{name}.#{v.name.cap_camel}; break; }
+<?rb end ?>
+  }
+}
+
+Json toJson(#{name} value) {
+  auto result = Json();
+  final switch(value) { 
+<?rb @enum.values.each do |v| ?>
+  case #{name}.#{v.name.cap_camel}: { result = "#{name}.#{v.name.shout}"; break; }
+<?rb end ?>
+  }
+  return result;
+}
+
+<?rb end ?>

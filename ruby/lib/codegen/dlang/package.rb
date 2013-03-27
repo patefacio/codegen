@@ -298,7 +298,7 @@ module Codegen::Dlang
       end
       if not definition
         if static_this
-          assignment = "#{name.cap_camel} = #{value};"
+          assignment = "cast(#{type})#{name.cap_camel} = #{value};"
           @definition = "#{static}const(#{type}) #{name.cap_camel};
 static this() {
 #{Codegen.indent_absolute_text(assignment)}
@@ -468,6 +468,7 @@ static this() {
     extend Attributes
     attribute_defaults(UDT.defaults.merge({ 
                                             :values => [],
+                                            :json_support => nil,
                                           }))
     def initialize(opts={ })
       opts[:type] = :ENUM
@@ -516,6 +517,8 @@ static this() {
                                             :ctor => nil,
                                             :ctor_default => nil,
                                             :ref => nil,
+                                            :ctor_arg_nonconst => nil,
+                                            :ctor_arg_cast_dup => nil,
                                           }))
 
     def initialize(opts={ })
@@ -545,7 +548,24 @@ static this() {
       @static_decl = static ? "static " : ""
     end
 
-    def prep()
+    def ctor_arg_type
+      return ctor_arg_nonconst ? type : "const(#{type})"
+    end
+
+    def ctor_arg_init
+      return ctor_default ? (" = " + (init ? init : "#{type}.init")) : ''
+    end
+
+    def ctor_arg_dup
+      if ctor_arg_cast_dup
+        return "this.#{vname} = (cast(#{type})#{name.camel}).dup"
+      else
+        return "this.#{vname} = #{name.camel}#{(ref or dup_init) ? '.gdup':''}"
+      end
+    end
+
+
+    def prep
       if protection == :public and not access.nil?
         @protection = :private
       end
