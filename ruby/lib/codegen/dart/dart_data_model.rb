@@ -27,7 +27,6 @@ module Codegen::Dart
       set_attributes(opts)
       @primitives = [ 'num', 'int', 'double', 'String', 'bool' ]
       @type_map = { }
-      @seq_or_map = /(\w+)(_map|_sequence)$/
     end
 
     def create_lib
@@ -83,6 +82,8 @@ module Codegen::Dart
       t = t.name
       if (t == 'date') or (t =~ /^time$/i)
         return make_id(:date_time).cap_camel
+      elsif (t =~ /(double|int)/i)
+        return $1
       else
         return make_id(t.downcase).cap_camel
       end
@@ -95,7 +96,6 @@ module Codegen::Dart
       @classes.each do |c|
         next if c.is_template_class? or c.is_templated_class?
         next if non_generated.include? c.name.to_sym
-        next if seq_or_map.match c.name
 
         data_class = { 
           :id => c.name, :members => [], :public => true,
@@ -107,7 +107,8 @@ module Codegen::Dart
         c.members.each do |m|
           type = get_type(m.type)
           init = nil
-          if seq_or_map.match m.type.name
+          if m.type.class == Klass and m.type.is_templated_class?
+            puts "Found templated member #{m}"
             init = "new #{type}()"
           end
           data_class[:members] << { 
