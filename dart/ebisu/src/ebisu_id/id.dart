@@ -63,9 +63,14 @@ class Id {
 
   static final RegExp _hasUpperRe = new RegExp("[A-Z]");
 
+  static capitalize(String s) => "${s[0].toUpperCase()}${s.substring(1)}";
+  static uncapitalize(String s) => "${s[0].toLowerCase()}${s.substring(1)}";
+
   String get emacs => _words.join('-');
+  String get camel => uncapitalize(_words.map((w) => capitalize(w)).join(''));
+  String get capCamel => _words.map((w) => capitalize(w)).join('');
   String get shout => _words.map((w) => w.toUpperCase()).join('_');
-  String get title => _words.map((w) => "${w[0].toUpperCase()}${w.substring(1)}").join(' ');  
+  String get title => _words.map((w) => capitalize(w)).join(' ');  
   String get squish => _words.join('');
   String get abbrev => _words.map((w) => w[0]).join();
 
@@ -74,6 +79,8 @@ class Id {
   static Id fromString(String id) {
     return new Id(id);
   }
+
+  String toString() => camel;
 
 // end <id impl>
 }

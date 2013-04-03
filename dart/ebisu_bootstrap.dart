@@ -13,7 +13,7 @@ void main() {
     print(Id.pluralize(i).title);
   }
 
-  //showFormats();
+  showFormats();
 
   Member doc_member(String owner) => member('doc')
     ..doc = "Documentation for this $owner";
@@ -253,5 +253,6 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
       ebisu_dart_meta
     ];
 
-  print(prettyJsonMap(ebisu.toJson()));
+  ebisu.generate();
+  //print(prettyJsonMap(ebisu.toJson()));
 }

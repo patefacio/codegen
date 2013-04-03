@@ -250,6 +250,12 @@ class Part {
 
 
 // custom <part impl>
+
+  void generate() {
+    print("Generating the part $id into $ROOT_PATH");
+    classes.forEach((dc) => dc.generate());
+  }
+
 // end <part impl>
 }
 
@@ -323,6 +329,12 @@ class Library {
 
 
 // custom <library impl>
+
+  void generate() {
+    print("Generating the lib $id into $ROOT_PATH");
+    parts.forEach((part) => part.generate());
+  }
+
 // end <library impl>
 }
 
@@ -397,6 +409,12 @@ class App {
 
 
 // custom <app impl>
+
+  void generate() {
+    print("Generating the app $id into $ROOT_PATH");
+    libraries.forEach((lib) => lib.generate());
+  }
+
 // end <app impl>
 }
 
@@ -464,6 +482,13 @@ class System {
 
 
 // custom <system impl>
+
+  void generate() {
+    print("Generating the system $id into $ROOT_PATH");
+    apps.forEach((app) => app.generate());
+    libraries.forEach((lib) => lib.generate());
+  }
+
 // end <system impl>
 }
 
@@ -534,6 +559,11 @@ class DClass {
 
 
 // custom <d_class impl>
+
+  void generate() {
+    print("Generating the class $id into $ROOT_PATH");
+  }
+
 // end <d_class impl>
 }
 

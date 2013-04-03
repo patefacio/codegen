@@ -3,6 +3,7 @@ library edm;
 import "ebisu_id.dart";
 import "package:plus/pprint.dart";
 part "src/edm/meta.dart";
+final String ROOT_PATH = '/home/dbdavidson/ebisu_bootstrap';
 
 main() { 
   print("Main for lib ebisu_dart_meta");

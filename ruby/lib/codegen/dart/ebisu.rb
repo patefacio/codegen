@@ -9,10 +9,10 @@ ebisu = Place[Place.top] + 'dart' + 'ebisu'
 lib = Lib.new({
                 :id => 'ebisu',
                 :root_path => ebisu,
-                :imports =>
+                :public_finals =>
                 [
                 ],
-                :public_finals => 
+                :imports =>
                 [
                 ],
                 :public_typedefs =>
@@ -201,6 +201,7 @@ lib = Lib.new({
                 ],
                 :public_finals => 
                 [
+                 [ 'String', :root_path, "'/home/dbdavidson/ebisu_bootstrap'" ]
                 ],
                 :public_typedefs =>
                 [
