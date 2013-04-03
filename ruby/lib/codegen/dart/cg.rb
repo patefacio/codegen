@@ -386,7 +386,7 @@ module Codegen::Dart
         end
       end
       if pp_required
-        @imports << 'pprint.dart' 
+        @imports << 'package:plus/pprint.dart' 
       end
       @imports = clean_imports(@imports)
       @outpath = root_path

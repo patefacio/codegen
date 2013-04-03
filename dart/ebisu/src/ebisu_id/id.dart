@@ -33,6 +33,32 @@ class Id {
 // end <Id.default ctor>
   }
 
+  Map toJson() { 
+    return { 
+       "id" : _id,
+       "words" : _words
+    };
+  }
+
+  static Id fromJson(String json) {
+    Map jsonMap = parse(json);
+    Id result = new Id();
+    result._fromJsonMapImpl(jsonMap);
+    return result;
+  }
+
+  static Id fromJsonMap(Map jsonMap) {
+    Id result = new Id();
+    result._fromJsonMapImpl(jsonMap);
+    return result;
+  }
+
+  void _fromJsonMapImpl(Map jsonMap) {
+    _id = jsonMap["id"];
+    // words is good
+  }
+
+
 // custom <id impl>
 
   static final RegExp _hasUpperRe = new RegExp("[A-Z]");
@@ -44,6 +70,10 @@ class Id {
   String get abbrev => _words.map((w) => w[0]).join();
 
   static Id pluralize(Id id, [ String suffix = 's' ]) => new Id(id._id + suffix);
+
+  static Id fromString(String id) {
+    return new Id(id);
+  }
 
 // end <id impl>
 }
