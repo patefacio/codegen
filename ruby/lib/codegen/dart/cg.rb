@@ -101,7 +101,7 @@ module Codegen::Dart
     end
 
     def initializer
-      if ctor_init
+      if not ctor_init.nil?
         return "#{vname} = #{ctor_init}"
       else
         return "#{vname} = #{name}"

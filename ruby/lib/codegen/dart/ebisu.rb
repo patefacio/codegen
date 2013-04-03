@@ -128,7 +128,6 @@ lib = Lib.new({
 
                       ]
                     }
-
                    ]
                  },
                 ]
@@ -224,6 +223,63 @@ lib = Lib.new({
                    :classes =>
                    [
                     { 
+                      :id => :variable,
+                      :descr => "Defines a variable",
+                      :public => true,
+                      :json => true,
+                      :members =>
+                      [
+                       { 
+                         :id => :id,
+                         :descr => "Id of the variable",
+                         :type => :Id,
+                         :ctor => :default,
+                         :access => :ro,
+                         :final => true,
+                       },
+                       { 
+                         :id => :doc,
+                         :descr => "Documentation for the variable",
+                         :type => 'String',
+                         :public => true,
+                       },
+                       { 
+                         :id => :type,
+                         :type => 'String',
+                         :descr => "The type of the variable",
+                         :public => true,
+                         :ctor_init => "'var'",
+                       },
+                       { 
+                         :id => :init,
+                         :descr => "Initialization code (e.g. 'DateTime(1929, 10, 29)' for <DateTime crashDate = DateTime(1929, 10, 29)>;",
+                         :type => 'String',
+                         :public => true,
+                       },
+                       { 
+                         :id => :is_final,
+                         :descr => "True if the variable is final",
+                         :type => :bool,
+                         :public => true,
+                         :ctor_init => false,
+                       },
+                       { 
+                         :id => :is_const,
+                         :descr => "True if the variable is const",
+                         :type => :bool,
+                         :public => true,
+                         :ctor_init => false,
+                       },
+                       { 
+                         :id => :is_static,
+                         :descr => "True if the variable is static",
+                         :type => :bool,
+                         :public => true,
+                         :ctor_init => false,
+                       },
+                      ]
+                    },
+                    { 
                       :id => :enum,
                       :descr => "Defines an enum - to be generated as a class",
                       :public => true,
@@ -243,6 +299,7 @@ lib = Lib.new({
                          :type => 'List<Id>',
                          :descr => "The id's of the enums - Id being used to enforce consistency",
                          :public => true,
+                         :ctor_init => '[]',
                        }
                       ]
                     },
@@ -266,12 +323,14 @@ lib = Lib.new({
                          :type => 'List<DClass>',
                          :descr => 'The classes composing this part',
                          :public => true,
+                         :ctor_init => '[]',
                        },
                        { 
                          :id => :enums,
                          :type => 'List<Enum>',
                          :descr => 'The enums associated with this part',
                          :public => true,
+                         :ctor_init => '[]',
                        }
                       ]
                     },
@@ -291,11 +350,94 @@ lib = Lib.new({
                          :final => true,
                        },
                        { 
+                         :id => :doc,
+                         :descr => "Documentation for the library",
+                         :type => 'String',
+                         :public => true,
+                       },
+                       { 
                          :id => :parts,
                          :type => 'List<Part>',
                          :descr => 'The parts composing this library',
                          :public => true,
+                         :ctor_init => '[]',
+                       },
+                       { 
+                         :id => :variables,
+                         :type => 'List<Variable>',
+                         :descr => 'Global variables for this library',
+                         :public => true,
+                         :ctor_init => '[]',
                        }
+                      ]
+                    },
+
+
+                    { 
+                      :id => :app,
+                      :descr => "Defines a dart application",
+                      :public => true,
+                      :json => true,
+                      :members =>
+                      [
+                       { 
+                         :id => :id,
+                         :descr => "Id of the app",
+                         :type => :Id,
+                         :ctor => :default,
+                         :access => :ro,
+                         :final => true,
+                       },
+                       { 
+                         :id => :libraries,
+                         :type => 'List<Library>',
+                         :descr => "Libraries defined by this app",
+                         :public => true,
+                         :ctor_init => '[]',
+                       },
+                       { 
+                         :id => :imports,
+                         :type => 'List<String>',
+                         :descr => 'Any additional imports - include text after the "import " directly',
+                         :ctor_init => '[]',
+                       },
+                       { 
+                         :id => :variables,
+                         :type => 'List<Variable>',
+                         :descr => 'Global variables for this app',
+                         :public => true,
+                         :ctor_init => '[]',
+                       }
+                      ]
+                    },
+                    { 
+                      :id => :system,
+                      :descr => "Defines a dart system - collection of libs and apps",
+                      :public => true,
+                      :json => true,
+                      :members =>
+                      [
+                       { 
+                         :id => :id,
+                         :descr => "Id of the system",
+                         :type => :Id,
+                         :ctor => :default,
+                         :access => :ro,
+                         :final => true,
+                       },
+                       { 
+                         :id => :libraries,
+                         :type => 'List<Library>',
+                         :descr => "Libraries defined by this app",
+                         :public => true,
+                       },
+                       { 
+                         :id => :apps,
+                         :type => 'List<App>',
+                         :descr => 'List of applications in the system',
+                         :public => true,
+                         :ctor_named => 'default',
+                       },
                       ]
                     },
                     { 
@@ -314,7 +456,7 @@ lib = Lib.new({
                          :final => true,
                        },
                        { 
-                         :id => :public,
+                         :id => :is_public,
                          :descr => "If true the class is public and named appropriately",
                          :type => 'bool',
                          :public => true,
@@ -357,18 +499,18 @@ lib = Lib.new({
                          :public => true,
                        },
                        { 
-                         :id => :public,
-                         :descr => "If true the member is public and named appropriately",
-                         :public => true,
-                         :type => 'bool',
-                         :ctor_init => true,
-                       },
-                       { 
                          :id => :type,
                          :descr => "Type of the member",
                          :public => true,
                          :type => 'String',
                          :ctor_init => '"String"',
+                       },
+                       { 
+                         :id => :is_public,
+                         :descr => "If true the member is public and named appropriately",
+                         :public => true,
+                         :type => 'bool',
+                         :ctor_init => true,
                        },
                        { 
                          :id => :access,
@@ -395,6 +537,20 @@ lib = Lib.new({
                          :type => 'List<String>',
                          :public => true,
                          :ctor_init => '[]',
+                       },
+                       { 
+                         :id => :is_final,
+                         :descr => "True if the member is final",
+                         :type => :bool,
+                         :public => true,
+                         :ctor_init => false,
+                       },
+                       { 
+                         :id => :is_static,
+                         :descr => "True if the member is static",
+                         :type => :bool,
+                         :public => true,
+                         :ctor_init => false,
                        },
                        { 
                          :id => :var_name,
