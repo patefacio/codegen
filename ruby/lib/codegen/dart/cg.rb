@@ -42,6 +42,7 @@ module Codegen::Dart
                          :init => nil, :ctor => nil, :ctor_opt => nil,
                          :ctor_named => nil, :descr => nil, :final => nil,
                          :map_value_type => nil, :list_value_type => nil,
+                         :ctor_init => nil,
                        })
 
     def initialize(opts={ })
@@ -97,6 +98,14 @@ module Codegen::Dart
 
     def opt_initializer?
       return (has_init? and not init_is_const?)
+    end
+
+    def initializer
+      if ctor_init
+        return "#{vname} = #{ctor_init}"
+      else
+        return "#{vname} = #{name}"
+      end
     end
 
     def has_init?
@@ -240,7 +249,6 @@ module Codegen::Dart
     end
 
     def initialize(opts={ })
-      require 'yaml'
       set_attributes(opts)
       @members = instantiate(Member, members)
       @id = instantiate(method(:make_id), id)

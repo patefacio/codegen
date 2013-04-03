@@ -28,7 +28,7 @@ class #{@c.tname} {
 <?rb opt_args = oargs.map {|m| m.as_opt_arg } ?>
 <?rb nargs = @c.ctors[ctor][:named_args] ?>
 <?rb named_args = nargs.map {|m| m.as_named_arg } ?>
-<?rb initializers = @c.ctors[ctor][:args].map {|m| "#{m.vname} = #{m.name}" } ?>
+<?rb initializers = @c.ctors[ctor][:args].map {|m| m.initializer } + @c.members.select{|m| (not @c.ctors[ctor][:args].include?(m)) and m.ctor_init  }.map{|m| m.initializer } ?>
 <?rb initializers += oargs.select {|m| m.opt_initializer? }.map { |m| "this.#{m.vname} = ?#{m.name}? #{m.name} : #{m.init}" } ?>
 <?rb initializers += nargs.select {|m| m.opt_initializer? }.map { |m| "this.#{m.vname} = ?#{m.name}? #{m.name} : #{m.init}" } ?>
 <?rb uses_initializers = (initializers.empty? and "" or " :") ?>

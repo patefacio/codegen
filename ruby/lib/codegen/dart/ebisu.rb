@@ -136,3 +136,57 @@ lib = Lib.new({
 
 
 lib.generate
+
+
+lib = Lib.new({
+                :id => 'ebisu_id',
+                :root_path => ebisu,
+                :imports =>
+                [
+                ],
+                :public_finals => 
+                [
+                ],
+                :public_typedefs =>
+                [
+                ],
+                :namespace => [],
+                :parts =>
+                [
+                 { 
+                   :id => :id,
+                   :classes =>
+                   [
+                    { 
+                      :id => :id,
+                      :descr => "Given an id (all lower case string with words separated by '_') provides 
+various consistent representations.",
+                      :public => true,
+                      :custom_ctors => [:default],
+                      :members =>
+                      [
+                       { 
+                         :id => :id,
+                         :descr => "String containing lower case words separated by '_'",
+                         :type => :String,
+                         :ctor => :default,
+                         :access => :ro,
+                         :final => true,
+                       },
+                       { 
+                         :id => :words,
+                         :descr => "Individual words in the id",
+                         :type => 'List<String>',
+                         :access => :ro,
+                         :ctor_init => "id.split('_')",
+                         :final => true,
+                       },
+                      ]
+                    },
+                   ]
+                 },
+                ]
+              })
+
+
+lib.generate
