@@ -1,0 +1,8 @@
+enum ${_.name} { 
+#< for(var member in _.members) { >
+#<   if member.descr {            >
+// ${member.descr}
+#< } >
+${member.type} ${member.name}
+#< } >
+}

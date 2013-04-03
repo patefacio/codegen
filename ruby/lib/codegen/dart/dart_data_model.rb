@@ -47,7 +47,8 @@ module Codegen::Dart
                          :classes => @dart_classes,
                          :enums => @dart_enums,
                        }
-                      ]
+                      ],
+                      :json_sample_test => true,
                     })
       lib.generate
       return lib
@@ -82,7 +83,7 @@ module Codegen::Dart
       t = t.name
       if (t == 'date') or (t =~ /^time$/i)
         return make_id(:date_time).cap_camel
-      elsif (t =~ /(double|int)/i)
+      elsif (t =~ /(double\b|int\b)/i)
         return $1
       else
         return make_id(t.downcase).cap_camel
@@ -100,25 +101,30 @@ module Codegen::Dart
         data_class = { 
           :id => c.name, :members => [], :public => true,
           :ctor_named => true, :json => true, :descr => c.descr,
-          :no_class_impl => true,
+          #:no_class_impl => true,
         }
 
         # Add the members
         c.members.each do |m|
-          type = get_type(m.type)
-          init = nil
-          if m.type.class == Klass and m.type.is_templated_class?
-            puts "Found templated member #{m}"
-            init = "new #{type}()"
+          begin
+            type = get_type(m.type)
+            init = nil
+#            if m.type.class == Klass and m.type.is_templated_class?
+            if !primitives.include? type and type != 'DateTime' and m.type.class != Enumeration
+              init = "new #{type}()"
+            end
+            data_class[:members] << { 
+              :id => m.name,
+              :type => type,
+              :init => init,
+              :public => true,
+              #:access => :ro,
+              :descr => m.descr
+            }
+          rescue Exception => e
+            warn "Failed to handle member #{m.name} of #{c.name}!"
+            raise e
           end
-          data_class[:members] << { 
-            :id => m.name,
-            :type => type,
-            :init => init,
-            :public => true,
-            #:access => :ro,
-            :descr => m.descr
-          }
         end
 
         @dart_classes << data_class
@@ -128,10 +134,3 @@ module Codegen::Dart
   end
 end
 
-if __FILE__ == $0
-  include Codegen::Dart
-  model = Model.new(:file_path => '/home/dbdavidson/plusauri/modeling/plusauri.xmi')
-  dm = DataModel.new(:model => model, :lib_id => :dossier, 
-                     :packages => ['/plusauri/dossier', '/common'])
-  dm.create_lib
-end

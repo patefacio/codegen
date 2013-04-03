@@ -1,0 +1,9 @@
+class ${_.name} { 
+#< for(var member in asContexts(_.members)) { >
+${member['descr']==null ? 'foo' : 'bar'}
+  // Support for ${member['name']};
+  ${member.type} ${member.name};
+#< } >
+}
+// done it
+

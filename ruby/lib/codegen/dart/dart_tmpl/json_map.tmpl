@@ -1,7 +1,7 @@
 { 
 <?rb #Codegen.indent ?>
 <?rb items = [] ?>
-<?rb (1..(rand(5)+1)).each do |i| ?>
+<?rb (2..(rand(8)+1)).each do |i| ?>
 <?rb items << %Q{"#{@v}-#{i}": #{@lib.random_json(@v)}}.chomp ?>
 <?rb end ?>
 #{Codegen.indent_text(items.join(','+Codegen::NL))}

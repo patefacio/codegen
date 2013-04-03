@@ -1,0 +1,33 @@
+
+////////////////////////////////////////////////////////////////////////////////
+// Test of random json
+////////////////////////////////////////////////////////////////////////////////
+<?rb items = [] ?>
+String _randomJsonSample = """
+<?rb @lib.class_map.each_pair do |k,v| ?>
+<?rb  items << %Q{"#{k}": #{v.json_sample.strip}} ?>
+<?rb end ?>
+{
+#{Codegen.indent_absolute_text(items.join(","+Codegen::NL), 1)}
+}
+""";
+
+void _testRandomSampleData(String json) { 
+
+  Map jsonMap = parse(json);
+
+  jsonMap.forEach((k,v) { 
+    switch(k) { 
+<?rb @classes.sort.each do |klass| ?>
+    case "#{klass}": { 
+      #{klass} sample = #{klass}.fromJsonMap(v);
+      #{klass} sample_copy = #{klass}.fromJson(stringify(sample));
+      bool match = jp(sample) == jp(sample_copy);
+      assert(match);
+      print("Matched on #{klass}");
+      break;
+    }
+<?rb end ?>
+    }
+  });
+}

@@ -9,6 +9,8 @@ require 'tenjin'
 include Codegen
 
 module Codegen::Dart
+  
+  srand(2013)
 
   HERE = Pathname.new(File.expand_path(__FILE__)).parent
   @@engine = Tenjin::Engine.new(:path => [ HERE + 'dart_tmpl' ])
@@ -136,7 +138,7 @@ module Codegen::Dart
 
     def json_out()
       if type=='DateTime'
-        return "'${#{vname}.toString()}'"
+        return "(#{vname} == null)? null : '${#{vname}.toString()}'"
       elsif class_map.include? type
         return "#{vname}.toJson()"
       else
@@ -206,9 +208,10 @@ module Codegen::Dart
                          :generated => [],
                          :json => false,
                          :no_class_impl => false,
+                         :clone => false,
                        })
 
-    def json_sample(map_rand_range=(1..5))
+    def json_sample(map_rand_range=(3..8))
       output = @@engine.render('json_sample.tmpl', 
                                { 
                                  :c => self,
@@ -308,7 +311,6 @@ module Codegen::Dart
     end
 
     def owner=(parent)
-      puts "Part owner set #{parent.name}"
       @owner = parent
       classes.each do |cls|
         cls.owner = self
@@ -339,6 +341,7 @@ module Codegen::Dart
     attribute_defaults({ 
                          :id => nil, :members => [], 
                          :public_constants => [],
+                         :public_finals => [],
                          :public_typedefs => [],
                          :imports => [],
                          :parts => [], 
@@ -351,6 +354,7 @@ module Codegen::Dart
                          Codegen::Dart::HERE + '../../../../../dart',
                          :class_map => { },
                          :enum_map => { },
+                         :json_sample_test => nil,
                        })
 
     def initialize(opts={ })
@@ -382,8 +386,41 @@ module Codegen::Dart
         @outpath = @outpath + name
       end
       @public_constants = public_constants.map {|t,n,v| [ t, make_id(n).shout, v] }
+      @public_finals = public_finals.map {|t,n,v| [ t, make_id(n).shout, v] }
       @public_typedefs = public_typedefs.map {|src,target| [ src, make_id(target).cap_camel ] }
       @outpath = @outpath
+    end
+
+    def random_json(type, field_name=nil)
+      #puts "Creating random #{type} #{field_name} #{class_map.has_key?(type)}"
+      case type
+      when "String"
+        return (field_name and %Q{"#{field_name}-#{rand(10)}"} or "???-#{rand(100)}")
+      when "int"
+        return rand(100000)
+      when /^double$/i
+        return rand(100000) + rand()
+      when "DateTime"
+        d = DateTime.new(1929,10,29) + rand(40000)
+        return d.strftime('"%Y-%m-%dT%H:%M:%S"')
+      when /Map<String,\s*(\w+)/
+        return @@engine.render('json_map.tmpl', { :v => $1, :lib => self })
+      when /List<(\w+)/
+        return @@engine.render('json_list.tmpl', { :v => $1, :lib => self })
+      else
+        if class_map.has_key?(type)
+          return @@engine.render('json_sample.tmpl', 
+                                 { 
+                                   :c => class_map[type],
+                                   :lib => self,
+                                 })
+        elsif enum_map.has_key?(type)
+          e = enum_map[type]
+          return rand(e.values.length)
+        else
+          return %Q{"Nothing for #{type}"}
+        end
+      end
     end
 
     def generate()
@@ -391,6 +428,15 @@ module Codegen::Dart
                                                          { 
                                                            :lib => self,
                                                          }))
+
+      if json_sample_test
+        test_code = @@engine.render('json_sample_test.tmpl',
+                                    { 
+                                      :classes => class_map.keys.sort,
+                                      :lib => self,
+                                    })        
+        output += test_code
+      end
 
       Codegen.merge(output, @outpath + (id.to_s + '.dart'))
 
@@ -411,39 +457,6 @@ module Codegen::Dart
         end
         return result
       end
-
-      def random_json(type, field_name=nil)
-        #puts "Creating random #{type} #{field_name} #{class_map.has_key?(type)} #{class_map.keys}"
-        case type
-        when "String"
-          return (field_name and %Q{"#{field_name}-#{rand(10)}"} or "???-#{rand(100)}")
-        when "int"
-          return rand(100000)
-        when /double/i
-          return rand(100000) + rand()
-        when "DateTime"
-          d = DateTime.new(1929,10,29) + rand(40000)
-          return d.strftime('"%Y-%m-%dT%H:%M:%S"')
-        when /Map<String,\s*(\w+)/
-          return @@engine.render('json_map.tmpl', { :v => $1, :lib => self })
-        when /List<(\w+)/
-          return @@engine.render('json_list.tmpl', { :v => $1, :lib => self })
-        else
-          if class_map.has_key?(type)
-            return @@engine.render('json_sample.tmpl', 
-                               { 
-                                 :c => class_map[type],
-                                 :lib => self,
-                               })
-          elsif enum_map.has_key?(type)
-            e = enum_map[type]
-            return rand(e.values.length)
-          else
-            return %Q{"Nothing for #{type}"}
-          end
-        end
-      end
-
     end
   end
 

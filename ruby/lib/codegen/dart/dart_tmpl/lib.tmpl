@@ -1,7 +1,11 @@
 library #{@lib.name};
 
 <?rb @lib.imports.each do |imp| ?>
+<?rb if imp=~/(.*)\s+as\s+(.*)/ ?>
+import "#{$1}" as #{$2};
+<?rb else ?>
 import "#{imp}";
+<?rb end ?>
 <?rb end ?>
 <?rb @lib.parts.each do |part| ?>
 part "src/#{@lib.name}/#{part.id}.dart";
@@ -18,6 +22,9 @@ typedef #{src} #{target};
 const #{t} #{n} = #{val};
 <?rb end ?>
 <?rb end ?>
+<?rb @lib.public_finals.each do |t,n,val| ?>
+final #{t} #{n} = #{val};
+<?rb end ?>
 <?rb if not @lib.generated.empty? ?>
 
 #{@lib.generated.join(Codegen::NL)}
@@ -25,6 +32,9 @@ const #{t} #{n} = #{val};
 
 main() { 
   print("Main for lib #{@lib.id}");
+<?rb if @lib.json_sample_test ?>
+  _testRandomSampleData(_randomJsonSample);
+<?rb end ?>
 <?rb if not @lib.generated_main.empty? ?>
 
 #{@lib.generated_main.join(Codegen::NL)}
