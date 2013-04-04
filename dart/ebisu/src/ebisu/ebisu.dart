@@ -29,6 +29,7 @@ class Context {
 
 // custom <ebisu top level>
 
+
 Iterable asContexts(Iterable items) {
   return items.toList().map((i) => new Context(i));
 }
@@ -42,34 +43,42 @@ String indentBlock(String block, [String indent = '  ']) {
   return '$indent${block.split("\n").join("\n$indent")}';
 }
 
-const String commentBegin = '//';
-const String customBegin = '$commentBegin custom <([^>]+)>';
-const String customEnd = '$commentBegin end <([^>]+)>';
-final RegExp customBeginRe = new RegExp(customBegin);
-final RegExp customEndRe = new RegExp(customEnd);
+const String customBegin = r'//\s*custom';
+const String customEnd = r'//\s*end';
+const String customBlockText = '''
+// custom <TAG>
+// end <TAG>
+''';
+
+String customBlock(String tag) {
+  return customBlockText.replaceAll('TAG', tag);
+}
 
 String mergeWithFile(String generated, String destFilePath,
-    [ RegExp beginProtect, RegExp endProtect ]) {
+    [ String beginProtect, String endProtect ]) {
 
-  if(!?beginProtect) { beginProtect = customBeginRe; }
-  if(!?endProtect) { endProtect = customEndRe; }
+  if(!?beginProtect) beginProtect = customBegin;
+  if(!?endProtect) endProtect = customEnd;
 
   File inFile = new File(destFilePath);
-  List<String> results = [];
+
   if(inFile.existsSync()) {
     String currentText = inFile.readAsStringSync();
 
     Map<String, String> captures = {};
     Map<String, String> empties = {};
 
-    RegExp block = new RegExp("\\n?[^\\S\\n]*?//\\s*custom\\s+<(.*?)>(?:.|\\n)*?end\\s+<\\1>", multiLine: true);
-    for(Match match in block.allMatches(currentText)) {
-      captures[match.group(1)] = match.group(0);
-    }
+    RegExp block = 
+      new RegExp(
+          "\\n?[^\\S\\n]*?$customBegin"             // Look for begin
+          "\\s+<(.*?)>(?:.|\\n)*?"                  // Eat - non-greedy
+          "$customEnd\\s+<\\1>",                    // Require matching end
+          multiLine: true);
 
-    for(Match match in block.allMatches(generated)) {
-      empties[match.group(1)] = match.group(0);
-    }
+    block.allMatches(currentText).forEach((m) 
+        { captures[m.group(1)] = m.group(0); });
+    block.allMatches(generated).forEach((m) 
+        { empties[m.group(1)] = m.group(0); });
 
     captures.forEach((k,v) {
       if(!empties.containsKey(k)) {
