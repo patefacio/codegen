@@ -1,5 +1,6 @@
 library ebisu;
 
+import "dart:io";
 part "src/ebisu/ebisu.dart";
 
 main() { 

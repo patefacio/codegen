@@ -1,3 +1,4 @@
+import "ebisu/ebisu.dart";
 import "ebisu/ebisu_id.dart";
 import "ebisu/ebisu_dart_meta.dart";
 import "ebisu/ebisu_compiler.dart";
@@ -303,5 +304,22 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
 
   ebisu.finalize();
   ebisu.generate();
-  //print(prettyJsonMap(ebisu.toJson()));
+
+  mergeWithFile('''
+
+// custom <first>
+// end <first>
+
+this is good
+
+// custom <foo>
+// end <foo>
+
+zyds//   custom <boo>
+// end <boo>
+
+this is also gold
+
+
+''', "/home/dbdavidson/tmp/someFile.txt");
 }

@@ -14,6 +14,7 @@ lib = Lib.new({
                 ],
                 :imports =>
                 [
+                 :io,
                 ],
                 :public_typedefs =>
                 [
