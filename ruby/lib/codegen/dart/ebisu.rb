@@ -196,6 +196,7 @@ lib = Lib.new({
                 :imports =>
                 [
                  :io,
+                 'ebisu.dart',
                  'ebisu_id.dart',
                  'templates/dart_meta.dart as META',
                 ],
@@ -369,6 +370,13 @@ lib = Lib.new({
                          :final => true,
                        },
                        { 
+                         :id => :include_custom,
+                         :descr => "If true include custom block",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => true,
+                       },
+                       { 
                          :id => :name,
                          :descr => "Name of the part - for use in naming the part file",
                          :type => :String,
@@ -420,6 +428,13 @@ lib = Lib.new({
                          :descr => "Name of the library - for use in library and part statements",
                          :type => :String,
                          :access => :ro,
+                       },
+                       { 
+                         :id => :include_custom,
+                         :descr => "If true include custom block",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => true,
                        },
                        { 
                          :id => :doc,
@@ -538,6 +553,13 @@ lib = Lib.new({
                          :ctor => :default,
                          :access => :ro,
                          :final => true,
+                       },
+                       { 
+                         :id => :include_custom,
+                         :descr => "If true include custom block",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => true,
                        },
                        { 
                          :id => :name,
