@@ -12,3 +12,6 @@ ${v.define()}
 main() {
   print("Main for library ${_.id.snake}");
 }
+#< if(_.includeCustom) { >
+${customBlock("library ${_.name}")}
+#< } >

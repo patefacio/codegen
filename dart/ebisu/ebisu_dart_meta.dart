@@ -16,5 +16,6 @@ main() {
 }
 
 
-// custom <ebisu_dart_meta top level>
-// end <ebisu_dart_meta top level>
+// custom <ebisu_dart_meta lib top level>
+// end <ebisu_dart_meta lib top level>
+

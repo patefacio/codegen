@@ -11,5 +11,6 @@ main() {
 }
 
 
-// custom <ebisu top level>
-// end <ebisu top level>
+// custom <ebisu lib top level>
+// end <ebisu lib top level>
+

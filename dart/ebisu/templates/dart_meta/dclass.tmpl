@@ -2,4 +2,8 @@ class ${_.className} {
 #< for(var member in _.members) { >
 ${indentBlock(member.define())}
 #< } >
+#< if(_.includeCustom) { >
+
+${customBlock("class ${_.name}")}
+#< } >
 }

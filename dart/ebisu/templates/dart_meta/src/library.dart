@@ -31,5 +31,10 @@ main() {
   print("Main for library ${_.id.snake}");
 }
 ''');
+ if(_.includeCustom) { 
+  _buf.add('''
+${customBlock("library ${_.name}")}
+''');
+ } 
   return _buf.join();
 }

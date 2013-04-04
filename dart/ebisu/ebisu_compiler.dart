@@ -22,5 +22,6 @@ main() {
 }
 
 
-// custom <ebisu_compiler top level>
-// end <ebisu_compiler top level>
+// custom <ebisu_compiler lib top level>
+// end <ebisu_compiler lib top level>
+

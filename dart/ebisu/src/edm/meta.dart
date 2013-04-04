@@ -907,7 +907,7 @@ class Member {
 }
 
 
-// custom <meta top level>
+// custom <meta part top level>
 
 Id id(String _id) => new Id(_id);
 Enum enum(String _id) => new Enum(id(_id));
@@ -919,5 +919,5 @@ Part part(String _id) => new Part(id(_id));
 DClass dclass(String _id) => new DClass(id(_id));
 Member member(String _id) => new Member(id(_id));
 
-// end <meta top level>
+// end <meta part top level>
 

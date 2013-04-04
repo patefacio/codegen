@@ -27,8 +27,7 @@ class Context {
 }
 
 
-// custom <ebisu top level>
-
+// custom <ebisu part top level>
 
 Iterable asContexts(Iterable items) {
   return items.toList().map((i) => new Context(i));
@@ -46,8 +45,8 @@ String indentBlock(String block, [String indent = '  ']) {
 const String customBegin = r'//\s*custom';
 const String customEnd = r'//\s*end';
 const String customBlockText = '''
-// custom <TAG>
-// end <TAG>
+// ${'custom'} <TAG>
+// ${'end'} <TAG>
 ''';
 
 String customBlock(String tag) {
@@ -105,5 +104,5 @@ String mergeWithFile(String generated, String destFilePath,
   }
 }
 
-// end <ebisu top level>
+// end <ebisu part top level>
 

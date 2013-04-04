@@ -15,6 +15,12 @@ class ${_.className} {
 ${indentBlock(member.define())}
 ''');
  } 
+ if(_.includeCustom) { 
+  _buf.add('''
+
+${customBlock("class ${_.name}")}
+''');
+ } 
   _buf.add('''
 }
 ''');
