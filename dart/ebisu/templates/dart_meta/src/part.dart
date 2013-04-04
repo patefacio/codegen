@@ -13,15 +13,19 @@ part of ${_.parent.name};
 ''');
  for(var e in _.enums) { 
   _buf.add('''
+
 ${e.define()}
 ''');
  } 
-  _buf.add('''
-
-''');
  for(var c in _.classes) { 
   _buf.add('''
+
 ${c.define()}
+''');
+ } 
+ if(_.includeCustom) { 
+  _buf.add('''
+${customBlock("part ${_.name}")}
 ''');
  } 
   return _buf.join();
