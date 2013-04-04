@@ -262,10 +262,6 @@ class Enum {
     return META.enum(this);
   }
 
-  void generate() {
-    print("    Generating the enum $id with parent ${_parent.id}");
-  }
-
 // end <enum impl>
 }
 
@@ -279,6 +275,11 @@ class Part {
   */
   final Id _id;
   Id get id => _id;
+
+  /**
+     If true include custom block
+  */
+  bool includeCustom;
 
   /**
      Name of the part - for use in naming the part file
@@ -300,6 +301,7 @@ class Part {
 
   Part(Id id) :
     _id = id,
+    includeCustom = true,
     classes = [],
     enums = [] 
   { 
@@ -308,6 +310,7 @@ class Part {
   Map toJson() { 
     return { 
        "id" : _id,
+       "includeCustom" : includeCustom,
        "name" : _name,
        "parent" : _parent,
        "classes" : classes,
@@ -330,6 +333,7 @@ class Part {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    includeCustom = jsonMap["includeCustom"];
     _name = jsonMap["name"];
     _parent = jsonMap["parent"];
     classes = new List<DClass>();
@@ -353,20 +357,10 @@ class Part {
   }
 
   void generate() {
-    print("    Generating the part $id with parent ${_parent.id}");
-
     Library lib = _parent;
     String partName = _id.snake;
-    String partStubDir = "${ROOT_PATH}/lib/src";
-    new Directory(partStubDir)..createSync(recursive: true);
-    String partStubPath = "$partStubDir/${partName}.dart";
-    var outFile = new File(partStubPath).openWrite();
-    String contents = META.part(this);
-    outFile.write(contents);
-    print("Wrote part $partStubPath");
-
-    classes.forEach((dc) => dc.generate());
-    enums.forEach((e) => e.generate());
+    String partStubPath = "${ROOT_PATH}/lib/src/${partName}.dart";
+    mergeWithFile(META.part(this), partStubPath);
   }
 
 // end <part impl>
@@ -392,6 +386,11 @@ class Library {
   String get name => _name;
 
   /**
+     If true include custom block
+  */
+  bool includeCustom;
+
+  /**
      Documentation for the library
   */
   String doc;
@@ -413,6 +412,7 @@ class Library {
 
   Library(Id id) :
     _id = id,
+    includeCustom = true,
     imports = [],
     parts = [],
     variables = [] 
@@ -424,6 +424,7 @@ class Library {
        "id" : _id,
        "parent" : _parent,
        "name" : _name,
+       "includeCustom" : includeCustom,
        "doc" : doc,
        "imports" : imports,
        "parts" : parts,
@@ -448,6 +449,7 @@ class Library {
     _id = jsonMap["id"];
     _parent = jsonMap["parent"];
     _name = jsonMap["name"];
+    includeCustom = jsonMap["includeCustom"];
     doc = jsonMap["doc"];
     // imports is good
     parts = new List<Part>();
@@ -471,16 +473,8 @@ class Library {
   }
 
   void generate() {
-    print("  Generating the lib $id with parent ${_parent.id}");
-    String libStubDir = "${ROOT_PATH}/lib";
-    new Directory(libStubDir)..createSync(recursive: true);
-    String libStubPath = "$libStubDir/${id.snake}.dart";
-    var outFile = new File(libStubPath).openWrite();
-    String contents = META.library(this);
-    outFile.write(contents);
-    print("Wrote lib $libStubPath");
-
-    variables.forEach((v) => v.define());
+    String libStubPath = "${ROOT_PATH}/lib/${id.snake}.dart";
+    mergeWithFile(META.library(this), libStubPath);
     parts.forEach((part) => part.generate());
   }
 
@@ -570,7 +564,6 @@ class App {
   }
 
   void generate() {
-    print("  Generating the app $id with parent ${_parent.id}");
     libraries.forEach((lib) => lib.generate());
   }
 
@@ -648,7 +641,6 @@ class System {
   }
 
   void generate() {
-    print("Generating the system $id");
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
   }
@@ -666,6 +658,11 @@ class DClass {
   */
   final Id _id;
   Id get id => _id;
+
+  /**
+     If true include custom block
+  */
+  bool includeCustom;
 
   /**
      Name of the class, without access prefix
@@ -698,6 +695,7 @@ class DClass {
 
   DClass(Id id) :
     _id = id,
+    includeCustom = true,
     isPublic = true,
     members = [] 
   { 
@@ -706,6 +704,7 @@ class DClass {
   Map toJson() { 
     return { 
        "id" : _id,
+       "includeCustom" : includeCustom,
        "name" : _name,
        "className" : _className,
        "parent" : _parent,
@@ -730,6 +729,7 @@ class DClass {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    includeCustom = jsonMap["includeCustom"];
     _name = jsonMap["name"];
     _className = jsonMap["className"];
     _parent = jsonMap["parent"];
@@ -752,7 +752,6 @@ class DClass {
   }
 
   void generate() {
-    print("      Generating the class $id with parent ${_parent.id}");
     members.forEach((m) => m.generate());
   }
 
@@ -902,10 +901,6 @@ class Member {
 
   String define() {
     return META.member(this);
-  }
-
-  void generate() {
-    print("        Generating the member $id with parent ${_parent.id}");
   }
 
 // end <member impl>
