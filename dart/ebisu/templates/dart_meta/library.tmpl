@@ -1,0 +1,14 @@
+library ${_.name};
+
+#< for(var i in _.imports) { >
+#< } >
+#< for(var part in _.parts) { >
+part "src/${_.name}/${part.name}.dart";
+#< } >
+
+#< for(var v in _.variables) { >
+${v.define()}
+#< } >
+main() {
+  print("Main for library ${_.id.snake}");
+}

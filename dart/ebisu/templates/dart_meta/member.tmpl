@@ -1,0 +1,8 @@
+#< if(_.doc != null) { >
+${blockComment(_.doc)}
+#< } >
+#< if(_.classInit == null) { >
+${_.type} ${_.varName};
+#< } else { >
+${_.type} ${_.varName} = ${_.init};
+#< } >

@@ -1,0 +1,9 @@
+part of ${_.parent.name};
+
+#< for(var e in _.enums) { >
+${e.define()}
+#< } >
+
+#< for(var c in _.classes) { >
+${c.define()}
+#< } >

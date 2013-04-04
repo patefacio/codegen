@@ -1,0 +1,28 @@
+part of dart_meta;
+
+String part([dynamic _]) {
+  if(_ is Map) {
+    _ = new Context(_);
+  }
+  List<String> _buf = new List<String>();
+
+
+  _buf.add('''
+part of ${_.parent.name};
+
+''');
+ for(var e in _.enums) { 
+  _buf.add('''
+${e.define()}
+''');
+ } 
+  _buf.add('''
+
+''');
+ for(var c in _.classes) { 
+  _buf.add('''
+${c.define()}
+''');
+ } 
+  return _buf.join();
+}
