@@ -17,19 +17,6 @@ void main() {
 
   //showFormats();
 
-  Member doc_member(String owner) => member('doc')
-    ..doc = "Documentation for this $owner";
-
-  Member public_member(String owner) => member('is_public')
-    ..doc = "True if $owner is public.\nCode generation support will prefix private variables appropriately";
-
-  Member id_member(String owner) => member('id')
-    ..doc = "Id for this $owner";    
-
-  Member parent_member(String owner) => member('owner')
-    ..doc = "Reference for parent of this $owner"
-    ..isPublic = false;    
-
   Library ebisu_compiler = library('ebisu_compiler')
     ..doc = 'Supports generating dart code from template files'
     ..variables = [
@@ -99,6 +86,27 @@ provides consistent representations'''
         ]
       ]
     ];
+
+
+  // The following are commonly used members of the meta data classes
+  Member doc_member(String owner) => member('doc')
+    ..doc = "Documentation for this $owner";
+
+  Member public_member(String owner) => member('is_public')
+    ..doc = "True if $owner is public.\nCode generation support will prefix private variables appropriately"
+    ..type = 'bool';
+
+  Member id_member(String owner) => member('id')
+    ..doc = "Id for this $owner";    
+
+  Member parent_member(String owner) => member('owner')
+    ..doc = "Reference for parent of this $owner"
+    ..type = 'dynamic'
+    ..isPublic = false;    
+
+  Member custom_member(String owner) => member('include_custom')
+    ..doc = "If true a custom section will be included for $owner"
+    ..type = 'bool';
 
   Library ebisu_dart_meta = library('ebisu_dart_meta')
     ..doc = 'Support for storing dart meta data for purpose of generating code'
@@ -180,6 +188,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           id_member('app'),
           doc_member('app'),
           parent_member('app'),
+          custom_member('app'),
           member('classes')
           ..doc = 'Classes defined in this app'
           ..type = 'List<DClass>'
@@ -195,6 +204,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           id_member('library'),
           doc_member('library'),
           parent_member('library'),
+          custom_member('library'),
           member('name')
           ..doc = "Name of the library - for use in naming the library file, the 'library' and 'part of' statements",
           member('parts')
@@ -212,6 +222,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           id_member('part'),
           doc_member('part'),
           parent_member('part'),
+          custom_member('app'),
           member('name')
           ..doc = "Name of the part - for use in naming the part file",
           member('classes')
@@ -230,6 +241,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           doc_member('Dart class'),
           parent_member('Dart class'),
           public_member('Dart class'),
+          custom_member('app'),
           member('name')
           ..doc = "Name of the class - sans any access prefix (i.e. no '_')",
           member('class_name')
@@ -304,22 +316,4 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
 
   ebisu.finalize();
   ebisu.generate();
-
-  mergeWithFile('''
-
-// custom <first>
-// end <first>
-
-this is good
-
-// custom <foo>
-// end <foo>
-
-zyds//   custom <boo>
-// end <boo>
-
-this is also gold
-
-
-''', "/home/dbdavidson/tmp/someFile.txt");
 }

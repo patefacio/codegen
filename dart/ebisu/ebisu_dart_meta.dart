@@ -1,6 +1,7 @@
 library edm;
 
 import "dart:io";
+import "ebisu.dart";
 import "ebisu_id.dart";
 import "package:plus/pprint.dart";
 import "templates/dart_meta.dart" as META;
