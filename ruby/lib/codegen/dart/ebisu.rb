@@ -322,7 +322,26 @@ lib = Lib.new({
                        { 
                          :id => :parent,
                          :type => 'dynamic',
-                         :access => :rw,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :is_public,
+                         :descr => "If true the enum is public and named appropriately",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => true,
+                       },
+                       { 
+                         :id => :name,
+                         :descr => "Name of the enum sans access qualifier",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :enum_name,
+                         :descr => "Name of the enum with access qualifier",
+                         :type => :String,
+                         :access => :ro,
                        },
                        { 
                          :id => :values,

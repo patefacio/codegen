@@ -42,6 +42,5 @@ String indentBlock(String block, [String indent = '  ']) {
   return '$indent${block.split("\n").join("\n$indent")}';
 }
 
-
 // end <ebisu top level>
 

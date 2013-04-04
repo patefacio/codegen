@@ -186,7 +186,23 @@ class Enum {
   Id get id => _id;
   dynamic _parent;
   dynamic get parent => _parent;
-  set parent(dynamic parent) => _parent = parent;
+
+  /**
+     If true the enum is public and named appropriately
+  */
+  bool isPublic;
+
+  /**
+     Name of the enum sans access qualifier
+  */
+  String _name;
+  String get name => _name;
+
+  /**
+     Name of the enum with access qualifier
+  */
+  String _enumName;
+  String get enumName => _enumName;
 
   /**
      The id's of the enums - Id being used to enforce consistency
@@ -195,6 +211,7 @@ class Enum {
 
   Enum(Id id) :
     _id = id,
+    isPublic = true,
     values = [] 
   { 
   }
@@ -203,6 +220,9 @@ class Enum {
     return { 
        "id" : _id,
        "parent" : _parent,
+       "isPublic" : isPublic,
+       "name" : _name,
+       "enumName" : _enumName,
        "values" : values
     };
   }
@@ -223,11 +243,20 @@ class Enum {
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
     _parent = jsonMap["parent"];
+    isPublic = jsonMap["isPublic"];
+    _name = jsonMap["name"];
+    _enumName = jsonMap["enumName"];
     // values is good
   }
 
 
 // custom <enum impl>
+
+  set parent(p) {
+    _name = _id.capCamel;
+    _enumName = isPublic? _name : "_$_name";
+    _parent = p;
+  }
 
   String define() {
     return META.enum(this);
@@ -316,7 +345,7 @@ class Part {
 
 // custom <part impl>
 
-  void set parent(p) {
+  set parent(p) {
     _name = _id.snake;
     classes.forEach((dc) => dc.parent = this);
     enums.forEach((e) => e.parent = this);
@@ -434,7 +463,7 @@ class Library {
 
 // custom <library impl>
 
-  void set parent(p) {
+  set parent(p) {
     _name = _id.snake;
     parts.forEach((part) => part.parent = this);
     variables.forEach((v) => v.parent = this);
@@ -534,7 +563,7 @@ class App {
 
 // custom <app impl>
 
-  void set parent(p) {
+  set parent(p) {
     libraries.forEach((l) => l.parent = this);
     variables.forEach((v) => v.parent = this);
     _parent = p;
@@ -717,6 +746,7 @@ class DClass {
 
   set parent(p) {
     _name = id.capCamel;
+    _className = isPublic? _name : "_$_name";
     members.forEach((m) => m.parent = this);
     _parent = p;
   }
@@ -864,9 +894,9 @@ class Member {
 
 // custom <member impl>
 
-  void set parent(p) {
+  set parent(p) {
     _name = id.camel;
-    _varName = isPublic? _name : "_#{_name}";
+    _varName = isPublic? _name : "_$_name";
     _parent = p;
   }
 

@@ -8,7 +8,7 @@ String dclass([dynamic _]) {
 
 
   _buf.add('''
-class ${_.id} { 
+class ${_.className} { 
 ''');
  for(var member in _.members) { 
   _buf.add('''
@@ -17,8 +17,6 @@ ${indentBlock(member.define())}
  } 
   _buf.add('''
 }
-
-
 ''');
   return _buf.join();
 }

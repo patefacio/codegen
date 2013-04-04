@@ -151,13 +151,27 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           public_member('enum'),
           parent_member('enum'),
           member('name')
-          ..doc = "Name of the enum class generated, sans access prefix",
-          member('class_name')
+          ..doc = "Name of the enum class generated sans access prefix",
+          member('enum_name')
           ..doc = "Name of the enum class generated with access prefix",
           member('values')
           ..doc = "List of id's naming the values"
           ..type = 'List<Id>'
           ..ctorInit = '[]',
+        ],
+        dclass('system')
+        ..doc = 'Defines a dart system (collection of libraries and apps)'
+        ..members = [
+          id_member('system'),
+          doc_member('system'),
+          member('apps')
+          ..doc = 'Apps in the system'
+          ..type = 'List<App>'
+          ..ctorInit = '[]',
+          member('libraries')
+          ..doc = 'Libraries in the system'
+          ..type = 'List<Library>'
+          ..ctorInit = '[]'
         ],
         dclass('app')
         ..doc = 'Defines a dart application'
