@@ -18,7 +18,6 @@ lib = Lib.new({
                 :public_typedefs =>
                 [
                 ],
-                :namespace => [],
                 :parts =>
                 [
                  { 
@@ -61,7 +60,6 @@ lib = Lib.new({
                 :public_typedefs =>
                 [
                 ],
-                :namespace => [],
                 :parts =>
                 [
                  { 
@@ -149,7 +147,6 @@ lib = Lib.new({
                 :public_typedefs =>
                 [
                 ],
-                :namespace => [],
                 :parts =>
                 [
                  { 
@@ -197,7 +194,9 @@ lib = Lib.new({
                 :root_path => ebisu,
                 :imports =>
                 [
+                 :io,
                  'ebisu_id.dart',
+                 'templates/dart_meta.dart as META',
                 ],
                 :public_finals => 
                 [
@@ -206,7 +205,6 @@ lib = Lib.new({
                 :public_typedefs =>
                 [
                 ],
-                :namespace => [],
                 :parts =>
                 [
                  { 
@@ -245,6 +243,24 @@ lib = Lib.new({
                          :public => true,
                        },
                        { 
+                         :id => :name,
+                         :descr => "Name of the variable, without consideration of access - (i.e. no leading '_')",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :var_name,
+                         :descr => "Name of the variable",
+                         :type => 'String',
+                         :public => false,
+                         :access => :ro
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
+                       },
+                       { 
                          :id => :type,
                          :type => 'String',
                          :descr => "The type of the variable",
@@ -278,6 +294,14 @@ lib = Lib.new({
                          :public => true,
                          :ctor_init => false,
                        },
+                       { 
+                         :id => :is_public,
+                         :descr => "If true the variable is public and named appropriately",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => true,
+                       },
+
                       ]
                     },
                     { 
@@ -294,6 +318,11 @@ lib = Lib.new({
                          :ctor => :default,
                          :access => :ro,
                          :final => true,
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :rw,
                        },
                        { 
                          :id => :values,
@@ -318,6 +347,17 @@ lib = Lib.new({
                          :ctor => :default,
                          :access => :ro,
                          :final => true,
+                       },
+                       { 
+                         :id => :name,
+                         :descr => "Name of the part - for use in naming the part file",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
                        },
                        { 
                          :id => :classes,
@@ -351,9 +391,27 @@ lib = Lib.new({
                          :final => true,
                        },
                        { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :name,
+                         :descr => "Name of the library - for use in library and part statements",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
                          :id => :doc,
                          :descr => "Documentation for the library",
                          :type => 'String',
+                         :public => true,
+                       },
+                       { 
+                         :id => :imports,
+                         :type => 'List<String>',
+                         :descr => 'Any additional imports - include text after the "import " directly',
+                         :ctor_init => '[]',
                          :public => true,
                        },
                        { 
@@ -388,6 +446,11 @@ lib = Lib.new({
                          :ctor => :default,
                          :access => :ro,
                          :final => true,
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
                        },
                        { 
                          :id => :libraries,
@@ -457,6 +520,23 @@ lib = Lib.new({
                          :final => true,
                        },
                        { 
+                         :id => :name,
+                         :descr => "Name of the class, without access prefix",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :class_name,
+                         :descr => "Name of the class with access prefix",
+                         :type => :String,
+                         :access => :ro,
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
+                       },
+                       { 
                          :id => :is_public,
                          :descr => "If true the class is public and named appropriately",
                          :type => 'bool',
@@ -492,6 +572,11 @@ lib = Lib.new({
                          :ctor => :default,
                          :access => :ro,
                          :final => true,
+                       },
+                       { 
+                         :id => :parent,
+                         :type => 'dynamic',
+                         :access => :ro,
                        },
                        { 
                          :id => :doc,
@@ -554,9 +639,16 @@ lib = Lib.new({
                          :ctor_init => false,
                        },
                        { 
+                         :id => :name,
+                         :descr => "Name of variable - excluding any access prefix",
+                         :type => 'String',
+                         :access => :ro,
+                       },
+                       { 
                          :id => :var_name,
                          :descr => "Name of variable for the member - varies depending on public/private",
                          :type => 'String',
+                         :access => :ro,
                        },
                       ]
                     },

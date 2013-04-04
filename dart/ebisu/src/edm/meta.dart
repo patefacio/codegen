@@ -62,6 +62,20 @@ class Variable {
   String doc;
 
   /**
+     Name of the variable, without consideration of access - (i.e. no leading '_')
+  */
+  String _name;
+  String get name => _name;
+
+  /**
+     Name of the variable
+  */
+  String _varName;
+  String get varName => _varName;
+  dynamic _parent;
+  dynamic get parent => _parent;
+
+  /**
      The type of the variable
   */
   String type;
@@ -86,12 +100,18 @@ class Variable {
   */
   bool isStatic;
 
+  /**
+     If true the variable is public and named appropriately
+  */
+  bool isPublic;
+
   Variable(Id id) :
     _id = id,
     type = 'var',
     isFinal = false,
     isConst = false,
-    isStatic = false 
+    isStatic = false,
+    isPublic = true 
   { 
   }
 
@@ -99,11 +119,15 @@ class Variable {
     return { 
        "id" : _id,
        "doc" : doc,
+       "name" : _name,
+       "varName" : _varName,
+       "parent" : _parent,
        "type" : type,
        "init" : init,
        "isFinal" : isFinal,
        "isConst" : isConst,
-       "isStatic" : isStatic
+       "isStatic" : isStatic,
+       "isPublic" : isPublic
     };
   }
 
@@ -123,15 +147,30 @@ class Variable {
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
     doc = jsonMap["doc"];
+    _name = jsonMap["name"];
+    _varName = jsonMap["varName"];
+    _parent = jsonMap["parent"];
     type = jsonMap["type"];
     init = jsonMap["init"];
     isFinal = jsonMap["isFinal"];
     isConst = jsonMap["isConst"];
     isStatic = jsonMap["isStatic"];
+    isPublic = jsonMap["isPublic"];
   }
 
 
 // custom <variable impl>
+
+  void set parent(p) {
+    _name = id.camel;
+    _varName = isPublic? _name : "_#{_name}";
+    _parent = p;
+  }
+
+  String define() {
+    return META.variable(this);
+  }
+
 // end <variable impl>
 }
 
@@ -145,6 +184,9 @@ class Enum {
   */
   final Id _id;
   Id get id => _id;
+  dynamic _parent;
+  dynamic get parent => _parent;
+  set parent(dynamic parent) => _parent = parent;
 
   /**
      The id's of the enums - Id being used to enforce consistency
@@ -160,6 +202,7 @@ class Enum {
   Map toJson() { 
     return { 
        "id" : _id,
+       "parent" : _parent,
        "values" : values
     };
   }
@@ -179,11 +222,21 @@ class Enum {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _parent = jsonMap["parent"];
     // values is good
   }
 
 
 // custom <enum impl>
+
+  String define() {
+    return META.enum(this);
+  }
+
+  void generate() {
+    print("    Generating the enum $id with parent ${_parent.id}");
+  }
+
 // end <enum impl>
 }
 
@@ -197,6 +250,14 @@ class Part {
   */
   final Id _id;
   Id get id => _id;
+
+  /**
+     Name of the part - for use in naming the part file
+  */
+  String _name;
+  String get name => _name;
+  dynamic _parent;
+  dynamic get parent => _parent;
 
   /**
      The classes composing this part
@@ -218,6 +279,8 @@ class Part {
   Map toJson() { 
     return { 
        "id" : _id,
+       "name" : _name,
+       "parent" : _parent,
        "classes" : classes,
        "enums" : enums
     };
@@ -238,6 +301,8 @@ class Part {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _name = jsonMap["name"];
+    _parent = jsonMap["parent"];
     classes = new List<DClass>();
     jsonMap["classes"].forEach((v) { 
       classes.add(DClass.fromJsonMap(v));
@@ -251,9 +316,28 @@ class Part {
 
 // custom <part impl>
 
+  void set parent(p) {
+    _name = _id.snake;
+    classes.forEach((dc) => dc.parent = this);
+    enums.forEach((e) => e.parent = this);
+    _parent = p;
+  }
+
   void generate() {
-    print("Generating the part $id into $ROOT_PATH");
+    print("    Generating the part $id with parent ${_parent.id}");
+
+    Library lib = _parent;
+    String partName = _id.snake;
+    String partStubDir = "${ROOT_PATH}/lib/src";
+    new Directory(partStubDir)..createSync(recursive: true);
+    String partStubPath = "$partStubDir/${partName}.dart";
+    var outFile = new File(partStubPath).openWrite();
+    String contents = META.part(this);
+    outFile.write(contents);
+    print("Wrote part $partStubPath");
+
     classes.forEach((dc) => dc.generate());
+    enums.forEach((e) => e.generate());
   }
 
 // end <part impl>
@@ -269,11 +353,24 @@ class Library {
   */
   final Id _id;
   Id get id => _id;
+  dynamic _parent;
+  dynamic get parent => _parent;
+
+  /**
+     Name of the library - for use in library and part statements
+  */
+  String _name;
+  String get name => _name;
 
   /**
      Documentation for the library
   */
   String doc;
+
+  /**
+     Any additional imports - include text after the "import " directly
+  */
+  List<String> imports;
 
   /**
      The parts composing this library
@@ -287,6 +384,7 @@ class Library {
 
   Library(Id id) :
     _id = id,
+    imports = [],
     parts = [],
     variables = [] 
   { 
@@ -295,7 +393,10 @@ class Library {
   Map toJson() { 
     return { 
        "id" : _id,
+       "parent" : _parent,
+       "name" : _name,
        "doc" : doc,
+       "imports" : imports,
        "parts" : parts,
        "variables" : variables
     };
@@ -316,7 +417,10 @@ class Library {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _parent = jsonMap["parent"];
+    _name = jsonMap["name"];
     doc = jsonMap["doc"];
+    // imports is good
     parts = new List<Part>();
     jsonMap["parts"].forEach((v) { 
       parts.add(Part.fromJsonMap(v));
@@ -330,8 +434,24 @@ class Library {
 
 // custom <library impl>
 
+  void set parent(p) {
+    _name = _id.snake;
+    parts.forEach((part) => part.parent = this);
+    variables.forEach((v) => v.parent = this);
+    _parent = p;
+  }
+
   void generate() {
-    print("Generating the lib $id into $ROOT_PATH");
+    print("  Generating the lib $id with parent ${_parent.id}");
+    String libStubDir = "${ROOT_PATH}/lib";
+    new Directory(libStubDir)..createSync(recursive: true);
+    String libStubPath = "$libStubDir/${id.snake}.dart";
+    var outFile = new File(libStubPath).openWrite();
+    String contents = META.library(this);
+    outFile.write(contents);
+    print("Wrote lib $libStubPath");
+
+    variables.forEach((v) => v.define());
     parts.forEach((part) => part.generate());
   }
 
@@ -348,6 +468,8 @@ class App {
   */
   final Id _id;
   Id get id => _id;
+  dynamic _parent;
+  dynamic get parent => _parent;
 
   /**
      Libraries defined by this app
@@ -375,6 +497,7 @@ class App {
   Map toJson() { 
     return { 
        "id" : _id,
+       "parent" : _parent,
        "libraries" : libraries,
        "imports" : _imports,
        "variables" : variables
@@ -396,6 +519,7 @@ class App {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _parent = jsonMap["parent"];
     libraries = new List<Library>();
     jsonMap["libraries"].forEach((v) { 
       libraries.add(Library.fromJsonMap(v));
@@ -410,8 +534,14 @@ class App {
 
 // custom <app impl>
 
+  void set parent(p) {
+    libraries.forEach((l) => l.parent = this);
+    variables.forEach((v) => v.parent = this);
+    _parent = p;
+  }
+
   void generate() {
-    print("Generating the app $id into $ROOT_PATH");
+    print("  Generating the app $id with parent ${_parent.id}");
     libraries.forEach((lib) => lib.generate());
   }
 
@@ -483,8 +613,13 @@ class System {
 
 // custom <system impl>
 
+  void finalize() {
+    libraries.forEach((l) => l.parent = this);
+    apps.forEach((a) => a.parent = this);
+  }
+
   void generate() {
-    print("Generating the system $id into $ROOT_PATH");
+    print("Generating the system $id");
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
   }
@@ -502,6 +637,20 @@ class DClass {
   */
   final Id _id;
   Id get id => _id;
+
+  /**
+     Name of the class, without access prefix
+  */
+  String _name;
+  String get name => _name;
+
+  /**
+     Name of the class with access prefix
+  */
+  String _className;
+  String get className => _className;
+  dynamic _parent;
+  dynamic get parent => _parent;
 
   /**
      If true the class is public and named appropriately
@@ -528,6 +677,9 @@ class DClass {
   Map toJson() { 
     return { 
        "id" : _id,
+       "name" : _name,
+       "className" : _className,
+       "parent" : _parent,
        "isPublic" : isPublic,
        "doc" : doc,
        "members" : members
@@ -549,6 +701,9 @@ class DClass {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _name = jsonMap["name"];
+    _className = jsonMap["className"];
+    _parent = jsonMap["parent"];
     isPublic = jsonMap["isPublic"];
     doc = jsonMap["doc"];
     members = new List<Member>();
@@ -560,8 +715,19 @@ class DClass {
 
 // custom <d_class impl>
 
+  set parent(p) {
+    _name = id.capCamel;
+    members.forEach((m) => m.parent = this);
+    _parent = p;
+  }
+
   void generate() {
-    print("Generating the class $id into $ROOT_PATH");
+    print("      Generating the class $id with parent ${_parent.id}");
+    members.forEach((m) => m.generate());
+  }
+
+  String define() {
+    return META.dclass(this);
   }
 
 // end <d_class impl>
@@ -577,6 +743,8 @@ class Member {
   */
   final Id _id;
   Id get id => _id;
+  dynamic _parent;
+  dynamic get parent => _parent;
 
   /**
      Documentation for the class
@@ -624,9 +792,16 @@ class Member {
   bool isStatic;
 
   /**
+     Name of variable - excluding any access prefix
+  */
+  String _name;
+  String get name => _name;
+
+  /**
      Name of variable for the member - varies depending on public/private
   */
   String _varName;
+  String get varName => _varName;
 
   Member(Id id) :
     _id = id,
@@ -642,6 +817,7 @@ class Member {
   Map toJson() { 
     return { 
        "id" : _id,
+       "parent" : _parent,
        "doc" : doc,
        "type" : type,
        "isPublic" : isPublic,
@@ -651,6 +827,7 @@ class Member {
        "ctors" : ctors,
        "isFinal" : isFinal,
        "isStatic" : isStatic,
+       "name" : _name,
        "varName" : _varName
     };
   }
@@ -670,6 +847,7 @@ class Member {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
+    _parent = jsonMap["parent"];
     doc = jsonMap["doc"];
     type = jsonMap["type"];
     isPublic = jsonMap["isPublic"];
@@ -679,11 +857,27 @@ class Member {
     // ctors is good
     isFinal = jsonMap["isFinal"];
     isStatic = jsonMap["isStatic"];
+    _name = jsonMap["name"];
     _varName = jsonMap["varName"];
   }
 
 
 // custom <member impl>
+
+  void set parent(p) {
+    _name = id.camel;
+    _varName = isPublic? _name : "_#{_name}";
+    _parent = p;
+  }
+
+  String define() {
+    return META.member(this);
+  }
+
+  void generate() {
+    print("        Generating the member $id with parent ${_parent.id}");
+  }
+
 // end <member impl>
 }
 

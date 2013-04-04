@@ -66,6 +66,7 @@ class Id {
   static capitalize(String s) => "${s[0].toUpperCase()}${s.substring(1)}";
   static uncapitalize(String s) => "${s[0].toLowerCase()}${s.substring(1)}";
 
+  String get snake => _id;
   String get emacs => _words.join('-');
   String get camel => uncapitalize(_words.map((w) => capitalize(w)).join(''));
   String get capCamel => _words.map((w) => capitalize(w)).join('');

@@ -17,7 +17,7 @@ class #{@c.tname} {
   #{m.type} get #{m.name} => #{m.vname};
 <?rb end ?>
 <?rb if m.writable ?>
-  #{m.type} set #{m.name}(#{m.type} #{m.name}) => #{m.vname} = #{m.name};
+  set #{m.name}(#{m.type} #{m.name}) => #{m.vname} = #{m.name};
 <?rb end ?>
 <?rb end ?>
 <?rb @c.ctors.keys.sort.each do |ctor| ?>

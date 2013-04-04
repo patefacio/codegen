@@ -47,7 +47,7 @@ class TemplateFile {
     }
 
     if(null != outputModtime) {
-      if(inputModtime > outputModtime) {
+      if(true || inputModtime > outputModtime) {
         compileImpl();
         return true;
       } 
@@ -69,11 +69,10 @@ class TemplateFile {
 
     outFile.writeln('''
 
-String ${_functionName}([Map _map]) {
-  if(!?_map) {
-    _map = new Map();
+String ${_functionName}([dynamic _]) {
+  if(_ is Map) {
+    _ = new Context(_);
   }
-  Context _ = new Context(_map);
   List<String> _buf = new List<String>();
 
 ''');
@@ -103,7 +102,7 @@ String ${_functionName}([Map _map]) {
       }
     });
     closeString();
-    outFile.writeln('''  print(_buf.join());\n}''');
+    outFile.writeln('''  return _buf.join();\n}''');
   }
 
 // end <template_file impl>
@@ -187,7 +186,6 @@ class TemplateFolder {
     for(var file in dir.listSync()) {
       String p = file.path;
       if(null != dartRe.firstMatch(p)) {
-        print("$p and $libPath");
         String relPath = path.relative(p, from: path.dirname(libPath));
         outFile.writeln('part "$relPath";');
       }

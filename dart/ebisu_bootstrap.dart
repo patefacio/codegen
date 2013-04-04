@@ -1,5 +1,6 @@
 import "ebisu/ebisu_id.dart";
 import "ebisu/ebisu_dart_meta.dart";
+import "ebisu/ebisu_compiler.dart";
 import "package:plus/pprint.dart";
 
 void main() {
@@ -13,7 +14,7 @@ void main() {
     print(Id.pluralize(i).title);
   }
 
-  showFormats();
+  //showFormats();
 
   Member doc_member(String owner) => member('doc')
     ..doc = "Documentation for this $owner";
@@ -23,6 +24,10 @@ void main() {
 
   Member id_member(String owner) => member('id')
     ..doc = "Id for this $owner";    
+
+  Member parent_member(String owner) => member('owner')
+    ..doc = "Reference for parent of this $owner"
+    ..isPublic = false;    
 
   Library ebisu_compiler = library('ebisu_compiler')
     ..doc = 'Supports generating dart code from template files'
@@ -55,7 +60,8 @@ void main() {
           ..isPublic = false
         ],
         dclass('template_folder')
-        ..doc = 'A folder full of templates, all of which get compiled into a single dart library'
+        ..doc = '''A class to process a folder full of templates, 
+all of which get compiled into a single dart library'''
         ..members = [
           member('input_path')
           ..doc = 'Path to folder of templates'
@@ -110,9 +116,14 @@ provides consistent representations'''
           ..doc = 'Id for the variable - codegen will address naming of private'
           ..ctors = [ 'default' ],
           doc_member('variable'),
+          parent_member('variable'),
+          public_member('variable'),
           member('type')
           ..doc = 'Type for the variable'
           ..ctorInit = 'dynamic',
+          member('var_name')
+          ..doc = 'Name of variable - varies depending on public/private'
+          ..access = Access.RO,
           member('init')
           ..doc = '''Text used to initialize the variable
 (e.g. 'DateTime(1929, 10, 29)' for <DateTime crashDate = DateTime(1929, 10, 29)>
@@ -137,6 +148,12 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('enum'),
           doc_member('enum'),
+          public_member('enum'),
+          parent_member('enum'),
+          member('name')
+          ..doc = "Name of the enum class generated, sans access prefix",
+          member('class_name')
+          ..doc = "Name of the enum class generated with access prefix",
           member('values')
           ..doc = "List of id's naming the values"
           ..type = 'List<Id>'
@@ -147,6 +164,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('app'),
           doc_member('app'),
+          parent_member('app'),
           member('classes')
           ..doc = 'Classes defined in this app'
           ..type = 'List<DClass>'
@@ -161,6 +179,9 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('library'),
           doc_member('library'),
+          parent_member('library'),
+          member('name')
+          ..doc = "Name of the library - for use in naming the library file, the 'library' and 'part of' statements",
           member('parts')
           ..doc = 'List of parts in this library'
           ..type = 'List<Part>'
@@ -175,6 +196,9 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('part'),
           doc_member('part'),
+          parent_member('part'),
+          member('name')
+          ..doc = "Name of the part - for use in naming the part file",
           member('classes')
           ..doc = 'Classes defined in this part of the library'
           ..type = 'List<DClass>'
@@ -189,7 +213,12 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('Dart class'),
           doc_member('Dart class'),
+          parent_member('Dart class'),
           public_member('Dart class'),
+          member('name')
+          ..doc = "Name of the class - sans any access prefix (i.e. no '_')",
+          member('class_name')
+          ..doc = "Name of the class, including access prefix",
           member('members')
           ..doc = 'List of members of this class'
           ..type = 'List<Member>'
@@ -199,6 +228,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('class member'),
           doc_member('class member'),
+          parent_member('class member'),
           member('type')
           ..doc = 'Type of the member',
           public_member('class member'),
@@ -206,7 +236,9 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..doc = 'Access level supported for this member'
           ..type = 'Access',
           member('class_init')
-          ..doc = "If provided the member will be initialized in place of declaration of class",
+          ..doc = "If provided the member will be initialized to this text in place of declaration of class",
+          member('ctor_init')
+          ..doc = "If provided the member will be initialized to this text in generated ctor initializers",
           member('ctors')
           ..doc = "List of ctor names to include this member in"
           ..type = 'List<String>'
@@ -223,8 +255,10 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..doc = 'True if the member is static'
           ..type = 'bool'
           ..ctorInit = 'false',
+          member('name')
+          ..doc = "Name of variable for the member, excluding access prefix (i.e. no '_')",
           member('var_name')
-          ..doc = 'Name of variablefor the member - varies depending on public/private'
+          ..doc = 'Name of variable for the member - varies depending on public/private'
         ]
       ]
     ];
@@ -253,6 +287,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
       ebisu_dart_meta
     ];
 
+  ebisu.finalize();
   ebisu.generate();
   //print(prettyJsonMap(ebisu.toJson()));
 }

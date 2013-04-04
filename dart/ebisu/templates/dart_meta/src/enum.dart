@@ -1,28 +1,22 @@
 part of dart_meta;
 
-String enum([Map _map]) {
-  if(!?_map) {
-    _map = new Map();
+String enum([dynamic _]) {
+  if(_ is Map) {
+    _ = new Context(_);
   }
-  Context _ = new Context(_map);
   List<String> _buf = new List<String>();
 
 
   _buf.add('''
-enum ${_.name} { 
+enum ${_.id} { 
 ''');
- for(var member in _.members) { 
-   if member.descr {            
+ for(var value in _.values) { 
   _buf.add('''
-// ${member.descr}
-''');
- } 
-  _buf.add('''
-${member.type} ${member.name}
+${value.id}
 ''');
  } 
   _buf.add('''
 }
 ''');
-  print(_buf.join());
+  return _buf.join();
 }

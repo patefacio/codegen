@@ -1,7 +1,9 @@
 library edm;
 
+import "dart:io";
 import "ebisu_id.dart";
 import "package:plus/pprint.dart";
+import "templates/dart_meta.dart" as META;
 part "src/edm/meta.dart";
 final String ROOT_PATH = '/home/dbdavidson/ebisu_bootstrap';
 
