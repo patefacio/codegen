@@ -47,7 +47,7 @@ class TemplateFile {
     }
 
     if(null != outputModtime) {
-      if(true || inputModtime > outputModtime) {
+      if(inputModtime > outputModtime) {
         compileImpl();
         return true;
       } 
@@ -174,6 +174,7 @@ class TemplateFolder {
     outFile.writeln("library $_libName;");
 
     outFile.writeln('import "package:ebisu/ebisu.dart";');
+    outFile.writeln('import "package:ebisu/ebisu_dart_meta.dart";');
 
     if(null != _imports) {
       for(String imp in imports) {
