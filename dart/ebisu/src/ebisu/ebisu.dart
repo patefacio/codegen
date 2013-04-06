@@ -42,22 +42,27 @@ String indentBlock(String block, [String indent = '  ']) {
   return '$indent${block.split("\n").join("\n$indent")}';
 }
 
-const String customBegin = r'//\s*custom';
-const String customEnd = r'//\s*end';
-const String customBlockText = '''
+const String _customBegin = r'//\s*custom';
+const String _customEnd = r'//\s*end';
+const String _customBlockText = '''
 // ${'custom'} <TAG>
 // ${'end'} <TAG>
 ''';
 
 String customBlock(String tag) {
-  return customBlockText.replaceAll('TAG', tag);
+  return _customBlockText.replaceAll('TAG', tag);
+}
+
+final RegExp _trailingNewline = new RegExp(r'\n$');
+String chomp(String s) {
+  return s.replaceFirst(_trailingNewline, '');
 }
 
 String mergeWithFile(String generated, String destFilePath,
     [ String beginProtect, String endProtect ]) {
 
-  if(!?beginProtect) beginProtect = customBegin;
-  if(!?endProtect) endProtect = customEnd;
+  if(!?beginProtect) beginProtect = _customBegin;
+  if(!?endProtect) endProtect = _customEnd;
 
   File inFile = new File(destFilePath);
 
@@ -69,9 +74,9 @@ String mergeWithFile(String generated, String destFilePath,
 
     RegExp block = 
       new RegExp(
-          "\\n?[^\\S\\n]*?$customBegin"             // Look for begin
-          "\\s+<(.*?)>(?:.|\\n)*?"                  // Eat - non-greedy
-          "$customEnd\\s+<\\1>",                    // Require matching end
+          "\\n?[^\\S\\n]*?$_customBegin"             // Look for begin
+          "\\s+<(.*?)>(?:.|\\n)*?"                   // Eat - non-greedy
+          "$_customEnd\\s+<\\1>",                    // Require matching end
           multiLine: true);
 
     block.allMatches(currentText).forEach((m) 
@@ -96,7 +101,7 @@ String mergeWithFile(String generated, String destFilePath,
     }
 
   } else {
-    new Directory(path.directory(destFilePath))
+    new Directory(path.dirname(destFilePath))
       ..createSync(recursive: true);
     var out = inFile.openWrite();
     out.write(generated);
