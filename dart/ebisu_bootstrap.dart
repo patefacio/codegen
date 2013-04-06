@@ -119,7 +119,8 @@ provides consistent representations'''
 
   Member custom_member(String owner) => member('include_custom')
     ..doc = "If true a custom section will be included for $owner"
-    ..type = 'bool';
+    ..type = 'bool'
+    ..classInit = 'true';
 
   Library ebisu_dart_meta = library('ebisu_dart_meta')
     ..doc = 'Support for storing dart meta data for purpose of generating code'
@@ -196,6 +197,9 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         ..members = [
           id_member('system'),
           doc_member('system'),
+          member('root_path')
+          ..doc = 'Path to which code is generated'
+          ..classInit = '"/tmp/ebisu_bootstrap"',
           member('apps')
           ..doc = 'Apps in the system'
           ..type = 'List<App>'
@@ -276,7 +280,8 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..type = 'List<Member>',
           member('json_support')
           ..doc = "If true, generate toJson/fromJson on all members that are not jsonTransient"
-          ..type = 'bool',
+          ..type = 'bool'
+          ..classInit = 'false',
           member('name')
           ..doc = "Name of the class - sans any access prefix (i.e. no '_')"
           ..access = Access.RO,
@@ -334,6 +339,10 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
     ..libraries = [
       library('ebisu')
       ..doc = 'Primary library for client usage of ebisu'
+      ..imports = [
+        'io',
+        '"package:pathos/path.dart" as path'
+      ]
       ..parts = [
         part('ebisu')
         ..classes = [

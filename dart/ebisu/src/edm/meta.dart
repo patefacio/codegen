@@ -161,7 +161,7 @@ class Variable {
 
   void set parent(p) {
     _name = id.camel;
-    _varName = isPublic? _name : "_#{_name}";
+    _varName = isPublic? _name : "_${_name}";
     _parent = p;
   }
 
