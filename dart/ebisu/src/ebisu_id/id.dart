@@ -41,7 +41,7 @@ class Id {
   }
 
   static Id fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Id result = new Id();
     result._fromJsonMapImpl(jsonMap);
     return result;
