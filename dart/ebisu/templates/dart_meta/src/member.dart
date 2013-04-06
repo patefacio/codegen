@@ -17,9 +17,15 @@ ${blockComment(_.doc)}
 ${_.isFinal? 'final ':''}${_.type} ${_.varName};
 ''');
  } else { 
+   if(_.type == 'String') { 
+  _buf.add('''
+${_.isFinal? 'final ':''}${_.type} ${_.varName} = "${_.classInit}";
+''');
+   } else { 
   _buf.add('''
 ${_.isFinal? 'final ':''}${_.type} ${_.varName} = ${_.classInit};
 ''');
+   } 
  } 
  if(!_.isPublic) { 
    if(_.access == Access.RO || _.access == Access.RW) { 

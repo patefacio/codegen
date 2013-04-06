@@ -103,7 +103,7 @@ provides consistent representations'''
   Member public_member(String owner) => member('is_public')
     ..doc = "True if $owner is public.\nCode generation support will prefix private variables appropriately"
     ..type = 'bool'
-    ..classInit = 'false';
+    ..classInit = 'true';
 
   Member id_member(String owner) => member('id')
     ..doc = "Id for this $owner"
@@ -148,7 +148,8 @@ provides consistent representations'''
           public_member('variable'),
           member('type')
           ..doc = 'Type for the variable'
-          ..classInit = '"dynamic"',
+          ..type = 'String'
+          ..classInit = 'dynamic',
           member('init')
           ..doc = '''Text used to initialize the variable
 (e.g. 'DateTime(1929, 10, 29)' for <DateTime crashDate = DateTime(1929, 10, 29)>
@@ -199,7 +200,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           doc_member('system'),
           member('root_path')
           ..doc = 'Path to which code is generated'
-          ..classInit = '"/tmp/ebisu_bootstrap"',
+          ..classInit = '/tmp/ebisu_bootstrap',
           member('apps')
           ..doc = 'Apps in the system'
           ..type = 'List<App>'
@@ -296,7 +297,9 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           doc_member('class member'),
           parent_member('class member'),
           member('type')
-          ..doc = 'Type of the member',
+          ..doc = 'Type of the member'
+          ..type = 'String'
+          ..classInit = 'String',
           member('access')
           ..doc = 'Access level supported for this member'
           ..type = 'Access',
