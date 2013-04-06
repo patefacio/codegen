@@ -42,7 +42,7 @@ module Codegen::Dart
                          :init => nil, :ctor => nil, :ctor_opt => nil,
                          :ctor_named => nil, :descr => nil, :final => nil,
                          :map_value_type => nil, :list_value_type => nil,
-                         :ctor_init => nil,
+                         :ctor_init => nil, :json_transient => false
                        })
 
     def initialize(opts={ })
@@ -219,6 +219,10 @@ module Codegen::Dart
                          :no_class_impl => false,
                          :clone => false,
                        })
+
+    def json_members
+      return members.select {|m| not m.json_transient }
+    end
 
     def json_sample(map_rand_range=(3..8))
       output = @@engine.render('json_sample.tmpl', 
