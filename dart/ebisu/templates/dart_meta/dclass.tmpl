@@ -3,7 +3,15 @@ class ${_.className} {
 ${indentBlock(member.define())}
 #< } >
 #< if(_.includeCustom) { >
-
 ${customBlock("class ${_.name}")}
+#< } >
+#< if(_.jsonSupport) { >
+  Map toJson() { 
+    return { 
+#<   for(Member member in _.members.where((m) => !m.jsonTransient)) { >
+    "${member.name}": EBISU_UTILS.toJson(${member.varName}),
+#<   } >
+    };
+  }
 #< } >
 }

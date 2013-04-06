@@ -17,8 +17,22 @@ ${indentBlock(member.define())}
  } 
  if(_.includeCustom) { 
   _buf.add('''
-
 ${customBlock("class ${_.name}")}
+''');
+ } 
+ if(_.jsonSupport) { 
+  _buf.add('''
+  Map toJson() { 
+    return { 
+''');
+   for(Member member in _.members.where((m) => !m.jsonTransient)) { 
+  _buf.add('''
+    "${member.name}": EBISU_UTILS.toJson(${member.varName}),
+''');
+   } 
+  _buf.add('''
+    };
+  }
 ''');
  } 
   _buf.add('''

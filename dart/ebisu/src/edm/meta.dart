@@ -121,7 +121,6 @@ class Variable {
        "doc" : doc,
        "name" : _name,
        "varName" : _varName,
-       "parent" : _parent,
        "type" : type,
        "init" : init,
        "isFinal" : isFinal,
@@ -132,7 +131,7 @@ class Variable {
   }
 
   static Variable fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Variable result = new Variable();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -149,7 +148,6 @@ class Variable {
     doc = jsonMap["doc"];
     _name = jsonMap["name"];
     _varName = jsonMap["varName"];
-    _parent = jsonMap["parent"];
     type = jsonMap["type"];
     init = jsonMap["init"];
     isFinal = jsonMap["isFinal"];
@@ -219,7 +217,6 @@ class Enum {
   Map toJson() { 
     return { 
        "id" : _id,
-       "parent" : _parent,
        "isPublic" : isPublic,
        "name" : _name,
        "enumName" : _enumName,
@@ -228,7 +225,7 @@ class Enum {
   }
 
   static Enum fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Enum result = new Enum();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -242,7 +239,6 @@ class Enum {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
-    _parent = jsonMap["parent"];
     isPublic = jsonMap["isPublic"];
     _name = jsonMap["name"];
     _enumName = jsonMap["enumName"];
@@ -312,14 +308,13 @@ class Part {
        "id" : _id,
        "includeCustom" : includeCustom,
        "name" : _name,
-       "parent" : _parent,
        "classes" : classes,
        "enums" : enums
     };
   }
 
   static Part fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Part result = new Part();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -335,7 +330,6 @@ class Part {
     _id = jsonMap["id"];
     includeCustom = jsonMap["includeCustom"];
     _name = jsonMap["name"];
-    _parent = jsonMap["parent"];
     classes = new List<DClass>();
     jsonMap["classes"].forEach((v) { 
       classes.add(DClass.fromJsonMap(v));
@@ -359,7 +353,7 @@ class Part {
   void generate() {
     Library lib = _parent;
     String partName = _id.snake;
-    String partStubPath = "${ROOT_PATH}/lib/src/${partName}.dart";
+    String partStubPath = "${ROOT_PATH}/lib/src/${lib.name}/${partName}.dart";
     mergeWithFile(META.part(this), partStubPath);
   }
 
@@ -422,7 +416,6 @@ class Library {
   Map toJson() { 
     return { 
        "id" : _id,
-       "parent" : _parent,
        "name" : _name,
        "includeCustom" : includeCustom,
        "doc" : doc,
@@ -433,7 +426,7 @@ class Library {
   }
 
   static Library fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Library result = new Library();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -447,7 +440,6 @@ class Library {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
-    _parent = jsonMap["parent"];
     _name = jsonMap["name"];
     includeCustom = jsonMap["includeCustom"];
     doc = jsonMap["doc"];
@@ -464,6 +456,29 @@ class Library {
 
 
 // custom <library impl>
+
+  static final _standardImports = new Set.from([
+    'async', 'chrome', 'collection', 'core', 'crypto',
+    'html', 'indexed_db', 'io', 'isolate', 'json', 'math',
+    'mirrors', 'scalarlist', 'svg', 'uri', 'utf', 'web_audio',
+    'web_sql'
+  ]);
+
+  static final _standardPackageImports = new Set.from([
+    'args', 'fixnum', 'intl', 'logging', 'matcher', 'meta',
+    'mock', 'scheduled_test', 'serialization',
+    'unittest'
+  ]);
+
+  static String importStatement(String i) {
+    if(_standardImports.contains(i)) {
+      return 'import "dart:$i";';
+    } else if(_standardPackageImports.contains(i)) {
+      return 'import "package:$i";';
+    } else {
+      return 'import $i;';
+    }
+  }
 
   set parent(p) {
     _name = _id.snake;
@@ -520,7 +535,6 @@ class App {
   Map toJson() { 
     return { 
        "id" : _id,
-       "parent" : _parent,
        "libraries" : libraries,
        "imports" : _imports,
        "variables" : variables
@@ -528,7 +542,7 @@ class App {
   }
 
   static App fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     App result = new App();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -542,7 +556,6 @@ class App {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
-    _parent = jsonMap["parent"];
     libraries = new List<Library>();
     jsonMap["libraries"].forEach((v) { 
       libraries.add(Library.fromJsonMap(v));
@@ -608,7 +621,7 @@ class System {
   }
 
   static System fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     System result = new System();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -684,6 +697,11 @@ class DClass {
   bool isPublic;
 
   /**
+     If true adds to/from json
+  */
+  bool jsonSupport;
+
+  /**
      Documentation for the class
   */
   String doc;
@@ -697,6 +715,7 @@ class DClass {
     _id = id,
     includeCustom = true,
     isPublic = true,
+    jsonSupport = false,
     members = [] 
   { 
   }
@@ -707,15 +726,15 @@ class DClass {
        "includeCustom" : includeCustom,
        "name" : _name,
        "className" : _className,
-       "parent" : _parent,
        "isPublic" : isPublic,
+       "jsonSupport" : jsonSupport,
        "doc" : doc,
        "members" : members
     };
   }
 
   static DClass fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     DClass result = new DClass();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -732,8 +751,8 @@ class DClass {
     includeCustom = jsonMap["includeCustom"];
     _name = jsonMap["name"];
     _className = jsonMap["className"];
-    _parent = jsonMap["parent"];
     isPublic = jsonMap["isPublic"];
+    jsonSupport = jsonMap["jsonSupport"];
     doc = jsonMap["doc"];
     members = new List<Member>();
     jsonMap["members"].forEach((v) { 
@@ -788,11 +807,6 @@ class Member {
   /**
      If true the member is public and named appropriately
   */
-  bool isPublic;
-
-  /**
-     If true the member is public and named appropriately
-  */
   Access access;
 
   /**
@@ -832,24 +846,27 @@ class Member {
   String _varName;
   String get varName => _varName;
 
+  /**
+     If true will not be serialized to JSON
+  */
+  bool jsonTransient;
+
   Member(Id id) :
     _id = id,
     type = "String",
-    isPublic = true,
     access = Access.RW,
     ctors = [],
     isFinal = false,
-    isStatic = false 
+    isStatic = false,
+    jsonTransient = false 
   { 
   }
 
   Map toJson() { 
     return { 
        "id" : _id,
-       "parent" : _parent,
        "doc" : doc,
        "type" : type,
-       "isPublic" : isPublic,
        "access" : access,
        "classInit" : classInit,
        "ctorInit" : ctorInit,
@@ -857,12 +874,13 @@ class Member {
        "isFinal" : isFinal,
        "isStatic" : isStatic,
        "name" : _name,
-       "varName" : _varName
+       "varName" : _varName,
+       "jsonTransient" : jsonTransient
     };
   }
 
   static Member fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     Member result = new Member();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -876,10 +894,8 @@ class Member {
 
   void _fromJsonMapImpl(Map jsonMap) {
     _id = jsonMap["id"];
-    _parent = jsonMap["parent"];
     doc = jsonMap["doc"];
     type = jsonMap["type"];
-    isPublic = jsonMap["isPublic"];
     access = Access.fromJson(jsonMap["access"]);
     classInit = jsonMap["classInit"];
     ctorInit = jsonMap["ctorInit"];
@@ -888,10 +904,13 @@ class Member {
     isStatic = jsonMap["isStatic"];
     _name = jsonMap["name"];
     _varName = jsonMap["varName"];
+    jsonTransient = jsonMap["jsonTransient"];
   }
 
 
 // custom <member impl>
+
+  bool get isPublic => access == Access.RW;
 
   set parent(p) {
     _name = id.camel;

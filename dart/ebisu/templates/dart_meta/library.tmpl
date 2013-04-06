@@ -1,6 +1,7 @@
 library ${_.name};
 
 #< for(var i in _.imports) { >
+${Library.importStatement(i)}
 #< } >
 #< for(var part in _.parts) { >
 part "src/${_.name}/${part.name}.dart";

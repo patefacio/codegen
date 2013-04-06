@@ -78,12 +78,12 @@ class #{@c.tname} {
 <?rb i = '$'+'{_i_}' ?>
   Map toJson() { 
     return { 
-      #{@c.members.map {|m| %Q{ "#{m.name}" : #{m.json_out}}}.join(','+NL+'      ')}
+      #{@c.json_members.map {|m| %Q{ "#{m.name}" : #{m.json_out}}}.join(','+NL+'      ')}
     };
   }
 
   static #{@c.name} fromJson(String json) {
-    Map jsonMap = parse(json);
+    Map jsonMap = JSON.parse(json);
     #{@c.name} result = new #{@c.name}();
     result._fromJsonMapImpl(jsonMap);
     return result;
@@ -96,7 +96,7 @@ class #{@c.tname} {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-<?rb @c.members.each do |m| ?>
+<?rb @c.json_members.each do |m| ?>
 <?rb   if val_type = m.map_value_type ?>
 <?rb     if @c.class_map.has_key? val_type ?>
     jsonMap["#{m.name}"].forEach((k,v) { 
@@ -129,3 +129,4 @@ class #{@c.tname} {
 #{Codegen.protect_block("#{@c.id} impl")}
 <?rb end ?>
 }
+

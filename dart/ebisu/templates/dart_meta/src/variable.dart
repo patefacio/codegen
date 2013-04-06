@@ -14,11 +14,11 @@ String variable([dynamic _]) {
  } 
  if(_.init == null) { 
   _buf.add('''
-${_.type} ${_.varName};
+${_.isFinal? 'final ':''}${_.type} ${_.varName};
 ''');
  } else { 
   _buf.add('''
-${_.type} ${_.varName} = ${_.init};
+${_.isFinal? 'final ':''}${_.type} ${_.varName} = ${_.init};
 ''');
  } 
   return _buf.join();

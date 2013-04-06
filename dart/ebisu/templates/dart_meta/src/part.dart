@@ -9,18 +9,17 @@ String part([dynamic _]) {
 
   _buf.add('''
 part of ${_.parent.name};
-
 ''');
  for(var e in _.enums) { 
   _buf.add('''
 
-${e.define()}
+${chomp(e.define())}
 ''');
  } 
  for(var c in _.classes) { 
   _buf.add('''
 
-${c.define()}
+${chomp(c.define())}
 ''');
  } 
  if(_.includeCustom) { 

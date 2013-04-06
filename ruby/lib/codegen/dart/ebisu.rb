@@ -15,6 +15,7 @@ lib = Lib.new({
                 :imports =>
                 [
                  :io,
+                 'package:pathos/path.dart as path',
                 ],
                 :public_typedefs =>
                 [
@@ -196,6 +197,7 @@ lib = Lib.new({
                 :imports =>
                 [
                  :io,
+                 :json,
                  'ebisu.dart',
                  'ebisu_id.dart',
                  'templates/dart_meta.dart as META',
@@ -260,6 +262,7 @@ lib = Lib.new({
                        { 
                          :id => :parent,
                          :type => 'dynamic',
+                         :json_transient => true,
                          :access => :ro,
                        },
                        { 
@@ -323,6 +326,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -384,6 +388,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -420,6 +425,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -484,6 +490,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -575,6 +582,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -584,6 +592,13 @@ lib = Lib.new({
                          :type => 'bool',
                          :public => true,
                          :ctor_init => true,
+                       },
+                       { 
+                         :id => :json_support,
+                         :descr => "If true adds to/from json",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => false,
                        },
                        { 
                          :id => :doc,
@@ -617,6 +632,7 @@ lib = Lib.new({
                        },
                        { 
                          :id => :parent,
+                         :json_transient => true,
                          :type => 'dynamic',
                          :access => :ro,
                        },
@@ -632,13 +648,6 @@ lib = Lib.new({
                          :public => true,
                          :type => 'String',
                          :ctor_init => '"String"',
-                       },
-                       { 
-                         :id => :is_public,
-                         :descr => "If true the member is public and named appropriately",
-                         :public => true,
-                         :type => 'bool',
-                         :ctor_init => true,
                        },
                        { 
                          :id => :access,
@@ -691,6 +700,13 @@ lib = Lib.new({
                          :descr => "Name of variable for the member - varies depending on public/private",
                          :type => 'String',
                          :access => :ro,
+                       },
+                       { 
+                         :id => :json_transient,
+                         :descr => "If true will not be serialized to JSON",
+                         :type => 'bool',
+                         :public => true,
+                         :ctor_init => false,
                        },
                       ]
                     },
