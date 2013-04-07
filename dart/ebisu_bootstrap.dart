@@ -193,6 +193,25 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..doc = "Name of the enum class generated with access prefix"
           ..access = Access.RO,
         ],
+        dclass('pub_dependency')
+        ..doc = 'A dependency of the system'
+        ..members = [
+          member('name')
+          ..doc = 'Name of dependency',
+          member('version')
+          ..doc = 'Required version for this dependency'
+        ],
+        dclass('pub_spec')
+        ..doc = 'Information for the pubspec of the system'
+        ..members = [
+          id_member('pub spec'),
+          parent_member('pub spec'),
+          member('name')
+          ..doc = "Name of the project described in spec - if not set, id of system is used to generate"
+          ..access = Access.RO,
+          member('dependencies')
+          ..type = 'List<PubDependency>'
+        ],
         dclass('system')
         ..doc = 'Defines a dart system (collection of libraries and apps)'
         ..members = [
@@ -208,7 +227,10 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           member('libraries')
           ..doc = 'Libraries in the system'
           ..type = 'List<Library>'
-          ..classInit = '[]'
+          ..classInit = '[]',
+          member('pub_spec')
+          ..doc = 'Information for the pubspec'
+          ..type = 'PubSpec'
         ],
         dclass('app')
         ..doc = 'Defines a dart application'
