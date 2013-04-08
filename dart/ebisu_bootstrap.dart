@@ -219,7 +219,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           doc_member('system'),
           member('root_path')
           ..doc = 'Path to which code is generated'
-          ..classInit = '/tmp/ebisu_bootstrap',
+          ..classInit = '/home/dbdavidson/ebisu_bootstrap/',
           member('apps')
           ..doc = 'Apps in the system'
           ..type = 'List<App>'
@@ -324,6 +324,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..classInit = 'String',
           member('access')
           ..doc = 'Access level supported for this member'
+          ..classInit = 'Access.RW'
           ..type = 'Access',
           member('class_init')
           ..doc = "If provided the member will be initialized to this text in place of declaration of class",
@@ -360,6 +361,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
     ];
 
   System ebisu = system('ebisu')
+    ..pubSpec = pubspec('ebisu')
     ..apps = []
     ..libraries = [
       library('ebisu')

@@ -7,6 +7,11 @@ String enum([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
+ if(_.doc != null) { 
+  _buf.add('''
+${blockComment(_.doc)}
+''');
+ } 
   _buf.add('''
 class ${_.enumName} { 
 ''');
@@ -43,7 +48,7 @@ class ${_.enumName} {
 ''');
  for(var value in _.values) { 
   _buf.add('''
-      case return "${value.shout}": ${value.shout};
+      case "${value.shout}":  return ${value.shout};
 ''');
  } 
   _buf.add('''

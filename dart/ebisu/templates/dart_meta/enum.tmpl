@@ -1,3 +1,6 @@
+#< if(_.doc != null) { >
+${blockComment(_.doc)}
+#< } >
 class ${_.enumName} { 
 #< int i = 0; >
 #< for(var value in _.values) { >
@@ -23,7 +26,7 @@ class ${_.enumName} {
   static ${_.enumName} fromString(String s) { 
     switch(s) { 
 #< for(var value in _.values) { >
-      case return "${value.shout}": ${value.shout};
+      case "${value.shout}":  return ${value.shout};
 #< } >
     }
   }

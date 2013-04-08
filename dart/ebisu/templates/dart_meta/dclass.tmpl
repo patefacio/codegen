@@ -1,3 +1,6 @@
+#< if(_.doc != null) { >
+${blockComment(_.doc)}
+#< } >
 class ${_.className} { 
 #< for(var member in _.members) { >
 ${indentBlock(member.define())}

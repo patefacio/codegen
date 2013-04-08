@@ -7,6 +7,11 @@ String dclass([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
+ if(_.doc != null) { 
+  _buf.add('''
+${blockComment(_.doc)}
+''');
+ } 
   _buf.add('''
 class ${_.className} { 
 ''');
