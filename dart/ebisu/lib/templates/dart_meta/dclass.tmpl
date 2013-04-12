@@ -1,0 +1,34 @@
+#< if(_.doc != null) { >
+${docComment(_.doc)}
+#< } >
+#< if(null != _.extend) { >
+class ${_.className} extends ${_.extend} { 
+#< } else if(null != _.mixin) { >
+class ${_.className} extends ${_.mixin.source} with ${_.mixin.interfaces.join(',')} { 
+#< } else { >
+class ${_.className} { 
+#< } >
+#< _.ctors.forEach((ctorName, ctor) { >
+${indentBlock(ctor.ctorText)}
+#< }); >
+#< for(var member in _.members) { >
+${indentBlock(member.define())}
+#< } >
+#< if(_.includeCustom) { >
+${customBlock("class ${_.name}")}
+#< } >
+#< if(_.jsonSupport) { >
+  Map toJson() { 
+    return { 
+#<   for(Member member in _.members.where((m) => !m.jsonTransient)) { >
+    "${member.name}": EBISU_UTILS.toJson(${member.varName}),
+#<   } >
+#< if(null != _.extend) { >
+    "${_.extend}": super.toJson(),
+#< } else if(null != _.mixin) { >
+    // TODO: "${_.className}": super.toJson(),
+#< } >
+    };
+  }
+#< } >
+}

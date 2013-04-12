@@ -1,0 +1,7 @@
+name: ${_.name}
+description: ${_.doc}
+dependencies:
+#< for(PubDependency pbdep in _.dependencies) { >
+  name: ${pbdep.name} ${pbdep.version}
+#< } >
+// Are comments allowed here in pubspec
