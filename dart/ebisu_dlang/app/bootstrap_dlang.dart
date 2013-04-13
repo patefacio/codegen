@@ -277,7 +277,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             ..type = 'bool'
             ..classInit = 'true',
           ],
-          dclass('aarr_alias')
+          dclass('a_arr_alias')
           ..doc = 'Declaration for an alias to an associative array'
           ..members = [
             id_member('array alias'),

@@ -7,14 +7,14 @@ String decls([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
- for(var alias in _.aliases) { 
-  _buf.add('''
-${alias.id}
-''');
- } 
  for(var mixin in _.mixins) { 
   _buf.add('''
 ${mixin.decl};
+''');
+ } 
+ for(var alias in _.aliases) { 
+  _buf.add('''
+${alias.decl};
 ''');
  } 
  for(var enum in _.enums) { 

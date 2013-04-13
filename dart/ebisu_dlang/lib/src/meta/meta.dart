@@ -570,6 +570,10 @@ class Alias {
   
 // custom <class Alias>
 
+  String get decl {
+    return "alias ${aliased} ${name}";
+  }
+
   void finalize(dynamic parent) {
     _name = _id.capCamel;
   }
@@ -620,8 +624,17 @@ class ArrAlias {
   
 // custom <class ArrAlias>
 
+  String get decl {
+    if(immutable) {
+      return "alias immutable(${aliased})[] ${name}Arr";
+    } else {
+      return "alias ${aliased}[] ${name}Arr";
+    }
+  }
+
   void finalize(dynamic parent) {
     _name = _id.capCamel;
+    aliased = _name;
   }
 
 // end <class ArrAlias>
@@ -639,8 +652,8 @@ class ArrAlias {
 }
 
 /// Declaration for an alias to an associative array
-class AarrAlias { 
-  AarrAlias(
+class AArrAlias { 
+  AArrAlias(
     this._id
   ) {
   }
@@ -665,8 +678,17 @@ class AarrAlias {
   /// Type of the value
   String value;
   
-// custom <class AarrAlias>
-// end <class AarrAlias>
+// custom <class AArrAlias>
+
+  String get decl {
+    return "alias ${value}[${key}] ${name}Map";
+  }
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+  }
+
+// end <class AArrAlias>
 
   Map toJson() { 
     return { 
@@ -1047,7 +1069,11 @@ class Member {
     if(null != doc) {
       result += (blockComment(doc) + '\n');
     }
-    result += '$type $_vName';
+    if(null != init) {
+      result += '${type} ${_vName} = ${init}';
+    } else {
+      result += '${type} ${_vName}';
+    }
     return result;
   }
 
@@ -1079,6 +1105,8 @@ Struct struct(String _id) => new Struct(id(_id));
 Member member(String _id) => new Member(id(_id));
 Alias alias(String _id) => new Alias(id(_id));
 ArrAlias arrAlias(String _id) => new ArrAlias(id(_id));
+AArrAlias aArrAlias(String _id, String key, String value) => 
+  new AArrAlias(id(_id))..key = key..value = value;
 Constant constant(String _id) => new Constant(id(_id));
 Union union(String _id) => new Union(id(_id));
 Enum enum(String _id) => new Enum(id(_id));
