@@ -206,6 +206,18 @@ class Package {
   List<Package> packages;
   
 // custom <class Package>
+
+  void finalize(Package parent) {
+    if(modules != null) modules.forEach((module) => module.finalize(this)); 
+    if(packages != null) packages.forEach((pkg) => pkg.finalize(this)); 
+    _parent = parent;
+  }
+
+  void generate() {
+    finalize(null);
+    modules.forEach((module) => module.generate());
+  }
+
 // end <class Package>
 
   Map toJson() { 
@@ -248,6 +260,19 @@ class Module extends Decls {
   List<String> debugImports;
   
 // custom <class Module>
+
+  String get name => _id.snake;
+
+  void finalize(Package parent) {
+    finalizeDecls(this);
+    _parent = parent;
+  }
+
+  void generate() {
+    //print(META.decls(this));
+    print(decls());
+  }
+
 // end <class Module>
 
   Map toJson() { 
@@ -274,6 +299,10 @@ class EnumValue {
   /// Id for this enum value
   Id get id => _id;
   
+  String _name;
+  /// The generated name for enum value
+  String get name => _name;
+  
   /// Documentation for this enum value
   String doc;
   
@@ -281,13 +310,64 @@ class EnumValue {
   String value;
   
 // custom <class EnumValue>
+
+  void finalize() {
+    _name = _id.capCamel;
+  }
+
+  String get decl {
+    String result = (null != doc)? (blockComment(doc)+'\n') : '';
+    if(null == value) {
+      result += '$name';
+    } else {
+      result += '$name = $value';
+    }
+    return result;
+  }
+
 // end <class EnumValue>
 
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
+    "name": EBISU_UTILS.toJson(_name),
     "doc": EBISU_UTILS.toJson(doc),
     "value": EBISU_UTILS.toJson(value),
+    };
+  }
+}
+
+/// A template mixin
+class TMixin { 
+  TMixin(
+    this.name
+  ) {
+  }
+  
+  /// Textual name of template mixin
+  String name;
+  
+  /// D langauge access for this template mixin
+  DAccess dAccess = DAccess.PUBLIC;
+  
+  /// List of template args
+  List<String> tArgs = [];
+  
+// custom <class TMixin>
+
+  String get argsDecl => 
+    tArgs.length>1 ? "(${tArgs.join(',')})" : 
+    (tArgs.length==1 ? tArgs[0] : '');
+
+  String get decl => 'mixin $name!$argsDecl';
+
+// end <class TMixin>
+
+  Map toJson() { 
+    return { 
+    "name": EBISU_UTILS.toJson(name),
+    "dAccess": EBISU_UTILS.toJson(dAccess),
+    "tArgs": EBISU_UTILS.toJson(tArgs),
     };
   }
 }
@@ -320,6 +400,17 @@ class Enum {
   List<EnumValue> values;
   
 // custom <class Enum>
+
+  String define() {
+    return META.enum(this);
+  }
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+    values.forEach((v) => v.finalize());
+    _parent = parent;
+  }
+
 // end <class Enum>
 
   Map toJson() { 
@@ -371,6 +462,16 @@ class Constant {
   String init;
   
 // custom <class Constant>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+    _parent = parent;
+  }
+
+  String define() {
+    return META.constant(this);
+  }
+
 // end <class Constant>
 
   Map toJson() { 
@@ -416,6 +517,18 @@ class Union extends Decls {
   List<Member> members = [];
   
 // custom <class Union>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+    _parent = parent;
+    finalizeDecls(this);
+    members.forEach((member) => member.finalize(this));
+  }
+
+  String define() {
+    return META.union(this);
+  }
+
 // end <class Union>
 
   Map toJson() { 
@@ -456,6 +569,11 @@ class Alias {
   String aliased;
   
 // custom <class Alias>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+  }
+
 // end <class Alias>
 
   Map toJson() { 
@@ -501,6 +619,11 @@ class ArrAlias {
   bool immutable = true;
   
 // custom <class ArrAlias>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+  }
+
 // end <class ArrAlias>
 
   Map toJson() { 
@@ -581,6 +704,12 @@ class TemplateParm {
   String init;
   
 // custom <class TemplateParm>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+    _parent = parent;
+  }
+
 // end <class TemplateParm>
 
   Map toJson() { 
@@ -646,6 +775,7 @@ class CodeBlock {
   String code;
   
 // custom <class CodeBlock>
+
 // end <class CodeBlock>
 
   Map toJson() { 
@@ -658,6 +788,8 @@ class CodeBlock {
 
 /// Container for declarations
 class Decls { 
+  List mixins = [];
+  
   List<Alias> aliases = [];
   
   List<Constant> constants = [];
@@ -672,6 +804,8 @@ class Decls {
   
   List<CodeBlock> codeBlocks = [];
   
+  List<Member> members = [];
+  
   bool privateSection = false;
   
   bool publicSection = false;
@@ -679,10 +813,90 @@ class Decls {
   bool unitTest = false;
   
 // custom <class Decls>
+
+  bool empty() {
+    return (
+        mixins.length + aliases.length + constants.length+
+        structs.length + enums.length + unions.length +
+        templates.length + codeBlocks.length + members.length)==0;
+  }
+
+  Decls filter(DAccess access) {
+    Decls result = new Decls();
+    result.mixins = mixins.where((e) => e.dAccess == access).toList();
+    result.aliases = aliases.where((e) => e.dAccess == access).toList();
+    result.constants = constants.where((e) => e.dAccess == access).toList();
+    result.structs = structs.where((e) => e.dAccess == access).toList();
+    result.enums = enums.where((e) => e.dAccess == access).toList();
+    result.unions = unions.where((e) => e.dAccess == access).toList();
+    result.templates = templates.where((e) => e.dAccess == access).toList();
+    result.codeBlocks = codeBlocks.where((e) => e.dAccess == access).toList();
+    result.members = members.where((e) => e.dAccess == access).toList();
+    return result;
+  }
+
+  void finalizeDecls(dynamic parent) {
+    // mixins don't require finalize
+    aliases.forEach((alias) => alias.finalize(this));
+    constants.forEach((constant) => constant.finalize(this));
+    structs.forEach((struct) => struct.finalize(this));
+    enums.forEach((enum) => enum.finalize(this));
+    unions.forEach((union) => union.finalize(this));
+    templates.forEach((template) => template.finalize(this));
+    // codeBlocks don't require finalize
+    // members are finalized by their "owner"
+  }
+
+  String decls() {
+    String publicCustomBlock = 
+      (publicSection)? "\n${customBlock('public $name')}\n" : '';
+    String privateCustomBlock = 
+      (privateSection)? "\n${customBlock('private $name')}\n" : '';
+
+    List<String> result = [ META.decls(this.filter(DAccess.PUBLIC)), publicCustomBlock ];
+    Decls d = this.filter(DAccess.EXPORT);
+    if(!d.empty()) {
+      result.add('''
+export {
+${indentBlock(chomp(META.decls(d)))}
+}
+''');
+    }
+    d = this.filter(DAccess.PACKAGE);
+    if(!d.empty()) {
+      result.add('''
+package {
+${indentBlock(chomp(META.decls(d)))}
+}
+''');
+    }
+
+    d = this.filter(DAccess.PROTECTED);
+    if(!d.empty()) {
+      result.add('''
+protected {
+${indentBlock(chomp(META.decls(d)))}
+}
+''');
+    }
+
+    d = this.filter(DAccess.PRIVATE);
+    if(!d.empty()) {
+      result.add('''
+private {
+${indentBlock(chomp(META.decls(d)))}
+$privateCustomBlock}
+''');
+    }
+
+    return result.join('');
+  }
+
 // end <class Decls>
 
   Map toJson() { 
     return { 
+    "mixins": EBISU_UTILS.toJson(mixins),
     "aliases": EBISU_UTILS.toJson(aliases),
     "constants": EBISU_UTILS.toJson(constants),
     "structs": EBISU_UTILS.toJson(structs),
@@ -690,6 +904,7 @@ class Decls {
     "unions": EBISU_UTILS.toJson(unions),
     "templates": EBISU_UTILS.toJson(templates),
     "codeBlocks": EBISU_UTILS.toJson(codeBlocks),
+    "members": EBISU_UTILS.toJson(members),
     "privateSection": EBISU_UTILS.toJson(privateSection),
     "publicSection": EBISU_UTILS.toJson(publicSection),
     "unitTest": EBISU_UTILS.toJson(unitTest),
@@ -726,6 +941,18 @@ class Struct extends Decls {
   List<Member> members = [];
   
 // custom <class Struct>
+
+  void finalize(dynamic parent) {
+    _name = _id.capCamel;
+    _parent = parent;
+    finalizeDecls(this);
+    members.forEach((member) => member.finalize(this));
+  }
+
+  String define() {
+    return META.struct(this);
+  }
+
 // end <class Struct>
 
   Map toJson() { 
@@ -763,6 +990,13 @@ class Member {
   /// The generated name for D member
   String get name => _name;
   
+  /// D langauge access for this D struct
+  DAccess dAccess = DAccess.PUBLIC;
+  
+  String _vName;
+  /// Name of member as stored in struct/class/union
+  String get vName => _vName;
+  
   /// D developer access for this D member
   Access access = Access.IA;
   
@@ -784,6 +1018,39 @@ class Member {
   bool ctorDefaulted = false;
   
 // custom <class Member>
+
+  void finalize(dynamic parent) {
+    if(_parent != null) {
+      throw new StateError("Finalize must be called only once on $this => $id");
+    }
+    _name = _id.camel;
+    _parent = parent;
+    if(access == Access.RO) {
+      _vName = '_$_name';
+      dAccess = DAccess.PRIVATE;
+      parent.mixins.add(new TMixin('ReadOnly')..tArgs = [ _vName ]);
+    } else {
+      if(access == Access.RW) {
+        dAccess = DAccess.PUBLIC;
+      } else {
+        dAccess = DAccess.PRIVATE;
+      }
+      _vName = _name;
+    }
+    if(null == type) {
+      type = _id.capCamel;
+    }
+  }
+
+  String get decl {
+    String result = '';
+    if(null != doc) {
+      result += (blockComment(doc) + '\n');
+    }
+    result += '$type $_vName';
+    return result;
+  }
+
 // end <class Member>
 
   Map toJson() { 
@@ -792,6 +1059,8 @@ class Member {
     "doc": EBISU_UTILS.toJson(doc),
     "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
+    "dAccess": EBISU_UTILS.toJson(dAccess),
+    "vName": EBISU_UTILS.toJson(_vName),
     "access": EBISU_UTILS.toJson(access),
     "type": EBISU_UTILS.toJson(type),
     "init": EBISU_UTILS.toJson(init),
@@ -814,6 +1083,7 @@ Constant constant(String _id) => new Constant(id(_id));
 Union union(String _id) => new Union(id(_id));
 Enum enum(String _id) => new Enum(id(_id));
 EnumValue ev(String _id) => new EnumValue(id(_id));
+TMixin tmixin(String mixinName) => new TMixin(mixinName);
 
 Alias arr(String type) {
   Id aliasId = id(type+'_arr');

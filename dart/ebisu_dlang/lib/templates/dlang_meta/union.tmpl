@@ -1,0 +1,5 @@
+union ${_.name} { 
+#< for(var member in _.members) { >
+${indentBlock(member.decl)};
+#< } >
+}

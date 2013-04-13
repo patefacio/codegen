@@ -1,0 +1,6 @@
+#< if(null != _.doc) { >
+${blockComment(_.doc)}
+#< } >
+struct ${_.name} { 
+${chomp(indentBlock(_.decls()))}
+}

@@ -246,7 +246,7 @@ class System {
   String doc;
   
   /// Path to which code is generated
-  String rootPath = "/home/dbdavidson/ebisu_bootstrap";
+  String rootPath;
   
   /// Apps in the system
   List<App> apps = [];

@@ -5,15 +5,17 @@ import "package:ebisu/ebisu_id.dart";
 import "package:ebisu/ebisu_dart_meta.dart";
 import "package:ebisu/ebisu_compiler.dart";
 
+String _topDir;
+
 void main() {
 
   Options options = new Options();
   String here = path.absolute(options.script);
   bool noCompile = options.arguments.contains('--no_compile');
   bool compileOnly = options.arguments.contains('--compile_only');
-  String topDir = path.dirname(path.dirname(here));
+  _topDir = path.dirname(path.dirname(here));
   String templateFolderPath = 
-    path.join(topDir, 'lib', 'templates', 'dart_meta');
+    path.join(_topDir, 'lib', 'templates', 'dart_meta');
   if(! (new Directory(templateFolderPath).existsSync())) {
     throw new StateError(
         "Could not find ebisu templates in $templateFolderPath");
@@ -260,8 +262,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           id_member('system'),
           doc_member('system'),
           member('root_path')
-          ..doc = 'Path to which code is generated'
-          ..classInit = '/home/dbdavidson/ebisu_bootstrap',
+          ..doc = 'Path to which code is generated',
           member('apps')
           ..doc = 'Apps in the system'
           ..type = 'List<App>'
@@ -458,6 +459,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
     ];
 
   System ebisu = system('ebisu')
+    ..rootPath = _topDir
     ..pubSpec = (pubspec('ebisu')
         ..doc = 'A library that supports code generation of dart and others'
         ..dependencies = [

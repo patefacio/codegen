@@ -1,0 +1,6 @@
+#< if(null != _.doc) { >
+${blockComment(_.doc)}
+#< } >
+enum ${_.name} { 
+${indentBlock(_.values.map((v) => v.decl).join(',\n'))}
+}

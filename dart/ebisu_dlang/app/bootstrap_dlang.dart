@@ -5,17 +5,19 @@ import "package:ebisu/ebisu_id.dart";
 import "package:ebisu/ebisu_compiler.dart";
 import "package:ebisu/ebisu_dart_meta.dart";
 
+String _topDir;
+
 void main() {
   Options options = new Options();
   String here = path.absolute(options.script);
   bool noCompile = options.arguments.contains('--no_compile');
   bool compileOnly = options.arguments.contains('--compile_only');
-  String topDir = path.dirname(path.dirname(here));
+  _topDir = path.dirname(path.dirname(here));
   String templateFolderPath = 
-    path.join(topDir, 'lib', 'templates', 'dlang_meta');
+    path.join(_topDir, 'lib', 'templates', 'dlang_meta');
   if(! (new Directory(templateFolderPath).existsSync())) {
     throw new StateError(
-        "Could not find ebisu templates in $templateFolderPath");
+        "Could not find ebisu dlang templates in $templateFolderPath");
   }
 
   if(!noCompile) {
@@ -85,7 +87,7 @@ generate() {
     ..classInit = 'Access.IA';
 
   System ebisu = system('ebisu_dlang')
-    ..rootPath = '/home/dbdavidson/ebisu_dlang'
+    ..rootPath = '$_topDir'
     ..pubSpec = (pubspec('ebisu_dlang')
         ..doc = 'A library that supports code generation of dart and others'
         ..dependencies = [
@@ -194,9 +196,22 @@ generate() {
           ..doc = 'An entry in an enum'
           ..members = [
             id_member('enum value'),
+            name_member('enum value'),
             doc_member('enum value'),
             member('value')
             ..doc = 'Set value of the enum value only if required'
+          ],
+          dclass('t_mixin')
+          ..doc = 'A template mixin'
+          ..members = [
+            member('name')
+            ..doc = 'Textual name of template mixin'
+            ..ctors = [''],
+            d_access_member('template mixin'),
+            member('t_args')
+            ..doc = 'List of template args'
+            ..type = 'List<String>'
+            ..classInit = '[]'
           ],
           dclass('enum')
           ..members = [
@@ -301,6 +316,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
           dclass('decls')
           ..doc = 'Container for declarations'
           ..members = [
+            member('mixins')..type = 'List'..classInit = '[]',
             member('aliases')..type = 'List<Alias>'..classInit = '[]',
             member('constants')..type = 'List<Constant>'..classInit = '[]',
             member('structs')..type = 'List<Struct>'..classInit = '[]',
@@ -308,6 +324,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('unions')..type = 'List<Union>'..classInit = '[]',
             member('templates')..type = 'List<Template>'..classInit = '[]',
             member('code_blocks')..type = 'List<CodeBlock>'..classInit = '[]',
+            member('members')..type = 'List<Member>'..classInit = '[]',
             member('private_section')..type = 'bool'..classInit = 'false',
             member('public_section')..type = 'bool'..classInit = 'false',
             member('unit_test')..type = 'bool'..classInit = 'false',
@@ -333,6 +350,10 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             doc_member('D member'),
             parent_member('D member'),
             name_member('D member'),
+            d_access_member('D struct'),
+            member('v_name')
+            ..doc = 'Name of member as stored in struct/class/union'
+            ..access = Access.RO,
             access_member('D member'),
             member('type')..doc = 'The type for this member'..type = 'dynamic',
             member('init')..doc = 'What to initialize member to'..type = 'dynamic',

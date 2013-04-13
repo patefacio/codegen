@@ -36,7 +36,7 @@ Iterable asContexts(Iterable items) {
 }
 
 /// Return a new string with [text] wrapped in `/*...*/` comment block
-String blockComment(String text, [String indent = '  ']) {
+String blockComment(String text, [String indent = '   ']) {
   String guts = text.split('\n').join("\n$indent");
   return "/**\n$indent$guts\n*/";
 }
