@@ -57,15 +57,25 @@ class Id {
 
   String toString() => camel;
 
-
-// end <class Id>
-
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "words": EBISU_UTILS.toJson(_words),
     };
   }
+
+  static Id fromJson(String json) {
+    Map jsonMap = JSON.parse(json);
+    return fromJsonMap(jsonMap);
+  }
+
+  static Id fromJsonMap(Map jsonMap) {
+    return new Id(jsonMap["id"]);
+  }
+
+
+// end <class Id>
+
 }
 // custom <part id>
 // end <part id>
