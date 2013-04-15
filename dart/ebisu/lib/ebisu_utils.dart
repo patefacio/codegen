@@ -7,7 +7,6 @@ main() {
 // custom <library ebisu_utils>
 
 bool _toJsonRequired(final object) {
-
   if (object is num) {
     return false;
   } else if (object is bool) {
@@ -25,8 +24,31 @@ bool _toJsonRequired(final object) {
   return true;
 }
 
-dynamic toJson(dynamic obj) {
+dynamic toJson(final dynamic obj) {
   return _toJsonRequired(obj) ? obj.toJson() : obj;
+}
+
+dynamic fromJson(final dynamic obj) {
+  dynamic result;
+  if(obj is num || obj is bool || obj is String || obj == null) {
+    result = obj;
+  } else if(obj is List) {
+    result = [];
+    obj.forEach((e) => result.add(fromJson(e)));
+  } else {
+    if(obj is Map) {
+      try {
+        result = obj.fromJson(obj);
+      } catch(e) {
+        print("Caught ${e}: trying another fromJson");
+        result = {};
+        obj.forEach((k,v) => result[k] = fromJson(v));
+      }
+    } else {
+      throw new UnsupportedError("Type ${obj.runtimeType} not supported by fromJson");
+    }
+  }
+  return result;
 }
 
 // end <library ebisu_utils>
