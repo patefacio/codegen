@@ -46,6 +46,11 @@ class Access {
 }
 
 class Variable { 
+  Variable(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this variable
   Id get id => _id;
@@ -88,8 +93,6 @@ class Variable {
   
 // custom <class Variable>
 
-  Variable(Id id) : _id = id {}
-
   void set parent(p) {
     _name = id.camel;
     _varName = isPublic? _name : "_${_name}";
@@ -101,6 +104,7 @@ class Variable {
   }
 
 // end <class Variable>
+
 
   Map toJson() { 
     return { 
@@ -122,6 +126,11 @@ class Variable {
 /// See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
 /// 
 class Enum { 
+  Enum(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this enum
   Id get id => _id;
@@ -150,8 +159,6 @@ class Enum {
   
 // custom <class Enum>
 
-  Enum(Id id) : _id = id {}
-
   set parent(p) {
     _name = _id.capCamel;
     _enumName = isPublic? _name : "_$_name";
@@ -163,6 +170,7 @@ class Enum {
   }
 
 // end <class Enum>
+
 
   Map toJson() { 
     return { 
@@ -191,6 +199,7 @@ class PubDependency {
 
 // end <class PubDependency>
 
+
   Map toJson() { 
     return { 
     "name": EBISU_UTILS.toJson(name),
@@ -201,6 +210,11 @@ class PubDependency {
 
 /// Information for the pubspec of the system
 class PubSpec { 
+  PubSpec(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this pub spec
   Id get id => _id;
@@ -220,11 +234,13 @@ class PubSpec {
   
 // custom <class PubSpec>
 
-  PubSpec(Id id) : _id = id { 
-    _name = _id.camel;
+  set parent(p) {
+    _name = _id.capCamel;
+    _parent = p;
   }
 
 // end <class PubSpec>
+
 
   Map toJson() { 
     return { 
@@ -238,7 +254,7 @@ class PubSpec {
 
 /// Defines a dart system (collection of libraries and apps)
 class System { 
-  final Id _id;
+  Id _id;
   /// Id for this system
   Id get id => _id;
   
@@ -257,8 +273,10 @@ class System {
   /// Information for the pubspec
   PubSpec pubSpec;
   
+  /// Map of all classes that have jsonSupport
+  Map<String,DClass> jsonableClasses = {};
+  
 // custom <class System>
-
 
   /// Create system from the id
   System(Id id) : _id = id, pubSpec = new PubSpec(id) {}
@@ -267,8 +285,20 @@ class System {
   void finalize() {
     libraries.forEach((l) => l.parent = this);
     apps.forEach((a) => a.parent = this);
-    pubSpec._parent = this;
+    pubSpec.parent = this;
+
+    libraries.forEach((library) {
+      library.parts.forEach((part) {
+        part.classes.forEach((dclass) {
+          if(dclass.jsonSupport) {
+            jsonableClasses[dclass.name] = dclass;
+          }
+        });
+      });
+    });
   }
+
+  bool isClassJsonable(String className) => jsonableClasses.containsKey(className);
 
   /// Generate the code
   void generate() {
@@ -279,6 +309,7 @@ class System {
 
 // end <class System>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
@@ -287,12 +318,18 @@ class System {
     "apps": EBISU_UTILS.toJson(apps),
     "libraries": EBISU_UTILS.toJson(libraries),
     "pubSpec": EBISU_UTILS.toJson(pubSpec),
+    "jsonableClasses": EBISU_UTILS.toJson(jsonableClasses),
     };
   }
 }
 
 /// Defines a dart application
 class App { 
+  App(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this app
   Id get id => _id;
@@ -318,8 +355,6 @@ class App {
   
 // custom <class App>
 
-  App(Id id) : _id = id {}
-
   set parent(p) {
     libraries.forEach((l) => l.parent = this);
     variables.forEach((v) => v.parent = this);
@@ -331,6 +366,7 @@ class App {
   }
 
 // end <class App>
+
 
   Map toJson() { 
     return { 
@@ -346,6 +382,11 @@ class App {
 
 /// Defines a dart library - a collection of parts
 class Library { 
+  Library(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this library
   Id get id => _id;
@@ -375,8 +416,6 @@ class Library {
   
 // custom <class Library>
 
-  Library(Id id) : _id = id {}
-
   set parent(p) {
     _name = _id.snake;
     parts.forEach((part) => part.parent = this);
@@ -389,6 +428,8 @@ class Library {
     mergeWithFile(META.library(this), libStubPath);
     parts.forEach((part) => part.generate());
   }
+
+  bool isClassJsonable(String className) => _parent.isClassJsonable(className);
 
   static final _standardImports = new Set.from([
     'async', 'chrome', 'collection', 'core', 'crypto',
@@ -417,6 +458,7 @@ class Library {
 
 // end <class Library>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
@@ -432,6 +474,11 @@ class Library {
 
 /// Defines a dart part - as in 'part of' source file
 class Part { 
+  Part(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this part
   Id get id => _id;
@@ -458,8 +505,6 @@ class Part {
   
 // custom <class Part>
 
-  Part(Id id) : _id = id {}
-
   set parent(p) {
     _name = _id.snake;
     classes.forEach((dc) => dc.parent = this);
@@ -474,7 +519,10 @@ class Part {
     mergeWithFile(META.part(this), partStubPath);
   }
 
+  bool isClassJsonable(String className) => _parent.isClassJsonable(className);
+
 // end <class Part>
+
 
   Map toJson() { 
     return { 
@@ -505,6 +553,7 @@ class Mixin {
 // custom <class Mixin>
 // end <class Mixin>
 
+
   Map toJson() { 
     return { 
     "source": EBISU_UTILS.toJson(source),
@@ -515,6 +564,11 @@ class Mixin {
 
 /// Metadata associated with a Dart class
 class DClass { 
+  DClass(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this Dart class
   Id get id => _id;
@@ -546,6 +600,9 @@ class DClass {
   /// List of ctors of this class
   Map<String,Ctor> get ctors => _ctors;
   
+  /// If true, generate toJson
+  bool toJsonSupport = false;
+  
   /// If true, generate toJson/fromJson on all members that are not jsonTransient
   bool jsonSupport = false;
   
@@ -559,11 +616,13 @@ class DClass {
   
 // custom <class DClass>
 
-  DClass(Id id) : _id = id {}
-
   set parent(p) {
     _name = id.capCamel;
     _className = isPublic? _name : "_$_name";
+
+    if(jsonSupport) 
+      toJsonSupport = true;
+    
     // Iterate on all members and create the appropriate ctors
     members.forEach((m) {
       m.parent = this;
@@ -586,6 +645,12 @@ class DClass {
           ..namedMembers.add(m);
       });
     });
+    if(jsonSupport) {
+      _ctors.putIfAbsent('_json', () => new Ctor())
+        ..name = '_json'
+        ..className = _name;
+    }
+
     _parent = p;
   }
 
@@ -597,7 +662,10 @@ class DClass {
     return null;
   }
 
+  bool isClassJsonable(String className) => _parent.isClassJsonable(className);
+
 // end <class DClass>
+
 
   Map toJson() { 
     return { 
@@ -609,6 +677,7 @@ class DClass {
     "includeCustom": EBISU_UTILS.toJson(includeCustom),
     "members": EBISU_UTILS.toJson(members),
     "ctors": EBISU_UTILS.toJson(_ctors),
+    "toJsonSupport": EBISU_UTILS.toJson(toJsonSupport),
     "jsonSupport": EBISU_UTILS.toJson(jsonSupport),
     "name": EBISU_UTILS.toJson(_name),
     "className": EBISU_UTILS.toJson(_className),
@@ -635,8 +704,10 @@ class Ctor {
   
 // custom <class Ctor>
 
+  Ctor(){}
+
   String get qualifiedName => (name == 'default' || name == '')? 
-    className : '$className.name';
+    className : '${className}.${name}';
 
   String get ctorText {
     List<String> result = [];
@@ -666,6 +737,7 @@ ${guts}
 
 // end <class Ctor>
 
+
   Map toJson() { 
     return { 
     "className": EBISU_UTILS.toJson(className),
@@ -679,6 +751,11 @@ ${guts}
 
 /// Metadata associated with a member of a Dart class
 class Member { 
+  Member(
+    this._id
+  ) {
+  }
+  
   final Id _id;
   /// Id for this class member
   Id get id => _id;
@@ -733,8 +810,6 @@ class Member {
   
 // custom <class Member>
 
-  Member(Id id) : _id = id {}
-
   bool get isPublic => access == Access.RW;
 
   set parent(p) {
@@ -748,6 +823,7 @@ class Member {
   }
 
 // end <class Member>
+
 
   Map toJson() { 
     return { 
@@ -782,6 +858,31 @@ DClass dclass(String _id) => new DClass(id(_id));
 Member member(String _id) => new Member(id(_id));
 PubSpec pubspec(String _id)=> new PubSpec(id(_id));
 PubDependency pubdep(String name)=> new PubDependency(name);
+
+final RegExp _jsonableTypeRe = new RegExp(r"\b(?:int|double|num|String|bool)\b");
+final RegExp _mapTypeRe = new RegExp(r"Map\b");
+final RegExp _listTypeRe = new RegExp(r"List\b");
+final RegExp _jsonMapTypeRe = new RegExp(r"Map<\s*String,\s*(.*?)\s*>");
+final RegExp _jsonListTypeRe = new RegExp(r"List<\s*(.*?)\s*>");
+
+bool isJsonableType(String t) => _jsonableTypeRe.firstMatch(t) != null;
+bool isMapType(String t) => _mapTypeRe.firstMatch(t) != null;
+bool isListType(String t) => _listTypeRe.firstMatch(t) != null;
+String jsonMapValueType(String t) {
+  Match m = _jsonMapTypeRe.firstMatch(t);
+  if(m != null) {
+    return m.group(1);
+  }
+  return null;
+}
+String jsonListValueType(String t) {
+  Match m = _jsonListTypeRe.firstMatch(t);
+  if(m != null) {
+    return m.group(1);
+  }
+  return null;
+}
+
 
 // end <part meta>
 
