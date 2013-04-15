@@ -169,10 +169,71 @@ class BasicType {
 
 // end <class BasicType>
 
+
   Map toJson() { 
     return { 
     "name": EBISU_UTILS.toJson(_name),
     "init": EBISU_UTILS.toJson(_init),
+    };
+  }
+}
+
+/// Holder for packages, apps, and the root path
+class System { 
+  System(
+    this._id
+  ) {
+  }
+  
+  final Id _id;
+  /// Id for this system
+  Id get id => _id;
+  
+  /// Documentation for this system
+  String doc;
+  
+  /// Top level path to which code is generated
+  String rootPath;
+  
+  /// List of apps in the system
+  List<App> apps;
+  
+  /// List of apps in the system
+  List<Package> packages;
+  
+  bool _finalized = false;
+  /// Set to true when system is finalized
+  bool get finalized => _finalized;
+  
+// custom <class System>
+
+  void finalize() {
+    if(!_finalized) {
+      if(packages != null) packages.forEach((pkg) => pkg._finalize(this)); 
+      if(apps != null) app.forEach((pkg) => app._finalize(this)); 
+      _finalized = true;
+    }
+  }
+
+  void generate() {
+    finalize();
+    packages.forEach((pkg) => pkg.generate());
+  }
+
+  dynamic get root => this;
+  String get pkgPath => "${rootPath}";
+
+// end <class System>
+
+
+  Map toJson() { 
+    return { 
+    "id": EBISU_UTILS.toJson(_id),
+    "doc": EBISU_UTILS.toJson(doc),
+    "rootPath": EBISU_UTILS.toJson(rootPath),
+    "apps": EBISU_UTILS.toJson(apps),
+    "packages": EBISU_UTILS.toJson(packages),
+    "finalized": EBISU_UTILS.toJson(_finalized),
     };
   }
 }
@@ -207,24 +268,31 @@ class Package {
   
 // custom <class Package>
 
-  void finalize(Package parent) {
-    if(modules != null) modules.forEach((module) => module.finalize(this)); 
-    if(packages != null) packages.forEach((pkg) => pkg.finalize(this)); 
+  void _finalize(dynamic parent) {
+    if(modules != null) modules.forEach((module) => module._finalize(this)); 
+    if(packages != null) packages.forEach((pkg) => pkg._finalize(this)); 
     _parent = parent;
   }
 
   void generate() {
-    finalize(null);
-    modules.forEach((module) => module.generate());
+    if(_parent == null) 
+      throw new StateError("Finalize the system before generating Package ${_id}");
+    if(null != modules)
+      modules.forEach((module) => module.generate());
+    if(null != packages)
+      packages.forEach((pkg) => pkg.generate());
   }
 
+  dynamic get root => _parent.root;
+  String get pkgPath => "${_parent.pkgPath}/${_id.snake}";
+
 // end <class Package>
+
 
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "modules": EBISU_UTILS.toJson(modules),
     "packages": EBISU_UTILS.toJson(packages),
@@ -251,35 +319,55 @@ class Module extends Decls {
   dynamic get parent => _parent;
   
   /// List of modules to import
-  List<String> imports;
+  List<String> imports = [];
   
   /// List of modules to import publicly
-  List<String> publicImports;
+  List<String> publicImports = [];
   
   /// List of modules to import under the debug
-  List<String> debugImports;
+  List<String> debugImports = [];
   
 // custom <class Module>
 
   String get name => _id.snake;
 
-  void finalize(Package parent) {
+  void _finalize(Package parent) {
     finalizeDecls(this);
     _parent = parent;
+    // prefix std imports
+    imports = imports.map((i) => _standardImports.contains(i)? "std.${i}" : i).toList();
+    imports.sort();
+    imports = imports.where((i) => !i.contains('std.')).toList()..addAll(imports.where((i) => i.contains('std.')));
   }
 
+  String get contents => decls();
+
   void generate() {
-    //print(META.decls(this));
-    print(decls());
+    if(_parent == null) 
+      throw new StateError("Finalize the system before generating Module ${_id}");
+
+    String targetFile = "${pkgPath}/${_id.snake}.d";
+    mergeWithFile(META.module(this), targetFile);
+  }
+
+  dynamic get root => _parent.root;
+  String get pkgPath => "${_parent.pkgPath}";
+
+  String importStatement(String i) {
+    if(_standardImports.contains(i)) {
+      return "import std.${i}";
+    } else {
+      return "import ${i}";
+    }
   }
 
 // end <class Module>
+
 
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "imports": EBISU_UTILS.toJson(imports),
     "publicImports": EBISU_UTILS.toJson(publicImports),
     "debugImports": EBISU_UTILS.toJson(debugImports),
@@ -311,7 +399,7 @@ class EnumValue {
   
 // custom <class EnumValue>
 
-  void finalize() {
+  void _finalize() {
     _name = _id.capCamel;
   }
 
@@ -326,6 +414,7 @@ class EnumValue {
   }
 
 // end <class EnumValue>
+
 
   Map toJson() { 
     return { 
@@ -356,12 +445,13 @@ class TMixin {
 // custom <class TMixin>
 
   String get argsDecl => 
-    tArgs.length>1 ? "(${tArgs.join(',')})" : 
-    (tArgs.length==1 ? tArgs[0] : '');
+    tArgs.length>1 ? "!(${tArgs.join(',')})" : 
+    (tArgs.length==1 ? "!${tArgs[0]}" : '');
 
-  String get decl => 'mixin $name!$argsDecl';
+  String get decl => 'mixin ${name}${argsDecl}';
 
 // end <class TMixin>
+
 
   Map toJson() { 
     return { 
@@ -405,19 +495,19 @@ class Enum {
     return META.enum(this);
   }
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
-    values.forEach((v) => v.finalize());
+    values.forEach((v) => v._finalize());
     _parent = parent;
   }
 
 // end <class Enum>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
     "values": EBISU_UTILS.toJson(values),
@@ -463,7 +553,7 @@ class Constant {
   
 // custom <class Constant>
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
   }
@@ -474,11 +564,11 @@ class Constant {
 
 // end <class Constant>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
     "isStatic": EBISU_UTILS.toJson(isStatic),
@@ -518,11 +608,11 @@ class Union extends Decls {
   
 // custom <class Union>
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
     finalizeDecls(this);
-    members.forEach((member) => member.finalize(this));
+    members.forEach((member) => member._finalize(this));
   }
 
   String define() {
@@ -531,11 +621,11 @@ class Union extends Decls {
 
 // end <class Union>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
     "members": EBISU_UTILS.toJson(members),
@@ -571,14 +661,17 @@ class Alias {
 // custom <class Alias>
 
   String get decl {
-    return "alias ${aliased} ${name}";
+    String result = (null != doc)? (blockComment(doc)+'\n') : '';
+    result += "alias ${aliased} ${name}";
+    return result;
   }
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
   }
 
 // end <class Alias>
+
 
   Map toJson() { 
     return { 
@@ -632,12 +725,13 @@ class ArrAlias {
     }
   }
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
     aliased = _name;
   }
 
 // end <class ArrAlias>
+
 
   Map toJson() { 
     return { 
@@ -684,11 +778,12 @@ class AArrAlias {
     return "alias ${value}[${key}] ${name}Map";
   }
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
   }
 
 // end <class AArrAlias>
+
 
   Map toJson() { 
     return { 
@@ -727,12 +822,13 @@ class TemplateParm {
   
 // custom <class TemplateParm>
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
   }
 
 // end <class TemplateParm>
+
 
   Map toJson() { 
     return { 
@@ -775,11 +871,11 @@ class Template extends Decls {
 // custom <class Template>
 // end <class Template>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "templateParms": EBISU_UTILS.toJson(templateParms),
     "dAccess": EBISU_UTILS.toJson(dAccess),
@@ -799,6 +895,7 @@ class CodeBlock {
 // custom <class CodeBlock>
 
 // end <class CodeBlock>
+
 
   Map toJson() { 
     return { 
@@ -836,6 +933,8 @@ class Decls {
   
 // custom <class Decls>
 
+  Decls(){}
+
   bool empty() {
     return (
         mixins.length + aliases.length + constants.length+
@@ -859,12 +958,12 @@ class Decls {
 
   void finalizeDecls(dynamic parent) {
     // mixins don't require finalize
-    aliases.forEach((alias) => alias.finalize(this));
-    constants.forEach((constant) => constant.finalize(this));
-    structs.forEach((struct) => struct.finalize(this));
-    enums.forEach((enum) => enum.finalize(this));
-    unions.forEach((union) => union.finalize(this));
-    templates.forEach((template) => template.finalize(this));
+    aliases.forEach((alias) => alias._finalize(this));
+    constants.forEach((constant) => constant._finalize(this));
+    structs.forEach((struct) => struct._finalize(this));
+    enums.forEach((enum) => enum._finalize(this));
+    unions.forEach((union) => union._finalize(this));
+    templates.forEach((template) => template._finalize(this));
     // codeBlocks don't require finalize
     // members are finalized by their "owner"
   }
@@ -916,6 +1015,7 @@ $privateCustomBlock}
 
 // end <class Decls>
 
+
   Map toJson() { 
     return { 
     "mixins": EBISU_UTILS.toJson(mixins),
@@ -964,11 +1064,11 @@ class Struct extends Decls {
   
 // custom <class Struct>
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
     finalizeDecls(this);
-    members.forEach((member) => member.finalize(this));
+    members.forEach((member) => member._finalize(this));
   }
 
   String define() {
@@ -977,11 +1077,11 @@ class Struct extends Decls {
 
 // end <class Struct>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
     "members": EBISU_UTILS.toJson(members),
@@ -1041,7 +1141,7 @@ class Member {
   
 // custom <class Member>
 
-  void finalize(dynamic parent) {
+  void _finalize(dynamic parent) {
     if(_parent != null) {
       throw new StateError("Finalize must be called only once on $this => $id");
     }
@@ -1079,11 +1179,11 @@ class Member {
 
 // end <class Member>
 
+
   Map toJson() { 
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "parent": EBISU_UTILS.toJson(_parent),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
     "vName": EBISU_UTILS.toJson(_vName),
@@ -1099,6 +1199,7 @@ class Member {
 // custom <part meta>
 
 Id id(String _id) => new Id(_id);
+System system(String _id) => new System(id(_id));
 Package package(String _id) => new Package(id(_id));
 Module module(String _id) => new Module(id(_id));
 Struct struct(String _id) => new Struct(id(_id));
@@ -1113,12 +1214,34 @@ Enum enum(String _id) => new Enum(id(_id));
 EnumValue ev(String _id) => new EnumValue(id(_id));
 TMixin tmixin(String mixinName) => new TMixin(mixinName);
 
+
 Alias arr(String type) {
   Id aliasId = id(type+'_arr');
   String aliased = "${aliasId.capCamel}[]";
   Alias result = new Alias(aliasId)..aliased = aliased;
   return result;
 }
+
+Set _standardImports = new Set.from([
+  'algorithm', 'array', 'ascii', 'base64', 'bigint', 'bitmanip', 'compiler',
+  'complex', 'concurrency', 'container', 'conv', 'cpuid', 'cstream', 'csv',
+  'ctype', 'datetime', 'demangle', 'encoding', 'exception', 'file', 'format',
+  'functional', 'getopt', 'json', 'math', 'mathspecial', 'md5', 'metastrings',
+  'mmfile', 'numeric', 'outbuffer', 'parallelism', 'path', 'perf', 'process',
+  'random', 'range', 'regex', 'regexp', 'signals', 'socket', 'socketstream',
+  'stdint', 'stdiobase', 'stdio', 'stream', 'string', 'syserror', 'system',
+  'traits', 'typecons', 'typetuple', 'uni', 'uri', 'utf', 'uuid', 'variant',
+  'xml', 'zip', 'zlib',
+]);
+
+final Access ia = Access.IA;
+final Access ro = Access.RO;
+final Access rw = Access.RW;
+
+final DAccess public = DAccess.PUBLIC;
+final DAccess private = DAccess.PRIVATE;
+final DAccess protected = DAccess.PROTECTED;
+final DAccess export = DAccess.EXPORT;
 
 // end <part meta>
 

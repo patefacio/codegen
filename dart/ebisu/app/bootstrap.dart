@@ -150,7 +150,13 @@ provides consistent representations'''
     ..doc = "Id for this $owner"
     ..type = 'Id'
     ..access = Access.RO
+    ..ctors = ['']
     ..isFinal = true;
+
+  Member non_final_id_member(String owner) => member('id')
+    ..doc = "Id for this $owner"
+    ..type = 'Id'
+    ..access = Access.RO;
 
   Member parent_member(String owner) => member('parent')
     ..doc = "Reference to parent of this $owner"
@@ -258,7 +264,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
         dclass('system')
         ..doc = 'Defines a dart system (collection of libraries and apps)'
         ..members = [
-          id_member('system'),
+          non_final_id_member('system'),
           doc_member('system'),
           member('root_path')
           ..doc = 'Path to which code is generated',
@@ -503,7 +509,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
 
   ebisu_dart_meta.parts.forEach((part) {
     part.classes.forEach((c) {
-      c.jsonSupport = true;
+      c.toJsonSupport = true;
     });
   });
 

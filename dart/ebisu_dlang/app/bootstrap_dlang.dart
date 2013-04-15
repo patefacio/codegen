@@ -44,32 +44,33 @@ void main() {
   }
 }
 
-generate() {
+ generate() {
 
-  Member doc_member(String owner) => member('doc')
-    ..doc = "Documentation for this $owner";
+   Member doc_member(String owner) => member('doc')
+     ..doc = "Documentation for this $owner";
 
-  Member static_member(String owner) => member('is_static')
-    ..type = 'bool'
-    ..doc = "True if $owner is static"
-    ..classInit = 'false';
+   Member static_member(String owner) => member('is_static')
+     ..type = 'bool'
+     ..doc = "True if $owner is static"
+     ..classInit = 'false';
 
-  Member static_this_member(String owner) => member('has_static_this')
-    ..type = 'bool'
-    ..doc = "True if $owner is requires static this"
-    ..classInit = 'false';
+   Member static_this_member(String owner) => member('has_static_this')
+     ..type = 'bool'
+     ..doc = "True if $owner is requires static this"
+     ..classInit = 'false';
 
-  Member parent_member(String owner) => member('parent')
-    ..doc = "Reference to parent of this $owner"
-    ..type = 'dynamic'
-    ..access = Access.RO;
+   Member parent_member(String owner) => member('parent')
+     ..doc = "Reference to parent of this $owner"
+     ..type = 'dynamic'
+     ..jsonTransient = true
+     ..access = Access.RO;
 
-  Member id_member(String owner) => member('id')
-    ..doc = "Id for this $owner"
-    ..type = 'Id'
-    ..access = Access.RO
-    ..ctors = [ '' ]
-    ..isFinal = true;
+   Member id_member(String owner) => member('id')
+     ..doc = "Id for this $owner"
+     ..type = 'Id'
+     ..access = Access.RO
+     ..ctors = [ '' ]
+     ..isFinal = true;
 
   Member name_member(String owner) => member('name')
     ..doc = "The generated name for $owner"
@@ -99,7 +100,7 @@ generate() {
       ..doc = 'Support for storing dlang meta data for purpose of generating code'
       ..imports = [
         'io', 
-        'json', 
+        '"dart:json" as JSON', 
         '"package:ebisu/ebisu.dart"', 
         '"package:ebisu/ebisu_id.dart"', 
         '"package:ebisu/ebisu_utils.dart" as EBISU_UTILS', 
@@ -161,6 +162,25 @@ generate() {
             ..access = Access.RO
             ..ctors = [''],
           ],
+          dclass('system')
+          ..doc = 'Holder for packages, apps, and the root path'
+          ..members = [
+            id_member('system'),
+            doc_member('system'),
+            member('root_path')
+            ..doc = 'Top level path to which code is generated',
+            member('apps')
+            ..doc = 'List of apps in the system'
+            ..type = 'List<App>',
+            member('packages')
+            ..doc = 'List of apps in the system'
+            ..type = 'List<Package>',
+            member('finalized')
+            ..doc = 'Set to true when system is finalized'
+            ..type = 'bool'
+            ..classInit = 'false'
+            ..access = Access.RO,
+          ],
           dclass('package')
           ..doc = 'Meta data required for D package'
           ..members = [
@@ -184,13 +204,16 @@ generate() {
             parent_member('D struct'),
             member('imports')
             ..doc = 'List of modules to import'
-            ..type = 'List<String>',
+            ..type = 'List<String>'
+            ..classInit = '[]',
             member('public_imports')
             ..doc = 'List of modules to import publicly'
-            ..type = 'List<String>',
+            ..type = 'List<String>'
+            ..classInit = '[]',
             member('debug_imports')
             ..doc = 'List of modules to import under the debug'
-            ..type = 'List<String>',
+            ..type = 'List<String>'
+            ..classInit = '[]',
           ],
           dclass('enum_value')
           ..doc = 'An entry in an enum'
@@ -379,7 +402,7 @@ It only makes sense to use either `ctor` or `ctor_defaulted` and if using
   ebisu.libraries.forEach((library) {
     library.parts.forEach((part) {
       part.classes.forEach((c) {
-        c.jsonSupport = true;
+        c.toJsonSupport = true;
       });
     });
   });

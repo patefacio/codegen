@@ -1,7 +1,7 @@
 library meta;
 
 import "dart:io";
-import "dart:json";
+import "dart:json" as JSON;
 import "package:ebisu/ebisu.dart";
 import "package:ebisu/ebisu_id.dart";
 import "package:ebisu/ebisu_utils.dart" as EBISU_UTILS;

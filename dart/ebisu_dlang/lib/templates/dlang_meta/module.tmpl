@@ -1,0 +1,13 @@
+module ${_.name};
+
+#< for(String i in _.publicImports) { >
+public ${_.importStatement(i)};
+#< } >
+#< for(String i in _.imports) { >
+${_.importStatement(i)};
+#< } >
+#< for(String i in _.debugImports) { >
+debug ${_.importStatement(i)};
+#< } >
+${_.contents}
+
