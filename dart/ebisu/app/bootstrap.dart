@@ -120,7 +120,6 @@ all of which get compiled into a single dart library'''
         dclass('id')
         ..doc = '''Given an id (all lower case string of words separated by '_')
 provides consistent representations'''
-        ..jsonSupport = true
         ..members = [
           member('id')
           ..doc = "String containing the lower case words separated by '_'"
@@ -273,7 +272,11 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..classInit = '[]',
           member('pub_spec')
           ..doc = 'Information for the pubspec'
-          ..type = 'PubSpec'
+          ..type = 'PubSpec',
+          member('jsonable_classes')
+          ..doc = 'Map of all classes that have jsonSupport'
+          ..type = 'Map<String,DClass>'
+          ..classInit = '{}'
         ],
         dclass('app')
         ..doc = 'Defines a dart application'
@@ -371,6 +374,10 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..type = 'Map<String,Ctor>'
           ..classInit = '{}'
           ..access = Access.RO,
+          member('to_json_support')
+          ..doc = "If true, generate toJson"
+          ..type = 'bool'
+          ..classInit = 'false',
           member('json_support')
           ..doc = "If true, generate toJson/fromJson on all members that are not jsonTransient"
           ..type = 'bool'
