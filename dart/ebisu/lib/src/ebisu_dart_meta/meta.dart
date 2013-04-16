@@ -230,7 +230,7 @@ class PubSpec {
   /// Name of the project described in spec - if not set, id of system is used to generate
   String get name => _name;
   
-  List<PubDependency> dependencies;
+  List<PubDependency> dependencies = [];
   
 // custom <class PubSpec>
 
@@ -276,6 +276,10 @@ class System {
   /// Map of all classes that have jsonSupport
   Map<String,DClass> jsonableClasses = {};
   
+  bool _finalized = false;
+  /// Set to true on finalize
+  bool get finalized => _finalized;
+  
 // custom <class System>
 
   /// Create system from the id
@@ -283,25 +287,29 @@ class System {
 
   /// Finalize must be called before generate
   void finalize() {
-    libraries.forEach((l) => l.parent = this);
-    apps.forEach((a) => a.parent = this);
-    pubSpec.parent = this;
+    if(!_finalized) {
+      libraries.forEach((l) => l.parent = this);
+      apps.forEach((a) => a.parent = this);
+      pubSpec.parent = this;
 
-    libraries.forEach((library) {
-      library.parts.forEach((part) {
-        part.classes.forEach((dclass) {
-          if(dclass.jsonSupport) {
-            jsonableClasses[dclass.name] = dclass;
-          }
+      libraries.forEach((library) {
+        library.parts.forEach((part) {
+          part.classes.forEach((dclass) {
+            if(dclass.jsonSupport) {
+              jsonableClasses[dclass.name] = dclass;
+            }
+          });
         });
       });
-    });
+      _finalized = true;
+    }
   }
 
   bool isClassJsonable(String className) => jsonableClasses.containsKey(className);
 
   /// Generate the code
   void generate() {
+    finalize();
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
     print(META.pubspec(pubSpec));
@@ -319,6 +327,7 @@ class System {
     "libraries": EBISU_UTILS.toJson(libraries),
     "pubSpec": EBISU_UTILS.toJson(pubSpec),
     "jsonableClasses": EBISU_UTILS.toJson(jsonableClasses),
+    "finalized": EBISU_UTILS.toJson(_finalized),
     };
   }
 }
