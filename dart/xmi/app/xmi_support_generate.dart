@@ -52,10 +52,11 @@ main() {
             ..doc = 'Data in Map format from parsed json'
             ..access = Access.IA
             ..type = 'Map',
-            member('current')
-            ..doc = 'The current UML entry being built'
-            ..access = Access.IA
-            ..type = 'dynamic',
+            member('item_map')
+            ..doc = 'Map of items indexed by xmi:id'
+            ..type = 'Map<String, dynamic>'
+            ..access = Access.RO
+            ..classInit = '{}',
           ],
           dclass('u_model')
           ..members = [
@@ -64,6 +65,7 @@ main() {
             ..doc = 'Map of items indexed by xmi:id'
             ..type = 'Map<String, dynamic>'
             ..access = Access.RO
+            ..jsonTransient = true
             ..classInit = '{}',
           ],
           dclass('u_class')
@@ -72,8 +74,9 @@ main() {
             name_member('uml class'),
             comment_member('uml class'),
             properties_member('uml class'),
+            member('templ_binding')..type = 'UTemplBinding',
+            member('templ_sig')..type = 'UTemplSig',
           ],
-          dclass('u_classifier_templ_parm'),
           dclass('u_comment')
           ..members = [
             id_member('uml comment'),
@@ -106,6 +109,11 @@ main() {
             ..classInit = '[]',
             member('packages')
             ..type = 'List<UPackage>'
+            ..classInit = '[]',
+            member('parent_package_id'),
+            member('path')
+            ..doc = 'Path to package as list of strings'
+            ..type = 'List<String>'
             ..classInit = '[]'
           ],
           dclass('u_primitive_type')
@@ -118,6 +126,7 @@ main() {
             id_member('uml property'), 
             name_member('uml property'),
             comment_member('uml property'),
+            member('type')..doc = 'Id for the type of this property',
             member('visibility'),
             member('aggregation'),
           ],
@@ -132,9 +141,36 @@ main() {
             name_member('uml stereotype'),
             properties_member('uml class'),
           ],
-          dclass('u_templ_binding'),
-          dclass('u_templ_parm_subst'),
-          dclass('u_templ_sig'),
+          dclass('u_templ_binding')
+          ..members = [
+            id_member('uml template binding'),
+            member('signature_id')
+            ..doc = 'Id of the signature of this template binding',
+            member('templ_parm_substs')
+            ..doc = 'Parameter substitutions for this binding'
+            ..type = 'List<UTemplParmSubst>'
+            ..classInit = '[]',
+          ],
+          dclass('u_templ_parm_subst')
+          ..members = [
+            id_member('uml template parameter substitution'),
+            member('formal_id')..doc = 'Id of the formal type being substituted',            
+            member('actual_id')..doc = 'Id of the actual type being substituted',            
+          ],
+          dclass('u_classifier_templ_parm')
+          ..members = [
+            id_member('uml classifier template parameter'),
+            member('allow_substitutable')..type = 'bool'..classInit = 'false',
+            member('name'),
+            member('type'),
+          ],
+          dclass('u_templ_sig')
+          ..members = [
+            id_member('uml template signature'),
+            member('parms')
+            ..type = 'List<UClassifierTemplParm>'
+            ..classInit = '[]',
+          ],
         ]
       ]
     ];
