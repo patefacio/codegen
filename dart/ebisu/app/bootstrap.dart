@@ -260,6 +260,7 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           ..access = Access.RO,
           member('dependencies')
           ..type = 'List<PubDependency>'
+          ..classInit = '[]'
         ],
         dclass('system')
         ..doc = 'Defines a dart system (collection of libraries and apps)'
@@ -282,7 +283,12 @@ See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
           member('jsonable_classes')
           ..doc = 'Map of all classes that have jsonSupport'
           ..type = 'Map<String,DClass>'
-          ..classInit = '{}'
+          ..classInit = '{}',
+          member('finalized')
+          ..doc = 'Set to true on finalize'
+          ..access = Access.RO
+          ..type = 'bool'
+          ..classInit = 'false'
         ],
         dclass('app')
         ..doc = 'Defines a dart application'
