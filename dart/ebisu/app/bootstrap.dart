@@ -135,6 +135,7 @@ provides consistent representations'''
     ];
 
   Library ebisu_utils = library('ebisu_utils')
+    ..imports = [ 'math' ]
     ..doc = 'Support to be used by libraries generated with ebisu. Example (toJson)';
 
   // The following are commonly used members of the meta data classes
