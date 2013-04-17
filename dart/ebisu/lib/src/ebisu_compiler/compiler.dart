@@ -13,16 +13,12 @@ class TemplateFile {
   
   /// Path to file containting template code
   String inputPath;
-  
   /// Path to write the supporting dart file for the template
   String outputPath;
-  
   /// Name of library this "part" is a part of
   String partOf;
-  
   String _functionName;
   String get functionName => _functionName;
-  
 // custom <class TemplateFile>
 
   bool compile() {
@@ -129,16 +125,12 @@ class TemplateFolder {
   
   /// Path to folder of templates
   String inputPath;
-  
   /// Path to write the supporting dart files for the template folder
   String outputPath;
-  
   /// Name of dart library to be generated
   String libName;
-  
   /// List of imports required by the generated dart library
   List<String> imports = [];
-  
 // custom <class TemplateFolder>
 
   /// Compiles all files in the folder, returning number of files updated

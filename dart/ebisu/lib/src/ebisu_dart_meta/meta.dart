@@ -24,16 +24,12 @@ class Access {
     }
   }
 
-  static Access fromString(String s) { 
-    switch(s) { 
-      case "IA":  return IA;
-      case "RO":  return RO;
-      case "RW":  return RW;
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(3);
   }
 
   static Access fromJson(int v) { 
@@ -41,6 +37,14 @@ class Access {
       case IA.value: return IA;
       case RO.value: return RO;
       case RW.value: return RW;
+    }
+  }
+
+  static Access fromString(String s) { 
+    switch(s) { 
+      case "IA": return IA;
+      case "RO": return RO;
+      case "RW": return RW;
     }
   }
 }
@@ -54,43 +58,32 @@ class Variable {
   final Id _id;
   /// Id for this variable
   Id get id => _id;
-  
   /// Documentation for this variable
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this variable
   dynamic get parent => _parent;
-  
   /// True if variable is public.
   /// Code generation support will prefix private variables appropriately
   bool isPublic = true;
-  
   /// Type for the variable
   String type = "dynamic";
-  
   /// Text used to initialize the variable
   /// (e.g. 'DateTime(1929, 10, 29)' for <DateTime crashDate = DateTime(1929, 10, 29)>
   /// 
   String init;
-  
   /// True if the variable is final
   bool isFinal = false;
-  
   /// True if the variable is const
   bool isConst = false;
-  
   /// True if the variable is static
   bool isStatic = false;
-  
   String _name;
   /// Name of the enum class generated sans access prefix
   String get name => _name;
-  
   String _varName;
   /// Name of variable - varies depending on public/private
   String get varName => _varName;
-  
 // custom <class Variable>
 
   void set parent(p) {
@@ -120,6 +113,22 @@ class Variable {
     "varName": EBISU_UTILS.toJson(_varName),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isPublic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isFinal": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isConst": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isStatic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "varName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Defines an enum - to be generated idiomatically as a class
@@ -134,29 +143,22 @@ class Enum {
   final Id _id;
   /// Id for this enum
   Id get id => _id;
-  
   /// Documentation for this enum
   String doc;
-  
   /// True if enum is public.
   /// Code generation support will prefix private variables appropriately
   bool isPublic = true;
-  
   dynamic _parent;
   /// Reference to parent of this enum
   dynamic get parent => _parent;
-  
   /// List of id's naming the values
   List<Id> values = [];
-  
   String _name;
   /// Name of the enum class generated sans access prefix
   String get name => _name;
-  
   String _enumName;
   /// Name of the enum class generated with access prefix
   String get enumName => _enumName;
-  
 // custom <class Enum>
 
   set parent(p) {
@@ -182,16 +184,28 @@ class Enum {
     "enumName": EBISU_UTILS.toJson(_enumName),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isPublic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "values": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Id()..randJson),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "enumName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// A dependency of the system
 class PubDependency { 
   /// Name of dependency
   String name;
-  
   /// Required version for this dependency
   String version;
-  
 // custom <class PubDependency>
 
   PubDependency(String _name) : name = _name {
@@ -206,6 +220,14 @@ class PubDependency {
     "version": EBISU_UTILS.toJson(version),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "version": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Information for the pubspec of the system
@@ -218,20 +240,15 @@ class PubSpec {
   final Id _id;
   /// Id for this pub spec
   Id get id => _id;
-  
   /// Documentation for this pub spec
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this pub spec
   dynamic get parent => _parent;
-  
   String _name;
   /// Name of the project described in spec - if not set, id of system is used to generate
   String get name => _name;
-  
   List<PubDependency> dependencies = [];
-  
 // custom <class PubSpec>
 
   set parent(p) {
@@ -250,6 +267,18 @@ class PubSpec {
     "dependencies": EBISU_UTILS.toJson(dependencies),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dependencies": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new PubDependency()..randJson),
+    };
+  }
+
 }
 
 /// Defines a dart system (collection of libraries and apps)
@@ -257,29 +286,21 @@ class System {
   Id _id;
   /// Id for this system
   Id get id => _id;
-  
   /// Documentation for this system
   String doc;
-  
   /// Path to which code is generated
   String rootPath;
-  
   /// Apps in the system
   List<App> apps = [];
-  
   /// Libraries in the system
   List<Library> libraries = [];
-  
   /// Information for the pubspec
   PubSpec pubSpec;
-  
   /// Map of all classes that have jsonSupport
   Map<String,DClass> jsonableClasses = {};
-  
   bool _finalized = false;
   /// Set to true on finalize
   bool get finalized => _finalized;
-  
 // custom <class System>
 
   /// Create system from the id
@@ -330,6 +351,26 @@ class System {
     "finalized": EBISU_UTILS.toJson(_finalized),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "rootPath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "apps": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new App()..randJson),
+    "libraries": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Library()..randJson),
+    "pubSpec": EBISU_UTILS.randJson(_randomJsonGenerator, PubSpec.randJson),
+    "jsonableClasses": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
+        () => new DClass()..randJson()),
+    "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
 }
 
 /// Defines a dart application
@@ -342,26 +383,19 @@ class App {
   final Id _id;
   /// Id for this app
   Id get id => _id;
-  
   /// Documentation for this app
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this app
   dynamic get parent => _parent;
-  
   /// If true a custom section will be included for app
   bool includeCustom = true;
-  
   /// Classes defined in this app
   List<DClass> classes = [];
-  
   /// List of libraries of this app
   List<Library> libraries = [];
-  
   /// List of global variables for this library
   List<Variable> variables = [];
-  
 // custom <class App>
 
   set parent(p) {
@@ -387,6 +421,24 @@ class App {
     "variables": EBISU_UTILS.toJson(variables),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "classes": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new DClass()..randJson),
+    "libraries": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Library()..randJson),
+    "variables": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Variable()..randJson),
+    };
+  }
+
 }
 
 /// Defines a dart library - a collection of parts
@@ -399,30 +451,22 @@ class Library {
   final Id _id;
   /// Id for this library
   Id get id => _id;
-  
   /// Documentation for this library
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this library
   dynamic get parent => _parent;
-  
   /// If true a custom section will be included for library
   bool includeCustom = true;
-  
   /// List of imports to be included by this library
   List<String> imports = [];
-  
   /// List of parts in this library
   List<Part> parts = [];
-  
   /// List of global variables for this library
   List<Variable> variables = [];
-  
   String _name;
   /// Name of the library - for use in naming the library file, the 'library' and 'part of' statements
   String get name => _name;
-  
 // custom <class Library>
 
   set parent(p) {
@@ -479,6 +523,25 @@ class Library {
     "name": EBISU_UTILS.toJson(_name),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "imports": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "parts": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Part()..randJson),
+    "variables": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Variable()..randJson),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Defines a dart part - as in 'part of' source file
@@ -491,27 +554,20 @@ class Part {
   final Id _id;
   /// Id for this part
   Id get id => _id;
-  
   /// Documentation for this part
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this part
   dynamic get parent => _parent;
-  
   /// If true a custom section will be included for app
   bool includeCustom = true;
-  
   /// Classes defined in this part of the library
   List<DClass> classes = [];
-  
   /// Enums defined in this part of the library
   List<Enum> enums = [];
-  
   String _name;
   /// Name of the part - for use in naming the part file
   String get name => _name;
-  
 // custom <class Part>
 
   set parent(p) {
@@ -543,6 +599,22 @@ class Part {
     "name": EBISU_UTILS.toJson(_name),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "classes": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new DClass()..randJson),
+    "enums": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Enum()..randJson),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Mixin for extending classes
@@ -555,10 +627,8 @@ class Mixin {
   
   /// Source of the mixin - as in the "Source" in "class Foo extends Source with Mixin"
   String source;
-  
   /// List of interaces being mixed in
   List<String> interfaces;
-  
 // custom <class Mixin>
 // end <class Mixin>
 
@@ -569,6 +639,16 @@ class Mixin {
     "interfaces": EBISU_UTILS.toJson(interfaces),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "source": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "interfaces": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    };
+  }
+
 }
 
 /// Metadata associated with a Dart class
@@ -581,49 +661,44 @@ class DClass {
   final Id _id;
   /// Id for this Dart class
   Id get id => _id;
-  
   /// Documentation for this Dart class
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this Dart class
   dynamic get parent => _parent;
-  
   /// True if Dart class is public.
   /// Code generation support will prefix private variables appropriately
   bool isPublic = true;
-  
   /// Any mixin declaration for the class
   Mixin mixin;
-  
   /// Any extends (NOTE extend not extends) declaration for the class - conflicts with mixin
   String extend;
-  
   /// If true a custom section will be included for Dart class
   bool includeCustom = true;
-  
   /// List of members of this class
   List<Member> members = [];
-  
   Map<String,Ctor> _ctors = {};
   /// List of ctors of this class
   Map<String,Ctor> get ctors => _ctors;
-  
   /// If true, generate toJson
   bool toJsonSupport = false;
-  
   /// If true, generate toJson/fromJson on all members that are not jsonTransient
   bool jsonSupport = false;
-  
   String _name;
   /// Name of the class - sans any access prefix (i.e. no '_')
   String get name => _name;
-  
   String _className;
   /// Name of the class, including access prefix
   String get className => _className;
-  
 // custom <class DClass>
+
+  String get jsonCtor {
+    if(_ctors.containsKey('_json')) {
+      return "${_className}._json";
+    } else {
+      return _className;
+    }
+  }
 
   set parent(p) {
     _name = id.capCamel;
@@ -631,10 +706,14 @@ class DClass {
 
     if(jsonSupport) 
       toJsonSupport = true;
-    
+
     // Iterate on all members and create the appropriate ctors
     members.forEach((m) {
       m.parent = this;
+
+      if(m.isFinal) 
+        hasFinalMembers = true;
+      
       m.ctors.forEach((ctorName) {
         Ctor ctor = _ctors.putIfAbsent(ctorName, () => new Ctor())
           ..name = ctorName
@@ -654,7 +733,9 @@ class DClass {
           ..namedMembers.add(m);
       });
     });
-    if(jsonSupport) {
+
+    // To deserialize a default ctor is needed
+    if(jsonSupport && _ctors.length > 0) {
       _ctors.putIfAbsent('_json', () => new Ctor())
         ..name = '_json'
         ..className = _name;
@@ -692,25 +773,42 @@ class DClass {
     "className": EBISU_UTILS.toJson(_className),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isPublic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "mixin": EBISU_UTILS.randJson(_randomJsonGenerator, Mixin.randJson),
+    "extend": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Member()..randJson),
+    "ctors": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
+        () => new Ctor()..randJson()),
+    "toJsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "jsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "className": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Metadata associated with a constructor
 class Ctor { 
   /// Name of the class of this ctor.
   String className;
-  
   /// Name of the ctor. If 'default' generated as name of class, otherwise as CLASS.NAME()
   String name;
-  
   /// List of members initialized in this ctor
   List<Member> members = [];
-  
   /// List of optional members initialized in this ctor (i.e. those in [])
   List<Member> optMembers = [];
-  
   /// List of optional members initialized in this ctor (i.e. those in {})
   List<Member> namedMembers = [];
-  
 // custom <class Ctor>
 
   Ctor(){}
@@ -756,6 +854,23 @@ ${guts}
     "namedMembers": EBISU_UTILS.toJson(namedMembers),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "className": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Member()..randJson),
+    "optMembers": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Member()..randJson),
+    "namedMembers": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => new Member()..randJson),
+    };
+  }
+
 }
 
 /// Metadata associated with a member of a Dart class
@@ -768,55 +883,39 @@ class Member {
   final Id _id;
   /// Id for this class member
   Id get id => _id;
-  
   /// Documentation for this class member
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this class member
   dynamic get parent => _parent;
-  
   /// Type of the member
   String type = "String";
-  
   /// Access level supported for this member
   Access access = Access.RW;
-  
   /// If provided the member will be initialized to this text in place of declaration of class
   String classInit;
-  
   /// If provided the member will be initialized to this text in generated ctor initializers
   String ctorInit;
-  
   /// List of ctor names to include this member in
   List<String> ctors = [];
-  
   /// List of ctor names to include this member in as optional parameter
   List<String> ctorsOpt = [];
-  
   /// List of ctor names to include this member in as named optional parameter
   List<String> ctorsNamed = [];
-  
   /// True if the member is final
   bool isFinal = false;
-  
   /// True if the member is const
   bool isConst = false;
-  
   /// True if the member is static
   bool isStatic = false;
-  
   /// True if the member should not be serialized if the parent class has jsonSupport
   bool jsonTransient = false;
-  
   String _name;
   /// Name of variable for the member, excluding access prefix (i.e. no '_')
   String get name => _name;
-  
   String _varName;
   /// Name of variable for the member - varies depending on public/private
   String get varName => _varName;
-  
 // custom <class Member>
 
   bool get isPublic => access == Access.RW;
@@ -853,6 +952,33 @@ class Member {
     "varName": EBISU_UTILS.toJson(_varName),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "access": EBISU_UTILS.randJson(_randomJsonGenerator, Access.randJson),
+    "classInit": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "ctorInit": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "ctors": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "ctorsOpt": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "ctorsNamed": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "isFinal": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isConst": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isStatic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "jsonTransient": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "varName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 // custom <part meta>
 

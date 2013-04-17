@@ -5,7 +5,6 @@ class Context {
   final Map _data;
   /// Data being wrapped
   Map get data => _data;
-  
 // custom <class Context>
 
   Context(Map data) :
