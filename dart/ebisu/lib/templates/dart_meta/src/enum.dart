@@ -43,20 +43,12 @@ class ${_.enumName} {
     }
   }
 
-  static ${_.enumName} fromString(String s) { 
-    switch(s) { 
-''');
- for(var value in _.values) { 
-  _buf.add('''
-      case "${value.shout}":  return ${value.shout};
-''');
- } 
-  _buf.add('''
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(${_.values.length});
   }
 
   static ${_.enumName} fromJson(int v) { 
@@ -65,6 +57,18 @@ class ${_.enumName} {
  for(var value in _.values) { 
   _buf.add('''
       case ${value.shout}.value: return ${value.shout};
+''');
+ } 
+  _buf.add('''
+    }
+  }
+
+  static ${_.enumName} fromString(String s) { 
+    switch(s) { 
+''');
+ for(var value in _.values) { 
+  _buf.add('''
+      case "${value.shout}": return ${value.shout};
 ''');
  } 
   _buf.add('''

@@ -24,16 +24,12 @@ class Access {
     }
   }
 
-  static Access fromString(String s) { 
-    switch(s) { 
-      case "IA":  return IA;
-      case "RO":  return RO;
-      case "RW":  return RW;
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(3);
   }
 
   static Access fromJson(int v) { 
@@ -41,6 +37,14 @@ class Access {
       case IA.value: return IA;
       case RO.value: return RO;
       case RW.value: return RW;
+    }
+  }
+
+  static Access fromString(String s) { 
+    switch(s) { 
+      case "IA": return IA;
+      case "RO": return RO;
+      case "RW": return RW;
     }
   }
 }
@@ -75,18 +79,12 @@ class DAccess {
     }
   }
 
-  static DAccess fromString(String s) { 
-    switch(s) { 
-      case "PUBLIC":  return PUBLIC;
-      case "PRIVATE":  return PRIVATE;
-      case "PACKAGE":  return PACKAGE;
-      case "PROTECTED":  return PROTECTED;
-      case "EXPORT":  return EXPORT;
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(5);
   }
 
   static DAccess fromJson(int v) { 
@@ -96,6 +94,16 @@ class DAccess {
       case PACKAGE.value: return PACKAGE;
       case PROTECTED.value: return PROTECTED;
       case EXPORT.value: return EXPORT;
+    }
+  }
+
+  static DAccess fromString(String s) { 
+    switch(s) { 
+      case "PUBLIC": return PUBLIC;
+      case "PRIVATE": return PRIVATE;
+      case "PACKAGE": return PACKAGE;
+      case "PROTECTED": return PROTECTED;
+      case "EXPORT": return EXPORT;
     }
   }
 }
@@ -127,17 +135,12 @@ class Udt {
     }
   }
 
-  static Udt fromString(String s) { 
-    switch(s) { 
-      case "ALIAS":  return ALIAS;
-      case "ENUM":  return ENUM;
-      case "STRUCT":  return STRUCT;
-      case "UNION":  return UNION;
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(4);
   }
 
   static Udt fromJson(int v) { 
@@ -146,6 +149,15 @@ class Udt {
       case ENUM.value: return ENUM;
       case STRUCT.value: return STRUCT;
       case UNION.value: return UNION;
+    }
+  }
+
+  static Udt fromString(String s) { 
+    switch(s) { 
+      case "ALIAS": return ALIAS;
+      case "ENUM": return ENUM;
+      case "STRUCT": return STRUCT;
+      case "UNION": return UNION;
     }
   }
 }
@@ -159,10 +171,8 @@ class BasicType {
   
   String _name;
   String get name => _name;
-  
   dynamic _init;
   dynamic get init => _init;
-  
 // custom <class BasicType>
 
   String toString() => _name;
@@ -176,6 +186,14 @@ class BasicType {
     "init": EBISU_UTILS.toJson(_init),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
+    };
+  }
+
 }
 
 /// Holder for packages, apps, and the root path
@@ -188,23 +206,17 @@ class System {
   final Id _id;
   /// Id for this system
   Id get id => _id;
-  
   /// Documentation for this system
   String doc;
-  
   /// Top level path to which code is generated
   String rootPath;
-  
   /// List of apps in the system
   List<App> apps;
-  
   /// List of apps in the system
   List<Package> packages;
-  
   bool _finalized = false;
   /// Set to true when system is finalized
   bool get finalized => _finalized;
-  
 // custom <class System>
 
   void finalize() {
@@ -236,6 +248,18 @@ class System {
     "finalized": EBISU_UTILS.toJson(_finalized),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "rootPath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "apps": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new App()),
+    "packages": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Package()),
+    "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
 }
 
 /// Meta data required for D package
@@ -248,24 +272,18 @@ class Package {
   final Id _id;
   /// Id for this D package
   Id get id => _id;
-  
   /// Documentation for this D package
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this D package
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for enum
   String get name => _name;
-  
   /// List of modules in the package
   List<Module> modules;
-  
   /// List of packages in the package
   List<Package> packages;
-  
 // custom <class Package>
 
   void _finalize(dynamic parent) {
@@ -298,6 +316,17 @@ class Package {
     "packages": EBISU_UTILS.toJson(packages),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "modules": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Module()),
+    "packages": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Package()),
+    };
+  }
+
 }
 
 /// Meta data required for D module
@@ -310,23 +339,17 @@ class Module extends Decls {
   final Id _id;
   /// Id for this D package
   Id get id => _id;
-  
   /// Documentation for this D package
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this D struct
   dynamic get parent => _parent;
-  
   /// List of modules to import
   List<String> imports = [];
-  
   /// List of modules to import publicly
   List<String> publicImports = [];
-  
   /// List of modules to import under the debug
   List<String> debugImports = [];
-  
 // custom <class Module>
 
   String get name => _id.snake;
@@ -374,6 +397,17 @@ class Module extends Decls {
     "Decls": super.toJson(),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "imports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    "publicImports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    "debugImports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    };
+  }
+
 }
 
 /// An entry in an enum
@@ -386,17 +420,13 @@ class EnumValue {
   final Id _id;
   /// Id for this enum value
   Id get id => _id;
-  
   String _name;
   /// The generated name for enum value
   String get name => _name;
-  
   /// Documentation for this enum value
   String doc;
-  
   /// Set value of the enum value only if required
   String value;
-  
 // custom <class EnumValue>
 
   void _finalize() {
@@ -424,6 +454,16 @@ class EnumValue {
     "value": EBISU_UTILS.toJson(value),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "value": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// A template mixin
@@ -435,13 +475,10 @@ class TMixin {
   
   /// Textual name of template mixin
   String name;
-  
   /// D langauge access for this template mixin
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// List of template args
   List<String> tArgs = [];
-  
 // custom <class TMixin>
 
   String get argsDecl => 
@@ -460,6 +497,15 @@ class TMixin {
     "tArgs": EBISU_UTILS.toJson(tArgs),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "tArgs": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    };
+  }
+
 }
 
 class Enum { 
@@ -471,24 +517,18 @@ class Enum {
   final Id _id;
   /// Id for this enum
   Id get id => _id;
-  
   /// Documentation for this enum
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this enum
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for enum
   String get name => _name;
-  
   /// D langauge access for this enum
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// List if Id's that constitute the values
   List<EnumValue> values;
-  
 // custom <class Enum>
 
   String define() {
@@ -513,6 +553,17 @@ class Enum {
     "values": EBISU_UTILS.toJson(values),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "values": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new EnumValue()),
+    };
+  }
+
 }
 
 class Constant { 
@@ -524,33 +575,24 @@ class Constant {
   final Id _id;
   /// Id for this constant
   Id get id => _id;
-  
   /// Documentation for this constant
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this constant
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for constant
   String get name => _name;
-  
   /// D langauge access for this constant
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// True if constant is static
   bool isStatic = false;
-  
   /// True if constant is requires static this
   bool hasStaticThis = false;
-  
   /// Type of the constant
   String type = "String";
-  
   /// Value to initialize the constant with
   String init;
-  
 // custom <class Constant>
 
   void _finalize(dynamic parent) {
@@ -577,6 +619,20 @@ class Constant {
     "init": EBISU_UTILS.toJson(init),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "isStatic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "hasStaticThis": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 class Union extends Decls { 
@@ -588,24 +644,18 @@ class Union extends Decls {
   final Id _id;
   /// Id for this union
   Id get id => _id;
-  
   /// Documentation for this union
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this union
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for union
   String get name => _name;
-  
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// List of members of this class
   List<Member> members = [];
-  
 // custom <class Union>
 
   void _finalize(dynamic parent) {
@@ -632,6 +682,17 @@ class Union extends Decls {
     "Decls": super.toJson(),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    };
+  }
+
 }
 
 /// Declaration for an alias
@@ -644,20 +705,15 @@ class Alias {
   final Id _id;
   /// Id for this alias
   Id get id => _id;
-  
   /// Documentation for this alias
   String doc;
-  
   String _name;
   /// The generated name for alias
   String get name => _name;
-  
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// What the alias is aliased to
   String aliased;
-  
 // custom <class Alias>
 
   String get decl {
@@ -682,6 +738,17 @@ class Alias {
     "aliased": EBISU_UTILS.toJson(aliased),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "aliased": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Declaration for an alias to an array
@@ -694,27 +761,21 @@ class ArrAlias {
   final Id _id;
   /// Id for this array alias
   Id get id => _id;
-  
   /// Documentation for this array alias
   String doc;
-  
   String _name;
   /// The generated name for array alias
   String get name => _name;
-  
   /// D langauge access for this array alias
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// Type which the list is of e.g. "Foo" means create alias "Foo[]".
   /// If this is not set, the id is used to form consistent alias.
   /// ArrAlias('foo') => "alias immutable(Foo)[] FooArr"
   /// ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
   /// 
   String aliased;
-  
   /// If true aliased type will have an immutable e.g. "immutable(Foo)[]"
   bool immutable = true;
-  
 // custom <class ArrAlias>
 
   String get decl {
@@ -743,6 +804,18 @@ class ArrAlias {
     "immutable": EBISU_UTILS.toJson(immutable),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "aliased": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "immutable": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
 }
 
 /// Declaration for an alias to an associative array
@@ -755,23 +828,17 @@ class AArrAlias {
   final Id _id;
   /// Id for this array alias
   Id get id => _id;
-  
   /// Documentation for this array alias
   String doc;
-  
   String _name;
   /// The generated name for array alias
   String get name => _name;
-  
   /// D langauge access for this array alias
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// Type of the key
   String key;
-  
   /// Type of the value
   String value;
-  
 // custom <class AArrAlias>
 
   String get decl {
@@ -795,6 +862,18 @@ class AArrAlias {
     "value": EBISU_UTILS.toJson(value),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "key": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "value": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 class TemplateParm { 
@@ -806,20 +885,15 @@ class TemplateParm {
   final Id _id;
   /// Id for this template parm
   Id get id => _id;
-  
   /// Documentation for this template parm
   String doc;
-  
   String _name;
   /// The generated name for template parm
   String get name => _name;
-  
   /// Name of the type
   String typeName;
-  
   /// A default value for the parameter
   String init;
-  
 // custom <class TemplateParm>
 
   void _finalize(dynamic parent) {
@@ -839,6 +913,17 @@ class TemplateParm {
     "init": EBISU_UTILS.toJson(init),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "typeName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Defines a D template
@@ -851,23 +936,17 @@ class Template extends Decls {
   final Id _id;
   /// Id for this template
   Id get id => _id;
-  
   /// Documentation for this template
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this template
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for template
   String get name => _name;
-  
   List<TemplateParm> templateParms;
-  
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
-  
 // custom <class Template>
 // end <class Template>
 
@@ -882,16 +961,25 @@ class Template extends Decls {
     "Decls": super.toJson(),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "templateParms": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new TemplateParm()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    };
+  }
+
 }
 
 /// Container for generated code
 class CodeBlock { 
   /// D langauge access for this code block
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// Block of code to be placed in a container
   String code;
-  
 // custom <class CodeBlock>
 
 // end <class CodeBlock>
@@ -903,34 +991,30 @@ class CodeBlock {
     "code": EBISU_UTILS.toJson(code),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "code": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    };
+  }
+
 }
 
 /// Container for declarations
 class Decls { 
   List mixins = [];
-  
   List<Alias> aliases = [];
-  
   List<Constant> constants = [];
-  
   List<Struct> structs = [];
-  
   List<Enum> enums = [];
-  
   List<Union> unions = [];
-  
   List<Template> templates = [];
-  
   List<CodeBlock> codeBlocks = [];
-  
   List<Member> members = [];
-  
   bool privateSection = false;
-  
   bool publicSection = false;
-  
   bool unitTest = false;
-  
 // custom <class Decls>
 
   Decls(){}
@@ -1032,6 +1116,24 @@ $privateCustomBlock}
     "unitTest": EBISU_UTILS.toJson(unitTest),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "mixins": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new null()),
+    "aliases": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Alias()),
+    "constants": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Constant()),
+    "structs": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Struct()),
+    "enums": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Enum()),
+    "unions": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Union()),
+    "templates": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Template()),
+    "codeBlocks": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new CodeBlock()),
+    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    "privateSection": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "publicSection": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "unitTest": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
 }
 
 /// Meta data required for D struct
@@ -1044,24 +1146,18 @@ class Struct extends Decls {
   final Id _id;
   /// Id for this D struct
   Id get id => _id;
-  
   /// Documentation for this D struct
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this D struct
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for D struct
   String get name => _name;
-  
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
-  
   /// List of members of this class
   List<Member> members = [];
-  
 // custom <class Struct>
 
   void _finalize(dynamic parent) {
@@ -1088,6 +1184,17 @@ class Struct extends Decls {
     "Decls": super.toJson(),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    };
+  }
+
 }
 
 /// Meta data required for D member
@@ -1100,45 +1207,33 @@ class Member {
   final Id _id;
   /// Id for this D member
   Id get id => _id;
-  
   /// Documentation for this D member
   String doc;
-  
   dynamic _parent;
   /// Reference to parent of this D member
   dynamic get parent => _parent;
-  
   String _name;
   /// The generated name for D member
   String get name => _name;
-  
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
-  
   String _vName;
   /// Name of member as stored in struct/class/union
   String get vName => _vName;
-  
   /// D developer access for this D member
   Access access = Access.IA;
-  
   /// The type for this member
   dynamic type;
-  
   /// What to initialize member to
   dynamic init;
-  
   /// If set preferred pass type is by ref
   bool byRef = false;
-  
   /// If set this member is included in the ctor
   bool ctor = false;
-  
   /// If set this member is included in the ctor with `init` member as the default.
   /// It only makes sense to use either `ctor` or `ctor_defaulted` and if using
   /// `ctor_defaulted` init should be set.
   bool ctorDefaulted = false;
-  
 // custom <class Member>
 
   void _finalize(dynamic parent) {
@@ -1195,6 +1290,23 @@ class Member {
     "ctorDefaulted": EBISU_UTILS.toJson(ctorDefaulted),
     };
   }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "vName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "access": EBISU_UTILS.randJson(_randomJsonGenerator, Access),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
+    "byRef": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "ctor": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "ctorDefaulted": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
 }
 // custom <part meta>
 
