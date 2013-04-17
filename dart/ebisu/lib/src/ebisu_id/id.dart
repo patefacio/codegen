@@ -6,11 +6,9 @@ class Id {
   final String _id;
   /// String containing the lower case words separated by '_'
   String get id => _id;
-  
   final List<String> _words;
   /// Words comprising the id
   List<String> get words => _words;
-  
 // custom <class Id>
 
   /// `id` must be a string in snake case (e.g. `how_now_brown_cow`)
