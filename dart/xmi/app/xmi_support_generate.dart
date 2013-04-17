@@ -57,6 +57,11 @@ main() {
             ..type = 'Map<String, dynamic>'
             ..access = Access.RO
             ..classInit = '{}',
+            member('sig_to_owner')
+            ..doc = 'Map of id of signature to its owner'
+            ..type = 'Map<String, String>'
+            ..access = Access.RO
+            ..classInit = '{}',
           ],
           dclass('u_model')
           ..members = [
@@ -106,6 +111,9 @@ main() {
             ..classInit = '[]',
             member('enums')
             ..type = 'List<UEnumeration>'
+            ..classInit = '[]',
+            member('primitive_types')
+            ..type = 'List<UPrimitiveType>'
             ..classInit = '[]',
             member('packages')
             ..type = 'List<UPackage>'
