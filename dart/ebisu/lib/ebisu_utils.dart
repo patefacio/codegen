@@ -1,5 +1,6 @@
 library ebisu_utils;
 
+import "dart:math";
 
 main() {
   print("Main for library ebisu_utils");
@@ -28,6 +29,38 @@ dynamic toJson(final dynamic obj) {
   return _toJsonRequired(obj) ? obj.toJson() : obj;
 }
 
+dynamic randJson(Random generator, var obj, [ final dynamic type ]) {
+  print("OBJ is $obj");
+  if(obj is List) {
+    List result = [];
+    new List(generator.nextInt(6)+1).forEach((i) {
+      result.add(type());
+    });
+    return result;
+  } else if(obj is Map) {
+    Map result = {};
+    new List(generator.nextInt(4)+1).forEach((i) {
+      result[generator.nextInt().toString()] = type;
+    });
+    return result;
+  } else if(obj is Function) {
+    return obj();
+  } else {
+    switch(obj) {
+      case num: return generator.nextInt();
+      case double: return generator.nextDouble();
+      case int: return generator.nextInt();
+      case String: return generator.nextInt().toString();
+      case bool: return 0==(nextInt()%2);
+      case null: return null;
+      default: { 
+        return obj.randJson();
+      }
+    }
+  }
+}
+
+/*
 dynamic fromJson(final dynamic obj) {
   dynamic result;
   if(obj is num || obj is bool || obj is String || obj == null) {
@@ -50,6 +83,7 @@ dynamic fromJson(final dynamic obj) {
   }
   return result;
 }
+*/
 
 // end <library ebisu_utils>
 
