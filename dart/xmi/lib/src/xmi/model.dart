@@ -58,11 +58,12 @@ class JsonUModelBuilder {
       if(propName.contains(bogusId)) {
         propName = 'e_'+propName;
       }
-      UProperty property = new UProperty(attribute['xmi:id'])..name = propName;
+      UProperty property = new UProperty(attribute['xmi:id'])
+        ..name = propName
+        ..type = attribute['type']
+        ..visibility = attribute['visibility']
+        ..aggregation = attribute['aggregation'];
       addComment(property, attribute);
-      property.type = attribute['type'];
-      property.visibility = attribute['visibility'];
-      property.aggregation = attribute['aggregation'];
       target.properties.add(property);
       _itemMap[property.id] = property;
     });

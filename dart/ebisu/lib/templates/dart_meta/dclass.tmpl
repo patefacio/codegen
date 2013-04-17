@@ -12,7 +12,7 @@ class ${_.className} {
 ${indentBlock(ctor.ctorText)}
 #< }); >
 #< for(var member in _.members) { >
-${indentBlock(member.define())}
+${indentBlock(chomp(member.define()))}
 #< } >
 #< if(_.includeCustom) { >
 ${customBlock("class ${_.name}")}
@@ -31,32 +31,70 @@ ${customBlock("class ${_.name}")}
 #<   } >
     };
   }
+
+  static Map randJson() { 
+    return { 
+#<   for(Member member in _.members.where((m) => !m.jsonTransient)) { >
+#<     if(isMapType(member.type)) { >
+#<       String valType = jsonMapValueType(member.type);  >
+#<       if(isJsonableType(valType)) { >
+    "${member.name}": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType})),
+#<       } else { >
+    "${member.name}": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
+        () => ${valType}.randJson()),
+#<       } >
+#<     } else if(isListType(member.type)) { >
+#<       String valType = jsonListValueType(member.type);  >
+#<       if(isJsonableType(valType)) { >
+    "${member.name}": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType})),
+#<       } else { >
+    "${member.name}": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => ${valType}.randJson()),
+#<       }  >
+#<     } else if(isJsonableType(member.type)) { >
+    "${member.name}": EBISU_UTILS.randJson(_randomJsonGenerator, ${member.type}),
+#<     } else { >
+    "${member.name}": EBISU_UTILS.randJson(_randomJsonGenerator, ${member.type}.randJson),
+#<     } >
+#<   } >
+    };
+  }
+
 #<   } >
 #< if(_.jsonSupport) { >
 
   static ${_.name} fromJson(String json) {
     Map jsonMap = JSON.parse(json);
-    ${_.name} result = new ${_.name}._json();
+    ${_.name} result = new ${_.jsonCtor}();
     result._fromJsonMapImpl(jsonMap);
     return result;
   }
 
   static ${_.name} fromJsonMap(Map jsonMap) {
-    ${_.name} result = new ${_.name}._json();
+    ${_.name} result = new ${_.jsonCtor}();
     result._fromJsonMapImpl(jsonMap);
     return result;
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
 #<   for(Member m in _.members.where((m) => !m.jsonTransient)) { >
+// ${m.name} of ${m.type} => ${_.isClassJsonable(m.type)}
 #<     if(_.isClassJsonable(m.type)) { >
-    ${m.varName} = EBISU_UTILS.fromJsonMap(jsonMap["${m.name}"]);
+    ${m.varName} = (jsonMap["${m.name}"] is Map)?
+      ${m.type}.fromJsonMap(jsonMap["${m.name}"]) :
+      ${m.type}.fromJson(jsonMap["${m.name}"]);
 #<     } else if(isMapType(m.type)) { >
 #<       String valType = jsonMapValueType(m.type);  >
 #<       if(valType != null) { >
     // ${m.name} map of <String, ${valType}>
     jsonMap["${m.name}"].forEach((k,v) { 
-       ${m.varName}[k] = ${valType}.fromJsonMap(v);
+      ${m.varName}[k] = ${valType}.fromJsonMap(v);
     });
 #<       } >
 #<     } else if(isListType(m.type)) { >
@@ -65,7 +103,7 @@ ${customBlock("class ${_.name}")}
     // ${m.name} list of ${valType}
     ${m.varName} = new ${m.type}();
     jsonMap["${m.name}"].forEach((v) { 
-       ${m.varName}.add(${valType}.fromJsonMap(v));
+      ${m.varName}.add(${valType}.fromJsonMap(v));
     });
 #<       } >
 #<     } else { >
@@ -73,6 +111,5 @@ ${customBlock("class ${_.name}")}
 #<     } >
 #<   } >
   }
-
 #< } >
 }

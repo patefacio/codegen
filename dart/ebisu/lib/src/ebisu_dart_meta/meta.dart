@@ -192,7 +192,7 @@ class Enum {
     "isPublic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "values": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Id()..randJson),
+        () => Id.randJson()),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "enumName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
@@ -275,7 +275,7 @@ class PubSpec {
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "dependencies": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new PubDependency()..randJson),
+        () => PubDependency.randJson()),
     };
   }
 
@@ -320,6 +320,9 @@ class System {
               jsonableClasses[dclass.name] = dclass;
             }
           });
+          part.enums.forEach((e) {
+            jsonableClasses[e.name] = e;
+          });
         });
       });
       _finalized = true;
@@ -359,14 +362,14 @@ class System {
     "rootPath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "apps": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new App()..randJson),
+        () => App.randJson()),
     "libraries": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Library()..randJson),
+        () => Library.randJson()),
     "pubSpec": EBISU_UTILS.randJson(_randomJsonGenerator, PubSpec.randJson),
     "jsonableClasses": 
        EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => new DClass()..randJson()),
+        () => DClass.randJson()),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
   }
@@ -429,13 +432,13 @@ class App {
     "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new DClass()..randJson),
+        () => DClass.randJson()),
     "libraries": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Library()..randJson),
+        () => Library.randJson()),
     "variables": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Variable()..randJson),
+        () => Variable.randJson()),
     };
   }
 
@@ -534,10 +537,10 @@ class Library {
         () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
     "parts": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Part()..randJson),
+        () => Part.randJson()),
     "variables": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Variable()..randJson),
+        () => Variable.randJson()),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -607,10 +610,10 @@ class Part {
     "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new DClass()..randJson),
+        () => DClass.randJson()),
     "enums": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Enum()..randJson),
+        () => Enum.randJson()),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -784,10 +787,10 @@ class DClass {
     "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "members": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Member()..randJson),
+        () => Member.randJson()),
     "ctors": 
        EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => new Ctor()..randJson()),
+        () => Ctor.randJson()),
     "toJsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "jsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
@@ -861,13 +864,13 @@ ${guts}
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "members": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Member()..randJson),
+        () => Member.randJson()),
     "optMembers": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Member()..randJson),
+        () => Member.randJson()),
     "namedMembers": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => new Member()..randJson),
+        () => Member.randJson()),
     };
   }
 

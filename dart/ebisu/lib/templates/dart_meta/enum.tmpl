@@ -23,22 +23,26 @@ class ${_.enumName} {
     }
   }
 
-  static ${_.enumName} fromString(String s) { 
-    switch(s) { 
-#< for(var value in _.values) { >
-      case "${value.shout}":  return ${value.shout};
-#< } >
-    }
-  }
-
   int toJson() { 
     return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(${_.values.length});
   }
 
   static ${_.enumName} fromJson(int v) { 
     switch(v) { 
 #< for(var value in _.values) { >
       case ${value.shout}.value: return ${value.shout};
+#< } >
+    }
+  }
+
+  static ${_.enumName} fromString(String s) { 
+    switch(s) { 
+#< for(var value in _.values) { >
+      case "${value.shout}": return ${value.shout};
 #< } >
     }
   }

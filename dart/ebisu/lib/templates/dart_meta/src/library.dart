@@ -32,6 +32,7 @@ ${v.define()}
   _buf.add('''
 main() {
   print("Main for library ${_.id.snake}");
+${indentBlock(customBlock("main ${_.name}"))}
 }
 ''');
  if(_.includeCustom) { 

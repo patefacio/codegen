@@ -4,6 +4,9 @@ import "dart:math";
 
 main() {
   print("Main for library ebisu_utils");
+  // custom <main ebisu_utils>
+  // end <main ebisu_utils>
+  
 }
 // custom <library ebisu_utils>
 
@@ -29,8 +32,30 @@ dynamic toJson(final dynamic obj) {
   return _toJsonRequired(obj) ? obj.toJson() : obj;
 }
 
+final _sourceChars = r'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*+;,.';
+final _randGenerator = new Random(0);
+
+String randString([Random generator, int maxLen = 10 ]) {
+  if(!?generator) generator = _randGenerator;
+  int numChars = generator.nextInt(maxLen)+1;
+  var chars = new List<int>(numChars);
+  for(var i=0; i<numChars; i++) {
+    chars[i] = _sourceChars.codeUnitAt(generator.nextInt(_sourceChars.length));
+  }
+  return new String.fromCharCodes(chars);
+}
+
+dynamic randJsonMap([Random generator, dynamic valueBuilder, int maxLen = 10]) {
+  Map result = {};
+  if(!?generator) generator = _randGenerator;
+  int numEntries = generator.nextInt(maxLen)+1;
+  for(var i=0; i<numEntries; i++) {
+    result[randString(generator)] = valueBuilder();
+  }
+  return result;
+}
+
 dynamic randJson(Random generator, var obj, [ final dynamic type ]) {
-  print("OBJ is $obj");
   if(obj is List) {
     List result = [];
     new List(generator.nextInt(6)+1).forEach((i) {
@@ -40,17 +65,17 @@ dynamic randJson(Random generator, var obj, [ final dynamic type ]) {
   } else if(obj is Map) {
     Map result = {};
     new List(generator.nextInt(4)+1).forEach((i) {
-      result[generator.nextInt().toString()] = type;
+      result[generator.nextInt(1<<31).toString()] = type;
     });
     return result;
   } else if(obj is Function) {
     return obj();
   } else {
     switch(obj) {
-      case num: return generator.nextInt();
-      case double: return generator.nextDouble();
-      case int: return generator.nextInt();
-      case String: return generator.nextInt().toString();
+      case num: return generator.nextInt(1<<31);
+      case double: return generator.nextInt(1<<31) * generator.nextDouble();
+      case int: return generator.nextInt(1<<31);
+      case String: return generator.nextInt(1<<31).toString();
       case bool: return 0==(nextInt()%2);
       case null: return null;
       default: { 

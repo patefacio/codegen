@@ -8,6 +8,9 @@ part "src/ebisu_id/id.dart";
 
 main() {
   print("Main for library ebisu_id");
+  // custom <main ebisu_id>
+  // end <main ebisu_id>
+  
 }
 // custom <library ebisu_id>
 // end <library ebisu_id>

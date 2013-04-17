@@ -10,6 +10,9 @@ part "src/ebisu_dart_meta/meta.dart";
 
 main() {
   print("Main for library ebisu_dart_meta");
+  // custom <main ebisu_dart_meta>
+  // end <main ebisu_dart_meta>
+  
 }
 // custom <library ebisu_dart_meta>
 // end <library ebisu_dart_meta>

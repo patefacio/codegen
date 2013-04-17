@@ -13,6 +13,9 @@ final RegExp commentRe = new RegExp("^\\s*#");
 
 main() {
   print("Main for library ebisu_compiler");
+  // custom <main ebisu_compiler>
+  // end <main ebisu_compiler>
+  
 }
 // custom <library ebisu_compiler>
 // end <library ebisu_compiler>
