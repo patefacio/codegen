@@ -7,6 +7,11 @@ String library([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
+ if(_.doc != null) { 
+  _buf.add('''
+${docComment(_.doc)}
+''');
+ } 
   _buf.add('''
 library ${_.name};
 
@@ -24,6 +29,18 @@ part "src/${_.name}/${part.name}.dart";
   _buf.add('''
 
 ''');
+ for(var e in _.enums) { 
+  _buf.add('''
+${chomp(e.define())}
+
+''');
+ } 
+ for(var c in _.classes) { 
+  _buf.add('''
+${chomp(c.define())}
+
+''');
+ } 
  for(var v in _.variables) { 
   _buf.add('''
 ${v.define()}

@@ -39,12 +39,14 @@ ${customBlock("class ${_.name}")}
 #<       String valType = jsonMapValueType(member.type);  >
 #<       if(isJsonableType(valType)) { >
     "${member.name}": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType})),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator, 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType}),
+        "${member.name}"),
 #<       } else { >
     "${member.name}": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => ${valType}.randJson()),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator,
+        () => ${valType}.randJson(),
+        "${member.name}"),
 #<       } >
 #<     } else if(isListType(member.type)) { >
 #<       String valType = jsonListValueType(member.type);  >
@@ -84,7 +86,6 @@ ${customBlock("class ${_.name}")}
 
   void _fromJsonMapImpl(Map jsonMap) {
 #<   for(Member m in _.members.where((m) => !m.jsonTransient)) { >
-// ${m.name} of ${m.type} => ${_.isClassJsonable(m.type)}
 #<     if(_.isClassJsonable(m.type)) { >
     ${m.varName} = (jsonMap["${m.name}"] is Map)?
       ${m.type}.fromJsonMap(jsonMap["${m.name}"]) :
@@ -93,6 +94,7 @@ ${customBlock("class ${_.name}")}
 #<       String valType = jsonMapValueType(m.type);  >
 #<       if(valType != null) { >
     // ${m.name} map of <String, ${valType}>
+    ${m.name} = { };
     jsonMap["${m.name}"].forEach((k,v) { 
       ${m.varName}[k] = ${valType}.fromJsonMap(v);
     });
@@ -107,7 +109,11 @@ ${customBlock("class ${_.name}")}
     });
 #<       } >
 #<     } else { >
+#<       if(m.type == 'DateTime') { >
+    ${m.varName} = DateTime.parse(jsonMap["${m.name}"]);
+#<       } else { >
     ${m.varName} = jsonMap["${m.name}"];
+#<       } >
 #<     } >
 #<   } >
   }

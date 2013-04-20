@@ -49,6 +49,55 @@ class Access {
   }
 }
 
+/// Dependency type of a PubDependency 
+class PubDepType { 
+  static const PATH = const PubDepType._(0);
+  static const GIT = const PubDepType._(1);
+  static const HOSTED = const PubDepType._(2);
+
+  static get values => [
+    PATH,
+    GIT,
+    HOSTED
+  ];
+
+  final int value;
+
+  const PubDepType._(this.value);
+
+  String toString() { 
+    switch(this) { 
+      case PATH: return "PATH";
+      case GIT: return "GIT";
+      case HOSTED: return "HOSTED";
+    }
+  }
+
+  int toJson() { 
+    return this.value;
+  }
+
+  static int randJson() { 
+   return _randomJsonGenerator.nextInt(3);
+  }
+
+  static PubDepType fromJson(int v) { 
+    switch(v) { 
+      case PATH.value: return PATH;
+      case GIT.value: return GIT;
+      case HOSTED.value: return HOSTED;
+    }
+  }
+
+  static PubDepType fromString(String s) { 
+    switch(s) { 
+      case "PATH": return PATH;
+      case "GIT": return GIT;
+      case "HOSTED": return HOSTED;
+    }
+  }
+}
+
 class Variable { 
   Variable(
     this._id
@@ -133,6 +182,7 @@ class Variable {
 
 /// Defines an enum - to be generated idiomatically as a class
 /// See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
+/// At some point when true enums are provided this may be revisited.
 /// 
 class Enum { 
   Enum(
@@ -205,10 +255,35 @@ class PubDependency {
   /// Name of dependency
   String name;
   /// Required version for this dependency
-  String version;
+  String version = "any";
+  /// Path to package, infers package type for git (git:...), hosted (http:...), path 
+  String path;
+  /// Type for the pub dependency
+  PubDepType type = PubDepType.PATH;
+  final RegExp pubTypeRe = new RegExp(r"(git:|http:|[./.])");
 // custom <class PubDependency>
 
+  bool get isHosted => (type == PubDepType.HOSTED);
+  bool get isGit => (type == PubDepType.GIT);
+
   PubDependency(String _name) : name = _name {
+    PubDepType pubDepType = PubDepType.PATH;
+    if(path != null) {
+      var match = pubTypeRe.firstMatch(path);
+
+      switch(match.group(1)) {
+        case 'git:': {
+          pubDepType = PubDepType.GIT;
+          break;
+        }
+        case 'http:': {
+          pubDepType = PubDepType.HOSTED;
+          break;
+        }
+      }
+    } else {
+      pubDepType = PubDepType.HOSTED;
+    }
   }
 
 // end <class PubDependency>
@@ -218,6 +293,9 @@ class PubDependency {
     return { 
     "name": EBISU_UTILS.toJson(name),
     "version": EBISU_UTILS.toJson(version),
+    "path": EBISU_UTILS.toJson(path),
+    "type": EBISU_UTILS.toJson(type),
+    "pubTypeRe": EBISU_UTILS.toJson(pubTypeRe),
     };
   }
 
@@ -225,6 +303,9 @@ class PubDependency {
     return { 
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "version": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "path": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, PubDepType.randJson),
+    "pubTypeRe": EBISU_UTILS.randJson(_randomJsonGenerator, RegExp.randJson),
     };
   }
 
@@ -245,14 +326,16 @@ class PubSpec {
   dynamic _parent;
   /// Reference to parent of this pub spec
   dynamic get parent => _parent;
-  String _name;
+  /// Version for this package
+  String version = "0.0.1";
   /// Name of the project described in spec - if not set, id of system is used to generate
-  String get name => _name;
+  String name;
   List<PubDependency> dependencies = [];
 // custom <class PubSpec>
 
   set parent(p) {
-    _name = _id.capCamel;
+    if(name == null)
+      name = _id.snake;
     _parent = p;
   }
 
@@ -263,7 +346,8 @@ class PubSpec {
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
-    "name": EBISU_UTILS.toJson(_name),
+    "version": EBISU_UTILS.toJson(version),
+    "name": EBISU_UTILS.toJson(name),
     "dependencies": EBISU_UTILS.toJson(dependencies),
     };
   }
@@ -272,6 +356,7 @@ class PubSpec {
     return { 
     "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "version": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "dependencies": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
@@ -313,7 +398,18 @@ class System {
       apps.forEach((a) => a.parent = this);
       pubSpec.parent = this;
 
+      // Track all classes and enums with json support so the template side can
+      // do proper inserts of code. There are classes and enums in the library
+      // as well as classes and enums in each part to consider.
       libraries.forEach((library) {
+        library.classes.forEach((dclass) {
+          if(dclass.jsonSupport) {
+            jsonableClasses[dclass.name] = dclass;
+          }
+        });
+        library.enums.forEach((e) {
+          jsonableClasses[e.name] = e;
+        });
         library.parts.forEach((part) {
           part.classes.forEach((dclass) {
             if(dclass.jsonSupport) {
@@ -368,8 +464,9 @@ class System {
         () => Library.randJson()),
     "pubSpec": EBISU_UTILS.randJson(_randomJsonGenerator, PubSpec.randJson),
     "jsonableClasses": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => DClass.randJson()),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator,
+        () => DClass.randJson(),
+        "jsonableClasses"),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
   }
@@ -467,6 +564,10 @@ class Library {
   List<Part> parts = [];
   /// List of global variables for this library
   List<Variable> variables = [];
+  /// Classes defined in this library
+  List<DClass> classes = [];
+  /// Enums defined in this library
+  List<Enum> enums = [];
   String _name;
   /// Name of the library - for use in naming the library file, the 'library' and 'part of' statements
   String get name => _name;
@@ -476,6 +577,8 @@ class Library {
     _name = _id.snake;
     parts.forEach((part) => part.parent = this);
     variables.forEach((v) => v.parent = this);
+    enums.forEach((e) => e.parent = this);
+    classes.forEach((c) => c.parent = this);
     _parent = p;
   }
 
@@ -523,6 +626,8 @@ class Library {
     "imports": EBISU_UTILS.toJson(imports),
     "parts": EBISU_UTILS.toJson(parts),
     "variables": EBISU_UTILS.toJson(variables),
+    "classes": EBISU_UTILS.toJson(classes),
+    "enums": EBISU_UTILS.toJson(enums),
     "name": EBISU_UTILS.toJson(_name),
     };
   }
@@ -541,6 +646,12 @@ class Library {
     "variables": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Variable.randJson()),
+    "classes": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => DClass.randJson()),
+    "enums": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Enum.randJson()),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -751,7 +862,7 @@ class DClass {
     return META.dclass(this);
   }
 
-  dynamic noSuchMethod(InvocationMirror msg) {
+  dynamic noSuchMethod(Invocation msg) {
     return null;
   }
 
@@ -789,8 +900,9 @@ class DClass {
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Member.randJson()),
     "ctors": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => Ctor.randJson()),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator,
+        () => Ctor.randJson(),
+        "ctors"),
     "toJsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "jsonSupport": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
@@ -997,7 +1109,7 @@ Member member(String _id) => new Member(id(_id));
 PubSpec pubspec(String _id)=> new PubSpec(id(_id));
 PubDependency pubdep(String name)=> new PubDependency(name);
 
-final RegExp _jsonableTypeRe = new RegExp(r"\b(?:int|double|num|String|bool)\b");
+final RegExp _jsonableTypeRe = new RegExp(r"\b(?:int|double|num|String|bool|DateTime)\b");
 final RegExp _mapTypeRe = new RegExp(r"Map\b");
 final RegExp _listTypeRe = new RegExp(r"List\b");
 final RegExp _jsonMapTypeRe = new RegExp(r"Map<\s*String,\s*(.*?)\s*>");

@@ -70,7 +70,6 @@ main() {
             ..doc = 'Map of items indexed by xmi:id'
             ..type = 'Map<String, dynamic>'
             ..access = Access.RO
-            ..jsonTransient = true
             ..classInit = '{}',
           ],
           dclass('u_class')
@@ -180,9 +179,41 @@ main() {
             ..classInit = '[]',
           ],
         ]
+      ],
+
+      library('xmi_to_dart')
+      ..doc = '''Support for creating a dart file from Altova UML class model (xmi file converted to json).
+Only structure is generated with json support. Effectively this allows IDL type structure modeling from
+UML with code generation to support Dart.
+'''
+      ..imports = [
+        'io',
+        '"dart:json" as JSON', 
+        '"package:plus/pprint.dart"',
+        '"package:pathos/path.dart" as path',
+        '"package:ebisu/ebisu_utils.dart" as EBISU_UTILS',
+        '"package:ebisu/ebisu_dart_meta.dart"',
+        '"package:pathos/path.dart"',
+        '"package:xmi/xmi.dart"',
+      ]
+      ..classes = [
+        dclass('converter')
+        ..doc = 'Pull in the model and generate dart'
+        ..members = [
+          member('src_file')
+          ..doc = 'Path to json input file'
+          ..ctors = [''],
+          member('out_path')
+          ..doc = 'Path into which to generate the dart code (with json support) representing the model'
+          ..ctors = [''],
+          member('library_name')
+          ..doc = 'Name of the library to create to support this model'
+          ..ctorsOpt = ['']
+        ]
       ]
     ];
 
+  /*
   xmi.libraries.forEach((library) {
     library.parts.forEach((part) {
       part.classes.forEach((c) {
@@ -190,6 +221,8 @@ main() {
       });
     });
   });
+  */
 
   xmi.generate();
+
 }

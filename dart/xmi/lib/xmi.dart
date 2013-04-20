@@ -9,6 +9,9 @@ part "src/xmi/model.dart";
 
 main() {
   print("Main for library xmi");
+  // custom <main xmi>
+  // end <main xmi>
+  
 }
 // custom <library xmi>
 // end <library xmi>

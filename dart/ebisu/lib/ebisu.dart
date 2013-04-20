@@ -1,3 +1,4 @@
+/// Primary library for client usage of ebisu
 library ebisu;
 
 import "dart:io";

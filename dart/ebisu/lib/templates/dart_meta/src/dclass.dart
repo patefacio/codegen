@@ -73,14 +73,16 @@ ${customBlock("class ${_.name}")}
        if(isJsonableType(valType)) { 
   _buf.add('''
     "${member.name}": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType})),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator, 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, ${valType}),
+        "${member.name}"),
 ''');
        } else { 
   _buf.add('''
     "${member.name}": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, { }, 
-        () => ${valType}.randJson()),
+       EBISU_UTILS.randJsonMap(_randomJsonGenerator,
+        () => ${valType}.randJson(),
+        "${member.name}"),
 ''');
        } 
      } else if(isListType(member.type)) { 
@@ -133,9 +135,6 @@ ${customBlock("class ${_.name}")}
   void _fromJsonMapImpl(Map jsonMap) {
 ''');
    for(Member m in _.members.where((m) => !m.jsonTransient)) { 
-  _buf.add('''
-// ${m.name} of ${m.type} => ${_.isClassJsonable(m.type)}
-''');
      if(_.isClassJsonable(m.type)) { 
   _buf.add('''
     ${m.varName} = (jsonMap["${m.name}"] is Map)?
@@ -147,6 +146,7 @@ ${customBlock("class ${_.name}")}
        if(valType != null) { 
   _buf.add('''
     // ${m.name} map of <String, ${valType}>
+    ${m.name} = { };
     jsonMap["${m.name}"].forEach((k,v) { 
       ${m.varName}[k] = ${valType}.fromJsonMap(v);
     });
@@ -164,9 +164,15 @@ ${customBlock("class ${_.name}")}
 ''');
        } 
      } else { 
+       if(m.type == 'DateTime') { 
+  _buf.add('''
+    ${m.varName} = DateTime.parse(jsonMap["${m.name}"]);
+''');
+       } else { 
   _buf.add('''
     ${m.varName} = jsonMap["${m.name}"];
 ''');
+       } 
      } 
    } 
   _buf.add('''

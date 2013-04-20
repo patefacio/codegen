@@ -45,7 +45,6 @@ class JsonUModelBuilder {
   addComment(dynamic target, Map map) {
     if(map.containsKey("ownedComment")) {
       Map comment = map["ownedComment"];
-      print("Added comment to ${target.name}");
       target.comment = new UComment(comment["xmi:id"])..body = comment["body"];
       _itemMap[target.id] = target;
     }
@@ -194,25 +193,6 @@ class JsonUModelBuilder {
 
 // end <class JsonUModelBuilder>
 
-
-  Map toJson() { 
-    return { 
-    "srcJsonFile": EBISU_UTILS.toJson(srcJsonFile),
-    "modelData": EBISU_UTILS.toJson(_modelData),
-    "itemMap": EBISU_UTILS.toJson(_itemMap),
-    "sigToOwner": EBISU_UTILS.toJson(_sigToOwner),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "srcJsonFile": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "modelData": EBISU_UTILS.randJson(_randomJsonGenerator, { }, () => new null()),
-    "itemMap": EBISU_UTILS.randJson(_randomJsonGenerator, { }, () => new dynamic()),
-    "sigToOwner": EBISU_UTILS.randJson(_randomJsonGenerator, { }, () => new String()),
-    };
-  }
-
 }
 
 class UModel { 
@@ -223,19 +203,6 @@ class UModel {
 // custom <class UModel>
 
 // end <class UModel>
-
-
-  Map toJson() { 
-    return { 
-    "root": EBISU_UTILS.toJson(root),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "root": EBISU_UTILS.randJson(_randomJsonGenerator, UPackage),
-    };
-  }
 
 }
 
@@ -260,29 +227,6 @@ class UClass {
 
 // end <class UClass>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    "comment": EBISU_UTILS.toJson(comment),
-    "properties": EBISU_UTILS.toJson(properties),
-    "templBinding": EBISU_UTILS.toJson(templBinding),
-    "templSig": EBISU_UTILS.toJson(templSig),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "comment": EBISU_UTILS.randJson(_randomJsonGenerator, UComment),
-    "properties": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UProperty()),
-    "templBinding": EBISU_UTILS.randJson(_randomJsonGenerator, UTemplBinding),
-    "templSig": EBISU_UTILS.randJson(_randomJsonGenerator, UTemplSig),
-    };
-  }
-
 }
 
 class UComment { 
@@ -302,21 +246,6 @@ class UComment {
 
 // end <class UComment>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "body": EBISU_UTILS.toJson(body),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "body": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
-
 }
 
 class UDependency { 
@@ -332,23 +261,6 @@ class UDependency {
   String client;
 // custom <class UDependency>
 // end <class UDependency>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "supplier": EBISU_UTILS.toJson(supplier),
-    "client": EBISU_UTILS.toJson(client),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "supplier": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "client": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
 
 }
 
@@ -369,25 +281,6 @@ class UEnumeration {
   UComment comment;
 // custom <class UEnumeration>
 // end <class UEnumeration>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    "properties": EBISU_UTILS.toJson(properties),
-    "comment": EBISU_UTILS.toJson(comment),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "properties": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UProperty()),
-    "comment": EBISU_UTILS.randJson(_randomJsonGenerator, UComment),
-    };
-  }
 
 }
 
@@ -414,35 +307,6 @@ class UPackage {
 // custom <class UPackage>
 // end <class UPackage>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    "comment": EBISU_UTILS.toJson(comment),
-    "classes": EBISU_UTILS.toJson(classes),
-    "enums": EBISU_UTILS.toJson(enums),
-    "primitiveTypes": EBISU_UTILS.toJson(primitiveTypes),
-    "packages": EBISU_UTILS.toJson(packages),
-    "parentPackageId": EBISU_UTILS.toJson(parentPackageId),
-    "path": EBISU_UTILS.toJson(path),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "comment": EBISU_UTILS.randJson(_randomJsonGenerator, UComment),
-    "classes": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UClass()),
-    "enums": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UEnumeration()),
-    "primitiveTypes": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UPrimitiveType()),
-    "packages": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UPackage()),
-    "parentPackageId": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "path": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new String()),
-    };
-  }
-
 }
 
 class UPrimitiveType { 
@@ -458,21 +322,6 @@ class UPrimitiveType {
   String name;
 // custom <class UPrimitiveType>
 // end <class UPrimitiveType>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
 
 }
 
@@ -496,29 +345,6 @@ class UProperty {
 // custom <class UProperty>
 // end <class UProperty>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    "comment": EBISU_UTILS.toJson(comment),
-    "type": EBISU_UTILS.toJson(type),
-    "visibility": EBISU_UTILS.toJson(visibility),
-    "aggregation": EBISU_UTILS.toJson(aggregation),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "comment": EBISU_UTILS.randJson(_randomJsonGenerator, UComment),
-    "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "visibility": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "aggregation": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
-
 }
 
 class UProfile { 
@@ -534,21 +360,6 @@ class UProfile {
   String name;
 // custom <class UProfile>
 // end <class UProfile>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
 
 }
 
@@ -568,23 +379,6 @@ class UStereotype {
 // custom <class UStereotype>
 // end <class UStereotype>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "name": EBISU_UTILS.toJson(name),
-    "properties": EBISU_UTILS.toJson(properties),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "properties": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UProperty()),
-    };
-  }
-
 }
 
 class UTemplBinding { 
@@ -602,23 +396,6 @@ class UTemplBinding {
   List<UTemplParmSubst> templParmSubsts = [];
 // custom <class UTemplBinding>
 // end <class UTemplBinding>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "signatureId": EBISU_UTILS.toJson(signatureId),
-    "templParmSubsts": EBISU_UTILS.toJson(templParmSubsts),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "signatureId": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "templParmSubsts": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UTemplParmSubst()),
-    };
-  }
 
 }
 
@@ -638,23 +415,6 @@ class UTemplParmSubst {
 // custom <class UTemplParmSubst>
 // end <class UTemplParmSubst>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "formalId": EBISU_UTILS.toJson(formalId),
-    "actualId": EBISU_UTILS.toJson(actualId),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "formalId": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "actualId": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
-
 }
 
 class UClassifierTemplParm { 
@@ -672,25 +432,6 @@ class UClassifierTemplParm {
 // custom <class UClassifierTemplParm>
 // end <class UClassifierTemplParm>
 
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "allowSubstitutable": EBISU_UTILS.toJson(allowSubstitutable),
-    "name": EBISU_UTILS.toJson(name),
-    "type": EBISU_UTILS.toJson(type),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "allowSubstitutable": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
-    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    };
-  }
-
 }
 
 class UTemplSig { 
@@ -705,21 +446,6 @@ class UTemplSig {
   List<UClassifierTemplParm> parms = [];
 // custom <class UTemplSig>
 // end <class UTemplSig>
-
-
-  Map toJson() { 
-    return { 
-    "id": EBISU_UTILS.toJson(_id),
-    "parms": EBISU_UTILS.toJson(parms),
-    };
-  }
-
-  static Map randJson() { 
-    return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "parms": EBISU_UTILS.randJson(_randomJsonGenerator, [], () => new UClassifierTemplParm()),
-    };
-  }
 
 }
 // custom <part model>

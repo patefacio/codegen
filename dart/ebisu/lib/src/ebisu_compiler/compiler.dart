@@ -47,7 +47,7 @@ class TemplateFile {
     }
 
     if(null != outputModtime) {
-      if(inputModtime > outputModtime) {
+      if(outputModtime.isBefore(inputModtime)) {
         compileImpl();
         return true;
       } 
