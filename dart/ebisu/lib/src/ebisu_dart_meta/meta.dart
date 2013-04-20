@@ -432,7 +432,8 @@ class System {
     finalize();
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
-    print(META.pubspec(pubSpec));
+    String pubSpecPath = "${rootPath}/pubspec.yaml";
+    mergeWithFile(META.pubspec(pubSpec), pubSpecPath);
   }
 
 // end <class System>

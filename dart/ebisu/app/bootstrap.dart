@@ -589,10 +589,6 @@ other languages like D) using a fairly declarative aproach.
 '''
         ..dependencies = [
           pubdep('pathos')
-          ..version = '0.4.5',
-          pubdep('ebisu'),
-          pubdep('bot')
-          ..version = '0.16.3+1',
         ]
                  )
     ..apps = []
@@ -629,6 +625,5 @@ other languages like D) using a fairly declarative aproach.
     });
   });
 
-  ebisu.finalize();
   ebisu.generate();
 }
