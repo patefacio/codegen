@@ -27,6 +27,27 @@ main() {
     ..type = 'UComment';
 
   System xmi = system('xmi')
+    ..pubSpec = (pubspec('xmi')
+        ..doc = '''Support for basic Dart code generation from Altova UML Model.  The idea is UML
+can be used to define the structure of data being passed between
+client/server. Once stored in UML the XMI data can be parsed and used to
+generate Dart code. Since Dart does not yet have an XML parser, the approach is
+to pass the model through a XML to JSON converter (_xmi_to_json.rb_) first. 
+
+
+Only a subset of the XMI meta data is defined - just enough to support basic
+classes with properties. Meta data for templates are required for two uml
+parameterized classes (list<E> and j_map<K>). This particular solution requires
+all class names in the UML to be lower case with underscore separating
+words. The reason for this is that the ebisu code generation itself is strict
+about that as well.
+'''
+        ..dependencies = [
+          pubdep('pathos'),
+          pubdep('ebisu')
+          ..path = '../ebisu',
+        ]
+                 )
     ..rootPath = _topDir
     ..libraries = [
       library('xmi')
@@ -34,14 +55,13 @@ main() {
       ..imports = [
         'io',
         '"dart:json" as JSON', 
-        '"package:plus/pprint.dart"',
         '"package:pathos/path.dart" as path',
         '"package:ebisu/ebisu_utils.dart" as EBISU_UTILS',
       ]
       ..parts = [
         part('model')
         ..classes = [
-          dclass('json_u_model_builder')
+          class_('json_u_model_builder')
           ..doc = 'Build a UModel from json representation of XMI'
           ..members = [
             member('src_json_file')
@@ -63,7 +83,7 @@ main() {
             ..access = Access.RO
             ..classInit = '{}',
           ],
-          dclass('u_model')
+          class_('u_model')
           ..members = [
             member('root')..type = 'UPackage',
             member('item_map')
@@ -72,7 +92,7 @@ main() {
             ..access = Access.RO
             ..classInit = '{}',
           ],
-          dclass('u_class')
+          class_('u_class')
           ..members = [ 
             id_member('uml class'), 
             name_member('uml class'),
@@ -81,26 +101,26 @@ main() {
             member('templ_binding')..type = 'UTemplBinding',
             member('templ_sig')..type = 'UTemplSig',
           ],
-          dclass('u_comment')
+          class_('u_comment')
           ..members = [
             id_member('uml comment'),
             member('body')
             ..doc = 'Text of the comment'
           ],
-          dclass('u_dependency')
+          class_('u_dependency')
           ..members = [
             id_member('uml dependency'),
             member('supplier'),
             member('client'),
           ],
-          dclass('u_enumeration')
+          class_('u_enumeration')
           ..members = [
             id_member('uml enumeration'), 
             name_member('uml enumeration'),
             properties_member('uml enumeration'),
             comment_member('uml enumeration'),
           ],
-          dclass('u_package')
+          class_('u_package')
           ..members = [
             id_member('uml package'), 
             name_member('uml package'),
@@ -123,12 +143,12 @@ main() {
             ..type = 'List<String>'
             ..classInit = '[]'
           ],
-          dclass('u_primitive_type')
+          class_('u_primitive_type')
           ..members = [
             id_member('uml primitive type'), 
             name_member('uml primitive type'),
           ],
-          dclass('u_property')
+          class_('u_property')
           ..members = [
             id_member('uml property'), 
             name_member('uml property'),
@@ -137,18 +157,18 @@ main() {
             member('visibility'),
             member('aggregation'),
           ],
-          dclass('u_profile')       
+          class_('u_profile')       
           ..members = [
             id_member('uml profile'), 
             name_member('uml profile'),
           ],
-          dclass('u_stereotype')
+          class_('u_stereotype')
           ..members = [
             id_member('uml stereotype'), 
             name_member('uml stereotype'),
             properties_member('uml class'),
           ],
-          dclass('u_templ_binding')
+          class_('u_templ_binding')
           ..members = [
             id_member('uml template binding'),
             member('signature_id')
@@ -158,20 +178,20 @@ main() {
             ..type = 'List<UTemplParmSubst>'
             ..classInit = '[]',
           ],
-          dclass('u_templ_parm_subst')
+          class_('u_templ_parm_subst')
           ..members = [
             id_member('uml template parameter substitution'),
             member('formal_id')..doc = 'Id of the formal type being substituted',            
             member('actual_id')..doc = 'Id of the actual type being substituted',            
           ],
-          dclass('u_classifier_templ_parm')
+          class_('u_classifier_templ_parm')
           ..members = [
             id_member('uml classifier template parameter'),
             member('allow_substitutable')..type = 'bool'..classInit = 'false',
             member('name'),
             member('type'),
           ],
-          dclass('u_templ_sig')
+          class_('u_templ_sig')
           ..members = [
             id_member('uml template signature'),
             member('parms')
@@ -197,7 +217,7 @@ UML with code generation to support Dart.
         '"package:xmi/xmi.dart"',
       ]
       ..classes = [
-        dclass('converter')
+        class_('converter')
         ..doc = 'Pull in the model and generate dart'
         ..members = [
           member('src_file')

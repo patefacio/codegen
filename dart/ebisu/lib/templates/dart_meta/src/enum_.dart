@@ -1,6 +1,6 @@
 part of dart_meta;
 
-String enum([dynamic _]) {
+String enum_([dynamic _]) {
   if(_ is Map) {
     _ = new Context(_);
   }

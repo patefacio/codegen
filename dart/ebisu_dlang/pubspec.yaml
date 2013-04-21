@@ -1,0 +1,8 @@
+name: ebisu_dlang
+version: 0.0.1
+description: >
+  A library that supports code generation of dart and others
+dependencies:
+  pathos:
+  ebisu:
+      path: ../ebisu

@@ -2,6 +2,7 @@
 library ebisu_utils;
 
 import "dart:math";
+import 'dart:json' as JSON;
 
 main() {
   print("Main for library ebisu_utils");
@@ -153,7 +154,7 @@ String prettyJsonMap(dynamic item, [String indent = "", bool showCount = false])
       result.add(prettyJsonMap(map, indent, showCount));
 
     } else {
-      result.add(stringify(item));
+      result.add(JSON.stringify(item));
     }
   }
   return result.join('');  

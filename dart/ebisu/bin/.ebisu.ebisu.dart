@@ -88,7 +88,7 @@ are simple:
     ..parts = [
       part('compiler')
       ..classes = [
-        dclass('template_file')
+        class_('template_file')
         ..doc = 'A file with ".tmpl" extension containing mixed dart code and text that can be "realized" by the template engine'
         ..members = [
           member('input_path')
@@ -103,7 +103,7 @@ are simple:
           member('function_name')
           ..access = Access.RO
         ],
-        dclass('template_folder')
+        class_('template_folder')
         ..doc = '''A class to process a folder full of templates, 
 all of which get compiled into a single dart library'''
         ..members = [
@@ -132,7 +132,7 @@ things like class names, variable names, function names, etc. Because different
 outputs will want different case conventions for different contexts, using the
 Id class allows a simple consistent input format (snake case) to be combined
 with the appropriate conventions (usually via templates) to produce consistent
-correct naming. Most ebisu entities are named (Libraries, Parts, DClasses, etc).
+correct naming. Most ebisu entities are named (Libraries, Parts, Classes, etc).
 
 '''
     ..imports = [
@@ -144,7 +144,7 @@ correct naming. Most ebisu entities are named (Libraries, Parts, DClasses, etc).
     ..parts = [
       part('id')
       ..classes = [
-        dclass('id')
+        class_('id')
         ..doc = '''Given an id (all lower case string of words separated by '_')
 provides consistent representations'''
         ..members = [
@@ -162,7 +162,7 @@ provides consistent representations'''
     ];
 
   Library ebisu_utils = library('ebisu_utils')
-    ..imports = [ 'math' ]
+    ..imports = [ 'math', "'dart:json' as JSON" ]
     ..doc = 'Support code to be used by libraries generated with ebisu. Example (toJson)';
 
   // The following are commonly used members of the meta data classes
@@ -202,7 +202,7 @@ provides consistent representations'''
 
 Support for storing dart meta data for purpose of generating code. Essentially
 this is a model of structural code items that comprise dart systems. Things like
-libraries (Library), classes (DClass), class members (Member), pubspecs
+libraries (Library), classes (Class), class members (Member), pubspecs
 (PubSpec), etc. A very nice feature of Dart is the dot-dot _.._ operator, which
 allows one to conveniently string together accessor calls to objects. For
 example, the following is the structure of the ebisu_id library.
@@ -219,7 +219,7 @@ example, the following is the structure of the ebisu_id library.
       ..parts = [
         part('id')
         ..classes = [
-          dclass('id')
+          class_('id')
           ..doc = "Given an id (all lower case string of words separated by '_')..."
           ..members = [
             member('id')
@@ -257,19 +257,19 @@ classes with JSON support.
     ..parts = [
       part('meta')
       ..enums = [
-        enum('access')
+        enum_('access')
         ..doc = 'Access for member variable - ia - inaccessible, ro - read/only, rw read/write'
         ..values = [
           id('ia'), id('ro'), id('rw')
         ],
-        enum('pub_dep_type')
+        enum_('pub_dep_type')
         ..doc = 'Dependency type of a PubDependency '
         ..values = [
           id('path'), id('git'), id('hosted')
         ],
       ]
       ..classes = [
-        dclass('variable')
+        class_('variable')
         ..members = [
           id_member('variable'),
           doc_member('variable'),
@@ -302,7 +302,7 @@ classes with JSON support.
           ..doc = 'Name of variable - varies depending on public/private'
           ..access = Access.RO,
         ],
-        dclass('enum')
+        class_('enum')
         ..doc = '''Defines an enum - to be generated idiomatically as a class
 See (http://stackoverflow.com/questions/13899928/does-dart-support-enumerations)
 At some point when true enums are provided this may be revisited.
@@ -323,7 +323,7 @@ At some point when true enums are provided this may be revisited.
           ..doc = "Name of the enum class generated with access prefix"
           ..access = Access.RO,
         ],
-        dclass('pub_dependency')
+        class_('pub_dependency')
         ..doc = 'A dependency of the system'
         ..members = [
           member('name')
@@ -342,7 +342,7 @@ At some point when true enums are provided this may be revisited.
           ..isFinal = true
           ..classInit = 'new RegExp(r"(git:|http:|[\./.])")'
         ],
-        dclass('pub_spec')
+        class_('pub_spec')
         ..doc = 'Information for the pubspec of the system'
         ..members = [
           id_member('pub spec'),
@@ -357,7 +357,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'List<PubDependency>'
           ..classInit = '[]',
         ],
-        dclass('system')
+        class_('system')
         ..doc = 'Defines a dart system (collection of libraries and apps)'
         ..members = [
           non_final_id_member('system'),
@@ -377,7 +377,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'PubSpec',
           member('jsonable_classes')
           ..doc = 'Map of all classes that have jsonSupport'
-          ..type = 'Map<String,DClass>'
+          ..type = 'Map<String,Class>'
           ..classInit = '{}',
           member('finalized')
           ..doc = 'Set to true on finalize'
@@ -385,7 +385,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'bool'
           ..classInit = 'false'
         ],
-        dclass('app')
+        class_('app')
         ..doc = 'Defines a dart application'
         ..members = [
           id_member('app'),
@@ -394,7 +394,7 @@ At some point when true enums are provided this may be revisited.
           custom_member('app'),
           member('classes')
           ..doc = 'Classes defined in this app'
-          ..type = 'List<DClass>'
+          ..type = 'List<Class>'
           ..classInit = '[]',
           member('libraries')
           ..doc = 'List of libraries of this app'
@@ -405,7 +405,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'List<Variable>'
           ..classInit = '[]',
         ],
-        dclass('library')
+        class_('library')
         ..doc = "Defines a dart library - a collection of parts"
         ..members = [
           id_member('library'),
@@ -426,7 +426,7 @@ At some point when true enums are provided this may be revisited.
           ..classInit = '[]',
           member('classes')
           ..doc = 'Classes defined in this library'
-          ..type = 'List<DClass>'
+          ..type = 'List<Class>'
           ..classInit = '[]',
           member('enums')
           ..doc = 'Enums defined in this library'
@@ -436,7 +436,7 @@ At some point when true enums are provided this may be revisited.
           ..doc = "Name of the library - for use in naming the library file, the 'library' and 'part of' statements"
           ..access = Access.RO,
         ],
-        dclass('part')
+        class_('part')
         ..doc = "Defines a dart part - as in 'part of' source file"
         ..members = [
           id_member('part'),
@@ -445,7 +445,7 @@ At some point when true enums are provided this may be revisited.
           custom_member('app'),
           member('classes')
           ..doc = 'Classes defined in this part of the library'
-          ..type = 'List<DClass>'
+          ..type = 'List<Class>'
           ..classInit = '[]',
           member('enums')
           ..doc = 'Enums defined in this part of the library'
@@ -455,7 +455,7 @@ At some point when true enums are provided this may be revisited.
           ..doc = "Name of the part - for use in naming the part file"
           ..access = Access.RO,
         ],
-        dclass('mixin')
+        class_('mixin')
         ..doc = 'Mixin for extending classes'
         ..members = [
           member('source')
@@ -466,7 +466,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'List<String>'
           ..ctors = [''],
         ],
-        dclass('d_class')
+        class_('class')
         ..doc = 'Metadata associated with a Dart class'
         ..members = [
           id_member('Dart class'),
@@ -504,7 +504,7 @@ At some point when true enums are provided this may be revisited.
           ..doc = "Name of the class, including access prefix"
           ..access = Access.RO,
         ],
-        dclass('ctor')
+        class_('ctor')
         ..doc = 'Metadata associated with a constructor'
         ..members = [
           member('class_name')
@@ -524,7 +524,7 @@ At some point when true enums are provided this may be revisited.
           ..type = 'List<Member>'
           ..classInit = '[]',
         ],
-        dclass('member')
+        class_('member')
         ..doc = 'Metadata associated with a member of a Dart class'
         ..members = [
           id_member('class member'),
@@ -602,7 +602,7 @@ other languages like D) using a fairly declarative aproach.
       ..parts = [
         part('ebisu')
         ..classes = [
-          dclass('context')
+          class_('context')
           ..doc = "Convenience wrapper for a map - passed into templates as variable '_'"
           ..members = [
             member('data')

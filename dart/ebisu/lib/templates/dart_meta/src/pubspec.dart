@@ -10,50 +10,56 @@ String pubspec([dynamic _]) {
   _buf.add('''
 name: ${_.name}
 version: ${_.version}
+''');
+ if(_.doc != null) {                            
+  _buf.add('''
 description: >
 ${indentBlock(_.doc)}
+''');
+ }                                              
+  _buf.add('''
 dependencies:
 ''');
- for(PubDependency pbdep in _.dependencies) { 
-   if(pbdep.isHosted) {          
+ for(PubDependency pbdep in _.dependencies) {   
+   if(pbdep.isHosted || pbdep.isPath) {         
   _buf.add('''
   ${pbdep.name}:
 ''');
-   } else {                      
+   } else {                                     
   _buf.add('''
   ${pbdep.name}: '${pbdep.version}'
 ''');
-   }                             
-   if(pbdep.path == null) {      
-   } else {                      
-     if(pbdep.isHosted) {        
+   }                                            
+   if(pbdep.path == null) {                     
+   } else {                                     
+     if(pbdep.isHosted) {                       
   _buf.add('''
       hosted: 
         name: ${pbdep.name}
         url: ${pbdep.path}
       version: '${pbdep.version}' 
 ''');
-     } else if(pbdep.isGit) {    
-       if(pbdep.gitRef != null) {
+     } else if(pbdep.isGit) {                   
+       if(pbdep.gitRef != null) {               
   _buf.add('''
       git: 
         url: ${pbdep.path}
         ref: ${pbdep.gitRef}
 ''');
-       } else {                  
+       } else {                                 
   _buf.add('''
       git: ${pbdep.path}
 ''');
-       }                         
+       }                                        
   _buf.add('''
 
 ''');
-     } else {                    
+     } else {                                   
   _buf.add('''
       path: ${pbdep.path}
 ''');
-     }                           
-   }                             
+     }                                          
+   }                                            
  } 
   return _buf.join();
 }

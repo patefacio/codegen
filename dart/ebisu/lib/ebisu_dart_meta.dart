@@ -1,7 +1,7 @@
 /// 
 /// Support for storing dart meta data for purpose of generating code. Essentially
 /// this is a model of structural code items that comprise dart systems. Things like
-/// libraries (Library), classes (DClass), class members (Member), pubspecs
+/// libraries (Library), classes (Class), class members (Member), pubspecs
 /// (PubSpec), etc. A very nice feature of Dart is the dot-dot _.._ operator, which
 /// allows one to conveniently string together accessor calls to objects. For
 /// example, the following is the structure of the ebisu_id library.
@@ -18,7 +18,7 @@
 ///       ..parts = [
 ///         part('id')
 ///         ..classes = [
-///           dclass('id')
+///           class_('id')
 ///           ..doc = "Given an id (all lower case string of words separated by '_')..."
 ///           ..members = [
 ///             member('id')

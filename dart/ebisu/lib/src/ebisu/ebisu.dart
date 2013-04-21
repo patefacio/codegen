@@ -12,7 +12,7 @@ class Context {
   { 
   }
 
-  dynamic noSuchMethod(InvocationMirror msg) {
+  dynamic noSuchMethod(Invocation msg) {
     String memberName = msg.memberName;
     if(! _data.containsKey(memberName)) {
       throw new ArgumentError("Context could not find key '$memberName' in data");

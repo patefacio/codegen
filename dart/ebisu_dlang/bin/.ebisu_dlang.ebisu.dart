@@ -92,7 +92,9 @@ void main() {
     ..pubSpec = (pubspec('ebisu_dlang')
         ..doc = 'A library that supports code generation of dart and others'
         ..dependencies = [
-          pubdep('pathos')
+          pubdep('pathos'),
+          pubdep('ebisu')
+          ..path = '../ebisu',
         ]
                  )
     ..libraries = [
@@ -135,24 +137,24 @@ void main() {
       ..parts = [
         part('meta')
         ..enums = [
-          enum('access')
+          enum_('access')
           ..doc = 'Access for member variable - ia - inaccessible, ro - read/only, rw read/write'
           ..values = [
             id('ia'), id('ro'), id('rw')
           ],
-          enum('d_access')
+          enum_('d_access')
           ..doc = 'Access in the D sense'
           ..values = [
             id('public'), id('private'), id('package'), id('protected'), id('export')
           ],
-          enum('udt')
+          enum_('udt')
           ..doc = 'User defined data type'
           ..values = [
             id('alias'), id('enum'), id('struct'), id('union'),
           ]
         ]
         ..classes = [
-          dclass('basic_type')
+          class_('basic_type')
           ..members = [
             member('name')
             ..access = Access.RO
@@ -162,7 +164,7 @@ void main() {
             ..access = Access.RO
             ..ctors = [''],
           ],
-          dclass('system')
+          class_('system')
           ..doc = 'Holder for packages, apps, and the root path'
           ..members = [
             id_member('system'),
@@ -181,7 +183,7 @@ void main() {
             ..classInit = 'false'
             ..access = Access.RO,
           ],
-          dclass('package')
+          class_('package')
           ..doc = 'Meta data required for D package'
           ..members = [
             id_member('D package'),
@@ -195,7 +197,7 @@ void main() {
             ..doc = 'List of packages in the package'
             ..type = 'List<Package>',
           ],
-          dclass('module')
+          class_('module')
           ..extend = 'Decls'
           ..doc = 'Meta data required for D module'
           ..members = [
@@ -215,7 +217,7 @@ void main() {
             ..type = 'List<String>'
             ..classInit = '[]',
           ],
-          dclass('enum_value')
+          class_('enum_value')
           ..doc = 'An entry in an enum'
           ..members = [
             id_member('enum value'),
@@ -224,7 +226,7 @@ void main() {
             member('value')
             ..doc = 'Set value of the enum value only if required'
           ],
-          dclass('t_mixin')
+          class_('t_mixin')
           ..doc = 'A template mixin'
           ..members = [
             member('name')
@@ -236,7 +238,7 @@ void main() {
             ..type = 'List<String>'
             ..classInit = '[]'
           ],
-          dclass('enum')
+          class_('enum')
           ..members = [
             id_member('enum'),
             doc_member('enum'),
@@ -247,7 +249,7 @@ void main() {
             ..doc = "List if Id's that constitute the values"
             ..type = 'List<EnumValue>'
           ],
-          dclass('constant')
+          class_('constant')
           ..members = [
             id_member('constant'),
             doc_member('constant'),
@@ -261,7 +263,7 @@ void main() {
             ..classInit = 'String',
             member('init')..doc = 'Value to initialize the constant with',
           ],
-          dclass('union')
+          class_('union')
           ..extend = 'Decls'
           ..members = [
             id_member('union'),
@@ -274,7 +276,7 @@ void main() {
             ..type = 'List<Member>'
             ..classInit = '[]',
           ],
-          dclass('alias')
+          class_('alias')
           ..doc = 'Declaration for an alias'
           ..members = [
             id_member('alias'),
@@ -283,7 +285,7 @@ void main() {
             d_access_member('D struct'),
             member('aliased')..doc = 'What the alias is aliased to',
           ],
-          dclass('arr_alias')
+          class_('arr_alias')
           ..doc = 'Declaration for an alias to an array'
           ..members = [
             id_member('array alias'),
@@ -300,7 +302,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             ..type = 'bool'
             ..classInit = 'true',
           ],
-          dclass('a_arr_alias')
+          class_('a_arr_alias')
           ..doc = 'Declaration for an alias to an associative array'
           ..members = [
             id_member('array alias'),
@@ -310,7 +312,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('key')..doc = 'Type of the key',
             member('value')..doc = 'Type of the value',
           ],
-          dclass('template_parm')
+          class_('template_parm')
           ..members = [
             id_member('template parm'),
             doc_member('template parm'),
@@ -318,7 +320,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('type_name')..doc = 'Name of the type',
             member('init')..doc = 'A default value for the parameter',
           ],
-          dclass('template')
+          class_('template')
           ..extend = 'Decls'
           ..doc = 'Defines a D template'
           ..members = [
@@ -329,14 +331,14 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('template_parms')..type = 'List<TemplateParm>',
             d_access_member('D struct'),
           ],
-          dclass('code_block')
+          class_('code_block')
           ..doc = 'Container for generated code'
           ..members = [
             d_access_member('code block'),
             member('code')
             ..doc = 'Block of code to be placed in a container'
           ],
-          dclass('decls')
+          class_('decls')
           ..doc = 'Container for declarations'
           ..members = [
             member('mixins')..type = 'List'..classInit = '[]',
@@ -352,7 +354,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('public_section')..type = 'bool'..classInit = 'false',
             member('unit_test')..type = 'bool'..classInit = 'false',
           ],
-          dclass('struct')
+          class_('struct')
           ..extend = 'Decls'
           ..doc = 'Meta data required for D struct'
           ..members = [
@@ -366,7 +368,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             ..type = 'List<Member>'
             ..classInit = '[]',
           ],
-          dclass('member')
+          class_('member')
           ..doc = 'Meta data required for D member'
           ..members = [
             id_member('D member'),

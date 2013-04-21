@@ -1,3 +1,4 @@
+/// Support for storing dlang meta data for purpose of generating code
 library meta;
 
 import "dart:io";
@@ -58,6 +59,9 @@ final BasicType dcharT = new BasicType('dchar', 'x0000ffff');
 
 main() {
   print("Main for library meta");
+  // custom <main meta>
+  // end <main meta>
+  
 }
 // custom <library meta>
 // end <library meta>

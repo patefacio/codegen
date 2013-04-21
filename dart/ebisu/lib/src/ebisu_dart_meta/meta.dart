@@ -218,7 +218,7 @@ class Enum {
   }
 
   String define() {
-    return META.enum(this);
+    return META.enum_(this);
   }
 
 // end <class Enum>
@@ -265,6 +265,7 @@ class PubDependency {
 
   bool get isHosted => (type == PubDepType.HOSTED);
   bool get isGit => (type == PubDepType.GIT);
+  bool get isPath => (type == PubDepType.PATH);
 
   PubDependency(String _name) : name = _name {
     PubDepType pubDepType = PubDepType.PATH;
@@ -382,7 +383,7 @@ class System {
   /// Information for the pubspec
   PubSpec pubSpec;
   /// Map of all classes that have jsonSupport
-  Map<String,DClass> jsonableClasses = {};
+  Map<String,Class> jsonableClasses = {};
   bool _finalized = false;
   /// Set to true on finalize
   bool get finalized => _finalized;
@@ -432,8 +433,10 @@ class System {
     finalize();
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
-    String pubSpecPath = "${rootPath}/pubspec.yaml";
-    mergeWithFile(META.pubspec(pubSpec), pubSpecPath);
+    if(pubSpec != null) {
+      String pubSpecPath = "${rootPath}/pubspec.yaml";
+      mergeWithFile(META.pubspec(pubSpec), pubSpecPath);
+    }
   }
 
 // end <class System>
@@ -466,7 +469,7 @@ class System {
     "pubSpec": EBISU_UTILS.randJson(_randomJsonGenerator, PubSpec.randJson),
     "jsonableClasses": 
        EBISU_UTILS.randJsonMap(_randomJsonGenerator,
-        () => DClass.randJson(),
+        () => Class.randJson(),
         "jsonableClasses"),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
@@ -492,7 +495,7 @@ class App {
   /// If true a custom section will be included for app
   bool includeCustom = true;
   /// Classes defined in this app
-  List<DClass> classes = [];
+  List<Class> classes = [];
   /// List of libraries of this app
   List<Library> libraries = [];
   /// List of global variables for this library
@@ -530,7 +533,7 @@ class App {
     "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => DClass.randJson()),
+        () => Class.randJson()),
     "libraries": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Library.randJson()),
@@ -566,7 +569,7 @@ class Library {
   /// List of global variables for this library
   List<Variable> variables = [];
   /// Classes defined in this library
-  List<DClass> classes = [];
+  List<Class> classes = [];
   /// Enums defined in this library
   List<Enum> enums = [];
   String _name;
@@ -649,7 +652,7 @@ class Library {
         () => Variable.randJson()),
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => DClass.randJson()),
+        () => Class.randJson()),
     "enums": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Enum.randJson()),
@@ -677,7 +680,7 @@ class Part {
   /// If true a custom section will be included for app
   bool includeCustom = true;
   /// Classes defined in this part of the library
-  List<DClass> classes = [];
+  List<Class> classes = [];
   /// Enums defined in this part of the library
   List<Enum> enums = [];
   String _name;
@@ -722,7 +725,7 @@ class Part {
     "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => DClass.randJson()),
+        () => Class.randJson()),
     "enums": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Enum.randJson()),
@@ -767,8 +770,8 @@ class Mixin {
 }
 
 /// Metadata associated with a Dart class
-class DClass { 
-  DClass(
+class Class { 
+  Class(
     this._id
   ) {
   }
@@ -805,7 +808,7 @@ class DClass {
   String _className;
   /// Name of the class, including access prefix
   String get className => _className;
-// custom <class DClass>
+// custom <class Class>
 
   String get jsonCtor {
     if(_ctors.containsKey('_json')) {
@@ -860,7 +863,7 @@ class DClass {
   }
 
   String define() {
-    return META.dclass(this);
+    return META.class_(this);
   }
 
   dynamic noSuchMethod(Invocation msg) {
@@ -869,7 +872,7 @@ class DClass {
 
   bool isClassJsonable(String className) => _parent.isClassJsonable(className);
 
-// end <class DClass>
+// end <class Class>
 
 
   Map toJson() { 
@@ -1099,13 +1102,13 @@ class Member {
 // custom <part meta>
 
 Id id(String _id) => new Id(_id);
-Enum enum(String _id) => new Enum(id(_id));
+Enum enum_(String _id) => new Enum(id(_id));
 System system(String _id) => new System(id(_id));
 App app(String _id) => new App(id(_id));
 Library library(String _id) => new Library(id(_id));
 Variable variable(String _id) => new Variable(id(_id));
 Part part(String _id) => new Part(id(_id));
-DClass dclass(String _id) => new DClass(id(_id));
+Class class_(String _id) => new Class(id(_id));
 Member member(String _id) => new Member(id(_id));
 PubSpec pubspec(String _id)=> new PubSpec(id(_id));
 PubDependency pubdep(String name)=> new PubDependency(name);
@@ -1116,7 +1119,7 @@ final RegExp _listTypeRe = new RegExp(r"List\b");
 final RegExp _jsonMapTypeRe = new RegExp(r"Map<\s*String,\s*(.*?)\s*>");
 final RegExp _jsonListTypeRe = new RegExp(r"List<\s*(.*?)\s*>");
 
-bool isJsonableType(String t) => _jsonableTypeRe.firstMatch(t) != null;
+bool isJsonableType(String t) =>_jsonableTypeRe.firstMatch(t) != null;
 bool isMapType(String t) => _mapTypeRe.firstMatch(t) != null;
 bool isListType(String t) => _listTypeRe.firstMatch(t) != null;
 String jsonMapValueType(String t) {
@@ -1131,7 +1134,7 @@ String jsonListValueType(String t) {
   if(m != null) {
     return m.group(1);
   }
-  return null;
+  return 'dynamic';
 }
 
 

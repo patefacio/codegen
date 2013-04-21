@@ -1,6 +1,6 @@
 part of dart_meta;
 
-String dclass([dynamic _]) {
+String class_([dynamic _]) {
   if(_ is Map) {
     _ = new Context(_);
   }

@@ -1,0 +1,21 @@
+name: xmi
+version: 0.0.1
+description: >
+  Support for basic Dart code generation from Altova UML Model.  The idea is UML
+  can be used to define the structure of data being passed between
+  client/server. Once stored in UML the XMI data can be parsed and used to
+  generate Dart code. Since Dart does not yet have an XML parser, the approach is
+  to pass the model through a XML to JSON converter (_xmi_to_json.rb_) first. 
+  
+  
+  Only a subset of the XMI meta data is defined - just enough to support basic
+  classes with properties. Meta data for templates are required for two uml
+  parameterized classes (list<E> and j_map<K>). This particular solution requires
+  all class names in the UML to be lower case with underscore separating
+  words. The reason for this is that the ebisu code generation itself is strict
+  about that as well.
+  
+dependencies:
+  pathos:
+  ebisu:
+      path: ../ebisu

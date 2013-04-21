@@ -4,7 +4,7 @@
 /// outputs will want different case conventions for different contexts, using the
 /// Id class allows a simple consistent input format (snake case) to be combined
 /// with the appropriate conventions (usually via templates) to produce consistent
-/// correct naming. Most ebisu entities are named (Libraries, Parts, DClasses, etc).
+/// correct naming. Most ebisu entities are named (Libraries, Parts, Classes, etc).
 /// 
 /// 
 library ebisu_id;

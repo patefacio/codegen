@@ -190,7 +190,7 @@ class BasicType {
   static Map randJson() { 
     return { 
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     };
   }
 
@@ -251,11 +251,15 @@ class System {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "rootPath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "apps": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new App()),
-    "packages": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Package()),
+    "apps": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => App.randJson()),
+    "packages": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Package.randJson()),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
   }
@@ -319,11 +323,15 @@ class Package {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "modules": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Module()),
-    "packages": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Package()),
+    "modules": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Module.randJson()),
+    "packages": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Package.randJson()),
     };
   }
 
@@ -400,11 +408,17 @@ class Module extends Decls {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "imports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
-    "publicImports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
-    "debugImports": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    "imports": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "publicImports": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "debugImports": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
     };
   }
 
@@ -457,7 +471,7 @@ class EnumValue {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "value": EBISU_UTILS.randJson(_randomJsonGenerator, String),
@@ -501,8 +515,10 @@ class TMixin {
   static Map randJson() { 
     return { 
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
-    "tArgs": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new String()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    "tArgs": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
     };
   }
 
@@ -556,11 +572,13 @@ class Enum {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
-    "values": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new EnumValue()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    "values": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EnumValue.randJson()),
     };
   }
 
@@ -622,10 +640,10 @@ class Constant {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "isStatic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "hasStaticThis": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
@@ -685,11 +703,13 @@ class Union extends Decls {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
-    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Member.randJson()),
     };
   }
 
@@ -741,10 +761,10 @@ class Alias {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "aliased": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -807,10 +827,10 @@ class ArrAlias {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "aliased": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "immutable": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
@@ -865,10 +885,10 @@ class AArrAlias {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "key": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "value": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
@@ -916,7 +936,7 @@ class TemplateParm {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "typeName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
@@ -964,11 +984,13 @@ class Template extends Decls {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "templateParms": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new TemplateParm()),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "templateParms": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => TemplateParm.randJson()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     };
   }
 
@@ -994,7 +1016,7 @@ class CodeBlock {
 
   static Map randJson() { 
     return { 
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "code": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -1119,15 +1141,33 @@ $privateCustomBlock}
 
   static Map randJson() { 
     return { 
-    "mixins": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new null()),
-    "aliases": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Alias()),
-    "constants": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Constant()),
-    "structs": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Struct()),
-    "enums": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Enum()),
-    "unions": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Union()),
-    "templates": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Template()),
-    "codeBlocks": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new CodeBlock()),
-    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    "mixins": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => dynamic.randJson()),
+    "aliases": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Alias.randJson()),
+    "constants": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Constant.randJson()),
+    "structs": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Struct.randJson()),
+    "enums": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Enum.randJson()),
+    "unions": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Union.randJson()),
+    "templates": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Template.randJson()),
+    "codeBlocks": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => CodeBlock.randJson()),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Member.randJson()),
     "privateSection": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "publicSection": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "unitTest": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
@@ -1187,11 +1227,13 @@ class Struct extends Decls {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
-    "members": EBISU_UTILS.randJson(_randomJsonGenerator, List, () => new Member()),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Member.randJson()),
     };
   }
 
@@ -1293,14 +1335,14 @@ class Member {
 
   static Map randJson() { 
     return { 
-    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id),
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
     "vName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "access": EBISU_UTILS.randJson(_randomJsonGenerator, Access),
-    "type": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
-    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic),
+    "access": EBISU_UTILS.randJson(_randomJsonGenerator, Access.randJson),
+    "type": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     "byRef": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "ctor": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "ctorDefaulted": EBISU_UTILS.randJson(_randomJsonGenerator, bool),

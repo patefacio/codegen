@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.omg.org/spec/UML/20110701">
+	<xmi:Documentation>
+		<contact>www.altova.com</contact>
+		<exporter>Altova UModel2013sp1</exporter>
+		<exporterVersion>11</exporterVersion>
+	</xmi:Documentation>
+	<uml:Model xmi:id="U00000001-7510-11d9-86f2-000476a22f44" name="Root">
+		<ownedComment xmi:type="uml:Comment" xmi:id="U250c6fce-6f4b-4129-9951-5fd0282fa487" body="Data modeling of financial objects from a personal finance perspective.">
+			<annotatedElement xmi:idref="U00000001-7510-11d9-86f2-000476a22f44"/>
+		</ownedComment>
+		<packagedElement xmi:type="uml:Package" xmi:id="U00000003-7510-11d9-86f2-000476a22f44" name="Component View"/>
+		<packagedElement xmi:type="uml:Package" xmi:id="U2048723e-b5c6-4369-ac0f-2da267e5a537" name="bsheet">
+			<ownedComment xmi:type="uml:Comment" xmi:id="Udd743773-d7e7-4455-a05a-d61b9d458d76" body="Balance Sheet">
+				<annotatedElement xmi:idref="U2048723e-b5c6-4369-ac0f-2da267e5a537"/>
+			</ownedComment>
+			<packagedElement xmi:type="uml:Package" xmi:id="U0a5a2d38-40c3-419d-8f11-7d593c53e6fd" name="common">
+				<packagedElement xmi:type="uml:Class" xmi:id="U9b37955b-a253-4a53-b6e1-3acce6abe80b" name="date_value">
+					<ownedComment xmi:type="uml:Comment" xmi:id="Ue50133ca-ac62-4ce0-8be0-9ae45e193c52" body="A date value pair: commonly used in things like cash flow sequences &#13;and rate curves.">
+						<annotatedElement xmi:idref="U9b37955b-a253-4a53-b6e1-3acce6abe80b"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U44832841-15a1-4f4b-a4d9-68d70cc3f89d" name="date" visibility="protected" type="Uf865f277-df63-4e1f-ab90-82096d59b6a0">
+						<ownedComment xmi:type="uml:Comment" xmi:id="U14ca4076-8720-4191-993e-c68ab82ba679" body="Date associated with value">
+							<annotatedElement xmi:idref="U44832841-15a1-4f4b-a4d9-68d70cc3f89d"/>
+						</ownedComment>
+					</ownedAttribute>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Uba600afe-eb0d-43c5-b64b-26cf61804cfb" name="value" visibility="protected" type="Ud3e50046-8392-47dd-a3fc-96b79b0cf59f">
+						<ownedComment xmi:type="uml:Comment" xmi:id="U48dcf46c-61c7-4204-a744-875cfaa98b0e" body="Value associated with date">
+							<annotatedElement xmi:idref="Uba600afe-eb0d-43c5-b64b-26cf61804cfb"/>
+						</ownedComment>
+					</ownedAttribute>
+				</packagedElement>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Package" xmi:id="U4148042a-8ea2-4d5f-90db-d26851fbba91" name="dossier">
+				<packagedElement xmi:type="uml:Class" xmi:id="U3fc143db-9b98-4c13-8b97-625e0e0b9834" name="acquired_retired">
+					<ownedComment xmi:type="uml:Comment" xmi:id="U3be1a308-3d04-43bd-a24b-21fa36b4f320" body="A pair of dates demarcating the life-cycle of an entity.">
+						<annotatedElement xmi:idref="U3fc143db-9b98-4c13-8b97-625e0e0b9834"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ua84a710a-5ec1-4bb9-87a3-ab515317f943" name="acquired" visibility="protected" type="Uf865f277-df63-4e1f-ab90-82096d59b6a0"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U91a7fccf-f9e6-4b0e-95f2-6ffa75c03680" name="retired" visibility="protected" type="Uf865f277-df63-4e1f-ab90-82096d59b6a0"/>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="U6fe8cf18-cfaa-4d27-b77a-b84875371913" name="asset">
+					<ownedComment xmi:type="uml:Comment" xmi:id="U56877205-f0db-434d-a9c5-6f2b931eced4" body="Items in the asset column of a balance sheet.">
+						<annotatedElement xmi:idref="U6fe8cf18-cfaa-4d27-b77a-b84875371913"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U1acc1d3c-3f37-4026-b9b0-889e2afd688c" name="b_s_item" visibility="protected" aggregation="composite" type="U9d95464b-d36a-4df0-b0f3-cf626ea1c413"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Uf701a7c8-725d-4693-ba4c-dde3a632e45d" name="asset_type" visibility="protected" type="U6a642d70-ff9b-4550-ad86-a0303131310a"/>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="U9d95464b-d36a-4df0-b0f3-cf626ea1c413" name="b_s_item">
+					<ownedComment xmi:type="uml:Comment" xmi:id="Udd51ea65-25c5-4cfc-a956-45ac4d60b67f" body="Something of value typically shown on a *balance sheet*- classified as an asset or liability.&#13;They have a lifecycle - i.e. are acquired and eventually retired.&#13;They may refer to an account, the act of which can have tax implications&#13;for assets.">
+						<annotatedElement xmi:idref="U9d95464b-d36a-4df0-b0f3-cf626ea1c413"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U1f9250c0-3461-4f07-9010-b0d386e798f2" name="acquired_retired" visibility="protected" aggregation="composite" type="U3fc143db-9b98-4c13-8b97-625e0e0b9834"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ub87e91ce-8137-45b1-ba97-db71a631416b" name="account_name" visibility="protected" type="U486ba0ce-0522-4849-91d6-d85f07e2cc8f"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ud664ccf8-50ce-4780-b34b-3ca73248fef4" name="descr" visibility="protected" type="U486ba0ce-0522-4849-91d6-d85f07e2cc8f"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U2d2b0a54-1b96-47d8-962b-60aed7aac249" name="quantity_history" visibility="protected" type="Uf1ad6e16-5c51-4fc0-9d56-c04e9ba87e19">
+						<ownedComment xmi:type="uml:Comment" xmi:id="U2cbe6ba7-1404-426b-8572-140cdc25648e" body="Quantity held on each date in the sequence.">
+							<annotatedElement xmi:idref="U2d2b0a54-1b96-47d8-962b-60aed7aac249"/>
+						</ownedComment>
+					</ownedAttribute>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="Ucc6c15f9-fe73-435c-bff7-047cdc5230fb" name="liability">
+					<ownedComment xmi:type="uml:Comment" xmi:id="Ua3b5e08b-85ab-4893-b196-0ac11f58fa2b" body="Items in the liability column of a balance sheet.">
+						<annotatedElement xmi:idref="Ucc6c15f9-fe73-435c-bff7-047cdc5230fb"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U5ec6a545-43eb-4457-b7d9-a265fd1108bc" name="b_s_item" visibility="protected" aggregation="composite" type="U9d95464b-d36a-4df0-b0f3-cf626ea1c413">
+						<ownedComment xmi:type="uml:Comment" xmi:id="U651b9d7a-1662-4f2b-93dd-8eebe2659f3d" body="Items in the liability column of a blanance sheet.">
+							<annotatedElement xmi:idref="U5ec6a545-43eb-4457-b7d9-a265fd1108bc"/>
+						</ownedComment>
+					</ownedAttribute>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ueccec53d-d8a9-4726-8127-5d5e59f24f8e" name="liability_type" visibility="protected" type="U83702d1f-21a0-4065-8fb5-7ca45862c9b3"/>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="U6e30adc6-7448-4043-bc6e-e3a29741ec7c" name="dossier">
+					<ownedComment xmi:type="uml:Comment" xmi:id="U043619d7-6223-4c2a-8fa8-dc2ea7b68c08" body="The primary data set required for valuation. &#13;A dossier combines balance sheet and income/expense modeling into a single data package.&#13;">
+						<annotatedElement xmi:idref="U6e30adc6-7448-4043-bc6e-e3a29741ec7c"/>
+					</ownedComment>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ub29a7ad4-1d10-44e1-8d5c-1d231733e36d" name="acquired_retired" visibility="protected" type="U3fc143db-9b98-4c13-8b97-625e0e0b9834"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ua8760622-84dd-410e-9de3-345da29df285" name="asset_map" visibility="protected" aggregation="composite" type="U7f07ff28-fad2-4677-9416-3395119d29f5">
+						<ownedComment xmi:type="uml:Comment" xmi:id="U6e71e8cb-2095-41b8-9429-c6b0cf29533b" body="Map name of asset to the asset instance.">
+							<annotatedElement xmi:idref="Ua8760622-84dd-410e-9de3-345da29df285"/>
+						</ownedComment>
+					</ownedAttribute>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U1296ac1b-309d-4730-9454-b3d06e3f1d57" name="liability_map" visibility="protected" aggregation="composite" type="U5c0ed5d6-aaac-4156-9826-7e4636e177df"/>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="U7f07ff28-fad2-4677-9416-3395119d29f5">
+					<templateBinding xmi:type="uml:TemplateBinding" xmi:id="U2273f2cc-090c-4193-851e-eff2601b38ab" signature="U2a76e79d-e9f0-4aa1-84b5-9bd09c18c49d">
+						<parameterSubstitution xmi:type="uml:TemplateParameterSubstitution" xmi:id="Ubfeae48d-547a-4afd-a0d3-8baa81391747" formal="Ud423a10b-f970-410a-93be-894b239b1edd" actual="U6fe8cf18-cfaa-4d27-b77a-b84875371913"/>
+					</templateBinding>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="U5c0ed5d6-aaac-4156-9826-7e4636e177df">
+					<templateBinding xmi:type="uml:TemplateBinding" xmi:id="U49baa4dc-227c-4247-a595-64051b4680a4" signature="U2a76e79d-e9f0-4aa1-84b5-9bd09c18c49d">
+						<parameterSubstitution xmi:type="uml:TemplateParameterSubstitution" xmi:id="U8f0617c6-668e-4b5c-a82e-042ac8a6a1bb" formal="Ud423a10b-f970-410a-93be-894b239b1edd" actual="Ucc6c15f9-fe73-435c-bff7-047cdc5230fb"/>
+					</templateBinding>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Class" xmi:id="Uf1ad6e16-5c51-4fc0-9d56-c04e9ba87e19">
+					<templateBinding xmi:type="uml:TemplateBinding" xmi:id="U488cb815-466c-4dba-9661-7b203503284a" signature="Ud7ccde28-5405-4a3f-a451-7a724a54a7ce">
+						<parameterSubstitution xmi:type="uml:TemplateParameterSubstitution" xmi:id="U8085f5ef-08b7-4c19-9f77-fe663d3bdb59" formal="Ufd3bfa13-883e-4345-8941-14092fe67a27" actual="U9b37955b-a253-4a53-b6e1-3acce6abe80b"/>
+					</templateBinding>
+				</packagedElement>
+				<clientDependency xmi:idref="Ufeb0d3bc-167f-4ff9-95c9-d103dddb20c2"/>
+				<clientDependency xmi:idref="Ue6ec93be-e28a-44e4-83a2-57440374c46b"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Package" xmi:id="Uadc1cb09-c75c-4b99-a6b7-020b3b134be9" name="lookup">
+				<ownedComment xmi:type="uml:Comment" xmi:id="Uc7e79ca4-f5e1-4e1c-9cc9-ead70984142f" body="Package containing various lookups (enum types) of the domain.">
+					<annotatedElement xmi:idref="Uadc1cb09-c75c-4b99-a6b7-020b3b134be9"/>
+				</ownedComment>
+				<packagedElement xmi:type="uml:Enumeration" xmi:id="U6a642d70-ff9b-4550-ad86-a0303131310a" name="asset_type">
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U232e1929-b8ff-416e-99a4-9eca016439dc" name="investment" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U88821f5f-8b30-483c-90f1-cdfab4dc1837" name="primary_residence" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U1c5377d9-3160-4bee-886d-0942b61dc29c" name="family_property" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U0f1ac589-a85d-4e13-8791-826ee01d0379" name="financial_instrument" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U852f453a-2546-40f0-8ec9-dd0b3ca11631" name="automobile" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Uf700ad83-8fd8-4054-8a4b-cae9adf24328" name="life_insurance_policy" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U0e49448b-110f-4a1a-a602-9cc71f9ab4aa" name="company_stock_option" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Uf5bc9a3d-5ba4-4f38-a9dd-26bf6c17b302" name="cash" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Uccbb409f-860d-40eb-9d6e-7d791528cff0" name="rental_property" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U08bba2d1-7017-4dd2-b4d6-6639eda0147a" name="other" visibility="protected"/>
+				</packagedElement>
+				<packagedElement xmi:type="uml:Enumeration" xmi:id="U83702d1f-21a0-4065-8fb5-7ca45862c9b3" name="liability_type">
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ue53edbf5-e42e-40da-aace-49366b9f51fc" name="mortgage" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="U39b3ff89-ea48-4171-bc18-10896aafd994" name="college_debt" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ua21c76bf-a5f3-45fc-8f85-573c7b75e88f" name="credit_card_debt" visibility="protected"/>
+					<ownedAttribute xmi:type="uml:Property" xmi:id="Ud59af783-64ba-442c-85c2-0a0ddf84a303" name="other" visibility="protected"/>
+				</packagedElement>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Dependency" xmi:id="Ufeb0d3bc-167f-4ff9-95c9-d103dddb20c2">
+				<supplier xmi:idref="Uf8209e08-ed23-4263-87f6-3a2507d47f50"/>
+				<client xmi:idref="U4148042a-8ea2-4d5f-90db-d26851fbba91"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Dependency" xmi:id="Ue6ec93be-e28a-44e4-83a2-57440374c46b">
+				<supplier xmi:idref="Uadc1cb09-c75c-4b99-a6b7-020b3b134be9"/>
+				<client xmi:idref="U4148042a-8ea2-4d5f-90db-d26851fbba91"/>
+			</packagedElement>
+		</packagedElement>
+		<packagedElement xmi:type="uml:Package" xmi:id="Uf8209e08-ed23-4263-87f6-3a2507d47f50" name="common">
+			<packagedElement xmi:type="uml:PrimitiveType" xmi:id="Ub7d382d0-b3e7-402e-93cb-5c0f00f97d1b" name="value"/>
+			<packagedElement xmi:type="uml:PrimitiveType" xmi:id="U486ba0ce-0522-4849-91d6-d85f07e2cc8f" name="string"/>
+			<packagedElement xmi:type="uml:PrimitiveType" xmi:id="Ud3e50046-8392-47dd-a3fc-96b79b0cf59f" name="double"/>
+			<packagedElement xmi:type="uml:Class" xmi:id="U3038102c-8de9-4e0b-8691-1ca2708dd1b5" name="j_map">
+				<ownedTemplateSignature xmi:type="uml:TemplateSignature" xmi:id="U2a76e79d-e9f0-4aa1-84b5-9bd09c18c49d">
+					<ownedParameter xmi:type="uml:ClassifierTemplateParameter" xmi:id="Ud423a10b-f970-410a-93be-894b239b1edd" allowSubstitutable="false">
+						<ownedParameteredElement xmi:type="uml:Class" xmi:id="Ua21b635b-c6d5-4d28-9878-8c87174d8a94" name="V">
+							<templateParameter xmi:idref="Ud423a10b-f970-410a-93be-894b239b1edd"/>
+						</ownedParameteredElement>
+						<parameteredElement xmi:idref="Ua21b635b-c6d5-4d28-9878-8c87174d8a94"/>
+					</ownedParameter>
+					<parameter xmi:idref="Ud423a10b-f970-410a-93be-894b239b1edd"/>
+				</ownedTemplateSignature>
+				<ownedComment xmi:type="uml:Comment" xmi:id="U8ef20a42-7955-4e66-9bff-80f0a163f361" body="This is a map, json style. That is, a map where the key is a string and the value is a json type or an object representable as json.">
+					<annotatedElement xmi:idref="U3038102c-8de9-4e0b-8691-1ca2708dd1b5"/>
+				</ownedComment>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="U13bf9228-8bfb-4ba4-9bbf-5494f0e5b8f9" name="list">
+				<ownedTemplateSignature xmi:type="uml:TemplateSignature" xmi:id="Ud7ccde28-5405-4a3f-a451-7a724a54a7ce">
+					<ownedParameter xmi:type="uml:ClassifierTemplateParameter" xmi:id="Ufd3bfa13-883e-4345-8941-14092fe67a27" allowSubstitutable="false">
+						<ownedParameteredElement xmi:type="uml:Class" xmi:id="Uba91b151-9edc-40ea-a6f1-7fd082a333ca" name="V">
+							<templateParameter xmi:idref="Ufd3bfa13-883e-4345-8941-14092fe67a27"/>
+						</ownedParameteredElement>
+						<parameteredElement xmi:idref="Uba91b151-9edc-40ea-a6f1-7fd082a333ca"/>
+					</ownedParameter>
+					<parameter xmi:idref="Ufd3bfa13-883e-4345-8941-14092fe67a27"/>
+				</ownedTemplateSignature>
+				<ownedComment xmi:type="uml:Comment" xmi:id="U782f1e81-71c6-4c54-be79-e99cf333e4dd" body="A list of objects.">
+					<annotatedElement xmi:idref="U13bf9228-8bfb-4ba4-9bbf-5494f0e5b8f9"/>
+				</ownedComment>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="Uf865f277-df63-4e1f-ab90-82096d59b6a0" name="date"/>
+		</packagedElement>
+	</uml:Model>
+</xmi:XMI>
