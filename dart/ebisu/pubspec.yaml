@@ -6,5 +6,3 @@ description: >
   
 dependencies:
   pathos:
-  ebisu:
-    path: ../ebisu

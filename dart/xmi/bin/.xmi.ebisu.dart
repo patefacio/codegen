@@ -213,7 +213,6 @@ UML with code generation to support Dart.
         '"package:pathos/path.dart" as path',
         '"package:ebisu/ebisu_utils.dart" as EBISU_UTILS',
         '"package:ebisu/ebisu_dart_meta.dart"',
-        '"package:pathos/path.dart"',
         '"package:xmi/xmi.dart"',
       ]
       ..classes = [

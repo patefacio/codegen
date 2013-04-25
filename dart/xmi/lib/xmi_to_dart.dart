@@ -10,7 +10,6 @@ import "package:plus/pprint.dart";
 import "package:pathos/path.dart" as path;
 import "package:ebisu/ebisu_utils.dart" as EBISU_UTILS;
 import "package:ebisu/ebisu_dart_meta.dart";
-import "package:pathos/path.dart";
 import "package:xmi/xmi.dart";
 
 /// Pull in the model and generate dart
@@ -30,14 +29,17 @@ class Converter {
   String outPath;
   /// Name of the library to create to support this model
   String libraryName;
-// custom <class Converter>
+  // custom <class Converter>
 
   void convert() {
     JsonUModelBuilder builder = new JsonUModelBuilder(srcFile);
     UModel model = builder.buildModel();
 
     if(libraryName == null) {
-      libraryName = path.basenameWithoutExtension(srcFile);
+      // Call basenameWithoutExtension twice, since convention may be
+      // FNAME.xml.json
+      libraryName = path.basenameWithoutExtension(
+          path.basenameWithoutExtension(srcFile));
     }
 
     Library library = library(libraryName)
@@ -57,6 +59,11 @@ class Converter {
       ];
     
     System sys = system('domain_model')
+      ..pubSpec = (pubspec('domain_model')
+          ..doc = 'Auto-generated support from ${srcFile}'
+          ..dependencies = [
+            pubdep('ebisu')
+          ])
       ..rootPath = outPath
       ..libraries = [ library ];
 
@@ -145,11 +152,10 @@ class Converter {
     });
 
     print("---------------------");
-    //print(prettyJsonMap(sys.toJson()));
     sys.generate();
   }
 
-// end <class Converter>
+  // end <class Converter>
 
 }
 

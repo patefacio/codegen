@@ -1,6 +1,14 @@
 #< if(null != _.doc) { >
 ${blockComment(_.doc)}
 #< } >
-struct ${_.name} { 
-${chomp(indentBlock(_.decls()))}
+struct ${_.templateName} { 
+#< if(null != _.ctor) { >
+${indentBlock(_.ctor.define())}
+#< } >
+${indentBlock(chomp(_.decls()))}
+#< if(_.unitTest) { >
+  static if(1) unittest { 
+${indentBlock(chomp(customBlock("unittest ${_.name}")))}
+  }
+#< } >
 }

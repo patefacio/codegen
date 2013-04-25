@@ -13,8 +13,24 @@ ${blockComment(_.doc)}
 ''');
  } 
   _buf.add('''
-struct ${_.name} { 
-${chomp(indentBlock(_.decls()))}
+struct ${_.templateName} { 
+''');
+ if(null != _.ctor) { 
+  _buf.add('''
+${indentBlock(_.ctor.define())}
+''');
+ } 
+  _buf.add('''
+${indentBlock(chomp(_.decls()))}
+''');
+ if(_.unitTest) { 
+  _buf.add('''
+  static if(1) unittest { 
+${indentBlock(chomp(customBlock("unittest ${_.name}")))}
+  }
+''');
+ } 
+  _buf.add('''
 }
 ''');
   return _buf.join();

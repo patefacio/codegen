@@ -7,8 +7,13 @@ String module([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
+ if(_.doc != null) { 
   _buf.add('''
-module ${_.name};
+${blockComment(_.doc)}
+''');
+ } 
+  _buf.add('''
+module ${_.qualifiedName};
 
 ''');
  for(String i in _.publicImports) { 
@@ -26,9 +31,20 @@ ${_.importStatement(i)};
 debug ${_.importStatement(i)};
 ''');
  } 
+ if (_.anyImports) { 
   _buf.add('''
-${_.contents}
 
 ''');
+ } 
+  _buf.add('''
+${chomp(_.contents)}
+''');
+ if(_.unitTest) { 
+  _buf.add('''
+static if(1) unittest { 
+${indentBlock(chomp(customBlock("unittest ${_.name}")))}
+}
+''');
+ } 
   return _buf.join();
 }

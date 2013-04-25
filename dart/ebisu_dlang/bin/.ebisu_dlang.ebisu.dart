@@ -85,7 +85,7 @@ void main() {
   Member access_member(String owner) => member('access')
     ..doc = "D developer access for this $owner"
     ..type = 'Access'
-    ..classInit = 'Access.IA';
+    ..classInit = 'Access.RW';
 
   System ebisu = system('ebisu_dlang')
     ..rootPath = '$_topDir'
@@ -107,6 +107,7 @@ void main() {
         '"package:ebisu/ebisu_id.dart"', 
         '"package:ebisu/ebisu_utils.dart" as EBISU_UTILS', 
         '"templates/dlang_meta.dart" as META',
+        '"package:pathos/path.dart" as path',
       ]
       ..variables = [
         variable('void_t')..type = 'BasicType'..isFinal = true..init = "new BasicType('void', null)",
@@ -261,7 +262,7 @@ void main() {
             member('type')
             ..doc = 'Type of the constant'
             ..classInit = 'String',
-            member('init')..doc = 'Value to initialize the constant with',
+            member('init')..doc = 'Value to initialize the constant with'..type='dynamic',
           ],
           class_('union')
           ..extend = 'Decls'
@@ -316,8 +317,10 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
           ..members = [
             id_member('template parm'),
             doc_member('template parm'),
+            parent_member('template parm'),            
             name_member('template parm'),
             member('type_name')..doc = 'Name of the type',
+            member('is_alias')..doc = 'True if template parm is an alias'..type = 'bool'..classInit = 'false',
             member('init')..doc = 'A default value for the parameter',
           ],
           class_('template')
@@ -337,6 +340,7 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             d_access_member('code block'),
             member('code')
             ..doc = 'Block of code to be placed in a container'
+            ..ctors = ['']
           ],
           class_('decls')
           ..doc = 'Container for declarations'
@@ -354,6 +358,25 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('public_section')..type = 'bool'..classInit = 'false',
             member('unit_test')..type = 'bool'..classInit = 'false',
           ],
+          class_('filtered_decls')
+          ..doc = '''The set of decls of given access from specific instance of
+item extending Decls (e.g. Module, Union, Template, Struct)'''
+          ..extend = 'Decls'
+          ..members = [
+            name_member('filtered decls'),
+            d_access_member('filtered decls'),
+          ],
+          class_('ctor')
+          ..doc = 'What is required to know how to generate a constructor'
+          ..members = [
+            member('name')
+            ..doc = 'Name of struct being constructed'
+            ..ctors = [''],
+            member('members')
+            ..doc = 'Ordered list of members either included directly, etiher as is or with default init'
+            ..type = 'List<Member>'
+            ..classInit = '[]'
+          ],
           class_('struct')
           ..extend = 'Decls'
           ..doc = 'Meta data required for D struct'
@@ -363,6 +386,16 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             parent_member('D struct'),
             name_member('D struct'),
             d_access_member('D struct'),
+            member('ctor')
+            ..doc = 'Constructor for this struct'
+            ..type = 'Ctor',
+            member('template_parms')
+            ..doc = '''
+List of template parms for this struct.
+Existance of any _tParms_ implies this struct is a template struct.
+'''
+            ..type = 'List<TemplateParm>'
+            ..classInit = '[]',
             member('members')
             ..doc = 'List of members of this class'
             ..type = 'List<Member>'
@@ -384,6 +417,15 @@ ArrAlias('foo')..immutable = false => "alias Foo[] FooArr"
             member('init')..doc = 'What to initialize member to'..type = 'dynamic',
             member('by_ref')
             ..doc = 'If set preferred pass type is by ref'
+            ..type = 'bool'
+            ..classInit = 'false',
+            member('by_const')
+            ..doc = 'If set preferred pass type is by const (the default)'
+            ..type = 'bool'
+            ..classInit = 'true',
+            member('cast_dup')
+            ..doc = '''If set and dup is perform an const cast is provided.
+ This allows duping things like maps from const into non-const since safel'''
             ..type = 'bool'
             ..classInit = 'false',
             member('ctor')
@@ -409,6 +451,5 @@ It only makes sense to use either `ctor` or `ctor_defaulted` and if using
     });
   });
 
-  ebisu.finalize();
   ebisu.generate();
 }

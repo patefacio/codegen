@@ -89,10 +89,10 @@ String ${_functionName}([dynamic _]) {
     }
     File inFile = new File(inputPath);
     inFile.readAsLinesSync().forEach((line) {
-      Match code_match = codeRe.firstMatch(line);
-      if(code_match != null) {
+      Match codeMatch = codeRe.firstMatch(line);
+      if(codeMatch != null) {
         closeString();
-        String code = code_match.group(1);
+        String code = codeMatch.group(1);
         if(null == commentRe.firstMatch(code)) {
           output.add("$code");
         }

@@ -1,17 +1,17 @@
 #< for(var mixin in _.mixins) { >
 ${mixin.decl};
 #< } >
+#< for(var constant in _.constants) { >
+${chomp(constant.define())}
+#< } >
 #< for(var alias in _.aliases) { >
 ${alias.decl};
 #< } >
 #< for(var enum in _.enums) { >
 ${chomp(enum.define())}
 #< } >
-#< for(var constant in _.constants) { >
-${chomp(constant.define())}
-#< } >
 #< for(var struct in _.structs) { >
-${chomp(struct.define())}
+${chomp(struct.define(), true)}
 #< } >
 #< for(var union in _.unions) { >
 ${chomp(union.define())}
@@ -20,7 +20,7 @@ ${chomp(union.define())}
 template(${templates.id})
 #< } >
 #< for(var codeBlock in _.codeBlocks) { >
-codeblock(${codeblock.text})
+${chomp(codeBlock.code)}
 #< } >
 #< for(var member in _.members) { >
 ${member.decl};

@@ -75,10 +75,13 @@ String customBlock(String tag) {
 }
 
 final RegExp _trailingNewline = new RegExp(r'\n$');
+final RegExp _trailingNewlines = new RegExp(r'\n*$');
 
 /// Removes trailing any `\n` from `s`
-String chomp(String s) {
-  return s.replaceFirst(_trailingNewline, '');
+String chomp(String s, [bool multiple = false ]) {
+  String result = multiple? s.replaceFirst(_trailingNewlines, '') :
+      s.replaceFirst(_trailingNewline, '');
+  return result;
 }
 
 /// Merge the contents of some generated text into the [destFilePath].  If there

@@ -7,6 +7,11 @@ String constant([dynamic _]) {
   List<String> _buf = new List<String>();
 
 
+ if(null != _.doc) { 
+  _buf.add('''
+${blockComment(chomp(_.doc, true))}
+''');
+ } 
  String staticTag = _.isStatic? 'static ' : ''; 
  if(null != _.init) { 
    if(_.hasStaticThis) { 

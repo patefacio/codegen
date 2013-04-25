@@ -588,7 +588,7 @@ A library that supports code generation of the structure Dart (and potentially
 other languages like D) using a fairly declarative aproach.
 '''
         ..dependencies = [
-          pubdep('pathos')
+          pubdep('pathos'),
         ]
                  )
     ..apps = []

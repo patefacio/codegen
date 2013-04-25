@@ -19,9 +19,13 @@ class Id {
     if(null != _hasUpperRe.firstMatch(id)) {
       throw new ArgumentError("Id must be lower case $id");
     }
+    if(null == _validSnakeRe.firstMatch(id)) {
+      throw new ArgumentError("Id has invalid characters $id");
+    }
   }
 
-  static final RegExp _hasUpperRe = new RegExp("[A-Z]");
+  static final RegExp _hasUpperRe = new RegExp(r"[A-Z]");
+  static final RegExp _validSnakeRe = new RegExp(r"^[a-z][a-z\d_]*$");
 
   /// Capitalize the string (i.e. make first character capital, leaving rest alone)
   static capitalize(String s) => "${s[0].toUpperCase()}${s.substring(1)}";
@@ -48,6 +52,9 @@ class Id {
 
   /// Return new id as the plural of the argument (`Id('dog')` => `Id('dogs')`)
   static Id pluralize(Id id, [ String suffix = 's' ]) => new Id(id._id + suffix);
+
+  /// Return true if name is snake case
+  static Id isValidSnakeId(String name) => _validSnakeRe.firstMatch(name) != null;
 
   static Id fromString(String id) {
     return new Id(id);

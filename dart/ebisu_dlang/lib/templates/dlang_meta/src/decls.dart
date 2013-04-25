@@ -12,6 +12,11 @@ String decls([dynamic _]) {
 ${mixin.decl};
 ''');
  } 
+ for(var constant in _.constants) { 
+  _buf.add('''
+${chomp(constant.define())}
+''');
+ } 
  for(var alias in _.aliases) { 
   _buf.add('''
 ${alias.decl};
@@ -22,14 +27,9 @@ ${alias.decl};
 ${chomp(enum.define())}
 ''');
  } 
- for(var constant in _.constants) { 
-  _buf.add('''
-${chomp(constant.define())}
-''');
- } 
  for(var struct in _.structs) { 
   _buf.add('''
-${chomp(struct.define())}
+${chomp(struct.define(), true)}
 ''');
  } 
  for(var union in _.unions) { 
@@ -44,7 +44,7 @@ template(${templates.id})
  } 
  for(var codeBlock in _.codeBlocks) { 
   _buf.add('''
-codeblock(${codeblock.text})
+${chomp(codeBlock.code)}
 ''');
  } 
  for(var member in _.members) { 

@@ -362,13 +362,25 @@ class Module extends Decls {
 
   String get name => _id.snake;
 
+  bool get anyImports => (imports.length + publicImports.length + debugImports.length) > 0;
+
   void _finalize(Package parent) {
     finalizeDecls(this);
     _parent = parent;
-    // prefix std imports
-    imports = imports.map((i) => _standardImports.contains(i)? "std.${i}" : i).toList();
-    imports.sort();
-    imports = imports.where((i) => !i.contains('std.')).toList()..addAll(imports.where((i) => i.contains('std.')));
+
+    List<String> orderImports(List<String> listImports) {
+      listImports = listImports.map((i) => _standardImports.contains(i)? 
+          "std.${i}" : i).toList();
+      listImports.sort();
+      // Put std imports at end
+      listImports = listImports.where((i) => !i.contains('std.')).toList()
+        ..addAll(listImports.where((i) => i.contains('std.')));
+      return listImports;
+    }
+
+    imports = orderImports(imports);
+    publicImports = orderImports(publicImports);
+    debugImports = orderImports(debugImports);
   }
 
   String get contents => decls();
@@ -383,6 +395,9 @@ class Module extends Decls {
 
   dynamic get root => _parent.root;
   String get pkgPath => "${_parent.pkgPath}";
+  String get rootRelativePath => 
+    path.split(path.relative(pkgPath, from:root.pkgPath)).join('.');
+  String get qualifiedName => "${rootRelativePath}.$name";
 
   String importStatement(String i) {
     if(_standardImports.contains(i)) {
@@ -610,12 +625,14 @@ class Constant {
   /// Type of the constant
   String type = "String";
   /// Value to initialize the constant with
-  String init;
+  dynamic init;
 // custom <class Constant>
 
   void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
+    if(null != init) 
+      init = init.toString();
   }
 
   String define() {
@@ -647,7 +664,7 @@ class Constant {
     "isStatic": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "hasStaticThis": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "type": EBISU_UTILS.randJson(_randomJsonGenerator, String),
-    "init": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     };
   }
 
@@ -743,7 +760,7 @@ class Alias {
   }
 
   void _finalize(dynamic parent) {
-    _name = _id.capCamel;
+    _name = _id.id == 'this'? 'this' : _id.capCamel;
   }
 
 // end <class Alias>
@@ -907,18 +924,32 @@ class TemplateParm {
   Id get id => _id;
   /// Documentation for this template parm
   String doc;
+  dynamic _parent;
+  /// Reference to parent of this template parm
+  dynamic get parent => _parent;
   String _name;
   /// The generated name for template parm
   String get name => _name;
   /// Name of the type
   String typeName;
+  /// True if template parm is an alias
+  bool isAlias = false;
   /// A default value for the parameter
   String init;
 // custom <class TemplateParm>
 
   void _finalize(dynamic parent) {
-    _name = _id.capCamel;
+    _name = isAlias? _id.camel : _id.capCamel;
     _parent = parent;
+  }
+
+  String get decl {
+    String initialized = (init == null)? _name : "${_name} = ${init}";
+    if(isAlias) {
+      return "alias ${initialized}";
+    } else {
+      return initialized;
+    }
   }
 
 // end <class TemplateParm>
@@ -930,6 +961,7 @@ class TemplateParm {
     "doc": EBISU_UTILS.toJson(doc),
     "name": EBISU_UTILS.toJson(_name),
     "typeName": EBISU_UTILS.toJson(typeName),
+    "isAlias": EBISU_UTILS.toJson(isAlias),
     "init": EBISU_UTILS.toJson(init),
     };
   }
@@ -940,6 +972,7 @@ class TemplateParm {
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "typeName": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isAlias": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "init": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
@@ -968,6 +1001,12 @@ class Template extends Decls {
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
 // custom <class Template>
+
+  void _finalize(dynamic parent) {
+    templateParms.forEach((tp) => tp._finalize(this));
+    _parent = parent;
+  }  
+
 // end <class Template>
 
 
@@ -998,6 +1037,11 @@ class Template extends Decls {
 
 /// Container for generated code
 class CodeBlock { 
+  CodeBlock(
+    this.code
+  ) {
+  }
+  
   /// D langauge access for this code block
   DAccess dAccess = DAccess.PUBLIC;
   /// Block of code to be placed in a container
@@ -1048,17 +1092,8 @@ class Decls {
         templates.length + codeBlocks.length + members.length)==0;
   }
 
-  Decls filter(DAccess access) {
-    Decls result = new Decls();
-    result.mixins = mixins.where((e) => e.dAccess == access).toList();
-    result.aliases = aliases.where((e) => e.dAccess == access).toList();
-    result.constants = constants.where((e) => e.dAccess == access).toList();
-    result.structs = structs.where((e) => e.dAccess == access).toList();
-    result.enums = enums.where((e) => e.dAccess == access).toList();
-    result.unions = unions.where((e) => e.dAccess == access).toList();
-    result.templates = templates.where((e) => e.dAccess == access).toList();
-    result.codeBlocks = codeBlocks.where((e) => e.dAccess == access).toList();
-    result.members = members.where((e) => e.dAccess == access).toList();
+  FilteredDecls filter(DAccess access) {
+    FilteredDecls result = new FilteredDecls.fromDecls(name, this, access);
     return result;
   }
 
@@ -1076,9 +1111,9 @@ class Decls {
 
   String decls() {
     String publicCustomBlock = 
-      (publicSection)? "\n${customBlock('public $name')}\n" : '';
+      (publicSection)? "\n${customBlock('${runtimeType.toString().toLowerCase()} public $name')}\n" : '';
     String privateCustomBlock = 
-      (privateSection)? "\n${customBlock('private $name')}\n" : '';
+      (privateSection)? "\n${customBlock('${runtimeType.toString().toLowerCase()} private $name')}\n" : '';
 
     List<String> result = [ META.decls(this.filter(DAccess.PUBLIC)), publicCustomBlock ];
     Decls d = this.filter(DAccess.EXPORT);
@@ -1176,6 +1211,117 @@ $privateCustomBlock}
 
 }
 
+/// The set of decls of given access from specific instance of
+/// item extending Decls (e.g. Module, Union, Template, Struct)
+class FilteredDecls extends Decls { 
+  String _name;
+  /// The generated name for filtered decls
+  String get name => _name;
+  /// D langauge access for this filtered decls
+  DAccess dAccess = DAccess.PUBLIC;
+// custom <class FilteredDecls>
+
+  FilteredDecls.fromDecls(String name, Decls decls, DAccess access) : _name = name {
+    mixins = decls.mixins.where((e) => e.dAccess == access).toList();
+    aliases = decls.aliases.where((e) => e.dAccess == access).toList();
+    constants = decls.constants.where((e) => e.dAccess == access).toList();
+    structs = decls.structs.where((e) => e.dAccess == access).toList();
+    enums = decls.enums.where((e) => e.dAccess == access).toList();
+    unions = decls.unions.where((e) => e.dAccess == access).toList();
+    templates = decls.templates.where((e) => e.dAccess == access).toList();
+    codeBlocks = decls.codeBlocks.where((e) => e.dAccess == access).toList();
+    members = decls.members.where((e) => e.dAccess == access).toList();
+    dAccess = access;
+    if(access == DAccess.PUBLIC) {
+      privateSection = decls.privateSection;
+      publicSection = decls.publicSection;
+      unitTest = decls.unitTest;
+    }
+  }
+
+// end <class FilteredDecls>
+
+
+  Map toJson() { 
+    return { 
+    "name": EBISU_UTILS.toJson(_name),
+    "dAccess": EBISU_UTILS.toJson(dAccess),
+    "Decls": super.toJson(),
+    };
+  }
+
+  static Map randJson() { 
+    return { 
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    };
+  }
+
+}
+
+/// What is required to know how to generate a constructor
+class Ctor { 
+  Ctor(
+    this.name
+  ) {
+  }
+  
+  /// Name of struct being constructed
+  String name;
+  /// Ordered list of members either included directly, etiher as is or with default init
+  List<Member> members = [];
+// custom <class Ctor>
+
+  String define() {
+    List<String> parts = [];
+    List<String> assignments = [];
+    members.forEach((m) {
+      String passType = m.byConst? "const(${m.type})" : m.type;
+      String part = m.byRef? "ref ${passType} ${m.name}" :
+        "${passType} ${m.name}";
+      if(m.ctorDefaulted) {
+        if(null == m.init) {
+          part += " = ${m.type}.init";
+        } else {
+          part += " = ${m.init}";
+        }
+      }
+      parts.add(part);
+      String rhs = m.castDup? 
+        "(cast(${m.type})${m.name}).dup" :
+        (m.byRef? "${m.name}.gdup" : m.name);
+
+      assignments.add("this.${m.vName} = ${rhs}");
+    });
+    
+    return '''
+//! ${name} member initializing ctor
+this(${parts.join(',\n     ')}) {
+  ${assignments.join(';\n  ')};
+}''';
+  }
+
+// end <class Ctor>
+
+
+  Map toJson() { 
+    return { 
+    "name": EBISU_UTILS.toJson(name),
+    "members": EBISU_UTILS.toJson(members),
+    };
+  }
+
+  static Map randJson() { 
+    return { 
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "members": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Member.randJson()),
+    };
+  }
+
+}
+
 /// Meta data required for D struct
 class Struct extends Decls { 
   Struct(
@@ -1196,6 +1342,12 @@ class Struct extends Decls {
   String get name => _name;
   /// D langauge access for this D struct
   DAccess dAccess = DAccess.PUBLIC;
+  /// Constructor for this struct
+  Ctor ctor;
+  /// List of template parms for this struct.
+  /// Existance of any _tParms_ implies this struct is a template struct.
+  /// 
+  List<TemplateParm> templateParms = [];
   /// List of members of this class
   List<Member> members = [];
 // custom <class Struct>
@@ -1203,9 +1355,27 @@ class Struct extends Decls {
   void _finalize(dynamic parent) {
     _name = _id.capCamel;
     _parent = parent;
+    templateParms.forEach((tp) => tp._finalize(this));
     finalizeDecls(this);
     members.forEach((member) => member._finalize(this));
+    List<Member> ctorMembers = members.where((m) => m.ctor || m.ctorDefaulted).toList();
+    if(ctorMembers.length>0) {
+      ctor = new Ctor(_name)..members = ctorMembers;
+    }
   }
+
+  String get templateDecl {
+    List<String> parts = [];
+    templateParms.forEach((tp) {
+      parts.add(tp.decl);
+    });
+    if(parts.length>0) {
+      return "(${parts.join(', ')})";
+    }
+    return '';
+  }
+  
+  String get templateName => "${name}${templateDecl}";
 
   String define() {
     return META.struct(this);
@@ -1220,6 +1390,8 @@ class Struct extends Decls {
     "doc": EBISU_UTILS.toJson(doc),
     "name": EBISU_UTILS.toJson(_name),
     "dAccess": EBISU_UTILS.toJson(dAccess),
+    "ctor": EBISU_UTILS.toJson(ctor),
+    "templateParms": EBISU_UTILS.toJson(templateParms),
     "members": EBISU_UTILS.toJson(members),
     "Decls": super.toJson(),
     };
@@ -1231,6 +1403,10 @@ class Struct extends Decls {
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "dAccess": EBISU_UTILS.randJson(_randomJsonGenerator, DAccess.randJson),
+    "ctor": EBISU_UTILS.randJson(_randomJsonGenerator, Ctor.randJson),
+    "templateParms": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => TemplateParm.randJson()),
     "members": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Member.randJson()),
@@ -1263,13 +1439,18 @@ class Member {
   /// Name of member as stored in struct/class/union
   String get vName => _vName;
   /// D developer access for this D member
-  Access access = Access.IA;
+  Access access = Access.RW;
   /// The type for this member
   dynamic type;
   /// What to initialize member to
   dynamic init;
   /// If set preferred pass type is by ref
   bool byRef = false;
+  /// If set preferred pass type is by const (the default)
+  bool byConst = true;
+  /// If set and dup is perform an const cast is provided.
+  ///  This allows duping things like maps from const into non-const since safel
+  bool castDup = false;
   /// If set this member is included in the ctor
   bool ctor = false;
   /// If set this member is included in the ctor with `init` member as the default.
@@ -1284,10 +1465,12 @@ class Member {
     }
     _name = _id.camel;
     _parent = parent;
-    if(access == Access.RO) {
+    if(access == Access.RO || access == Access.IA) {
       _vName = '_$_name';
       dAccess = DAccess.PRIVATE;
-      parent.mixins.add(new TMixin('ReadOnly')..tArgs = [ _vName ]);
+      if(access == Access.RO) {
+        parent.mixins.add(new TMixin('ReadOnly')..tArgs = [ _vName ]);
+      }
     } else {
       if(access == Access.RW) {
         dAccess = DAccess.PUBLIC;
@@ -1328,6 +1511,8 @@ class Member {
     "type": EBISU_UTILS.toJson(type),
     "init": EBISU_UTILS.toJson(init),
     "byRef": EBISU_UTILS.toJson(byRef),
+    "byConst": EBISU_UTILS.toJson(byConst),
+    "castDup": EBISU_UTILS.toJson(castDup),
     "ctor": EBISU_UTILS.toJson(ctor),
     "ctorDefaulted": EBISU_UTILS.toJson(ctorDefaulted),
     };
@@ -1344,6 +1529,8 @@ class Member {
     "type": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     "init": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     "byRef": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "byConst": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "castDup": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "ctor": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "ctorDefaulted": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
@@ -1359,20 +1546,32 @@ Module module(String _id) => new Module(id(_id));
 Struct struct(String _id) => new Struct(id(_id));
 Member member(String _id) => new Member(id(_id));
 Alias alias(String _id) => new Alias(id(_id));
+Alias aliasThis(String text) => new Alias(id('this'))..aliased = text;
 ArrAlias arrAlias(String _id) => new ArrAlias(id(_id));
 AArrAlias aArrAlias(String _id, String key, String value) => 
   new AArrAlias(id(_id))..key = key..value = value;
 Constant constant(String _id) => new Constant(id(_id));
 Union union(String _id) => new Union(id(_id));
-Enum enum(String _id) => new Enum(id(_id));
+Enum enum_(String _id) => new Enum(id(_id));
 EnumValue ev(String _id) => new EnumValue(id(_id));
 TMixin tmixin(String mixinName) => new TMixin(mixinName);
+TemplateParm tparm(String _id) => new TemplateParm(id(_id));
+CodeBlock codeBlock(String code) => new CodeBlock(code);
 
 
-Alias arr(String type) {
-  Id aliasId = id(type+'_arr');
-  String aliased = "${aliasId.capCamel}[]";
-  Alias result = new Alias(aliasId)..aliased = aliased;
+Alias arr(String type, { bool mutable : false, String of }) {
+  String aliasedType;
+
+  if(?of) {
+    aliasedType = "${of}Arr";
+  } else {
+    aliasedType = id(type).capCamel;
+  }
+
+  String aliased = mutable? 
+    "${aliasedType}[]" :
+    "immutable(${aliasedType})[]";    
+  Alias result = (alias("${type}_arr")..aliased = aliased);
   return result;
 }
 

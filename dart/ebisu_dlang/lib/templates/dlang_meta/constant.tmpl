@@ -1,3 +1,6 @@
+#< if(null != _.doc) { >
+${blockComment(chomp(_.doc, true))}
+#< } >
 #< String staticTag = _.isStatic? 'static ' : ''; >
 #< if(null != _.init) { >
 #<   if(_.hasStaticThis) { >
