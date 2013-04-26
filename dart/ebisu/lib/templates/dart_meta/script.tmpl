@@ -1,0 +1,21 @@
+#!/usr/bin/env dart
+#< if(_.doc != null) { >
+${docComment(_.doc)}
+#< } >
+
+#< for(var i in _.imports) { >
+${Library.importStatement(i)}
+#< } >
+
+ArgResults _parseArgs() { 
+  var parser = new ArgParser();
+#< for(var scriptArg in _.args) { >
+    print("${scriptArg.id}");
+#< } >
+}
+
+main() { 
+  ArgResults argResults = _parseArgs();
+  print("Done");
+}
+

@@ -376,6 +376,8 @@ class System {
   String doc;
   /// Path to which code is generated
   String rootPath;
+  /// Scripts in the system
+  List<Script> scripts = [];
   /// Apps in the system
   List<App> apps = [];
   /// Libraries in the system
@@ -396,6 +398,7 @@ class System {
   void finalize() {
     if(!_finalized) {
       libraries.forEach((l) => l.parent = this);
+      scripts.forEach((s) => s.parent = this);
       apps.forEach((a) => a.parent = this);
       pubSpec.parent = this;
 
@@ -431,6 +434,7 @@ class System {
   /// Generate the code
   void generate() {
     finalize();
+    scripts.forEach((script) => script.generate());
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
     if(pubSpec != null) {
@@ -447,6 +451,7 @@ class System {
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
     "rootPath": EBISU_UTILS.toJson(rootPath),
+    "scripts": EBISU_UTILS.toJson(scripts),
     "apps": EBISU_UTILS.toJson(apps),
     "libraries": EBISU_UTILS.toJson(libraries),
     "pubSpec": EBISU_UTILS.toJson(pubSpec),
@@ -460,6 +465,9 @@ class System {
     "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "rootPath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "scripts": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => Script.randJson()),
     "apps": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => App.randJson()),
@@ -472,6 +480,130 @@ class System {
         () => Class.randJson(),
         "jsonableClasses"),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    };
+  }
+
+}
+
+/// An agrument to a script
+class ScriptArg { 
+  ScriptArg(
+    this._id
+  ) {
+  }
+  
+  final Id _id;
+  /// Id for this script argument
+  Id get id => _id;
+  /// Documentation for this script argument
+  String doc;
+  dynamic _parent;
+  /// Reference to parent of this script argument
+  dynamic get parent => _parent;
+  /// If true the argument is required
+  bool isRequired;
+  /// If true this argument is a boolean flag (i.e. no option is required)
+  bool isFlag = false;
+  /// If true the argument may be specified mutiple times
+  bool isMultiple = false;
+  /// Used to initialize the value in case not set
+  String defaultsTo;
+  /// A list of allowed values to choose from
+  List<String> allowed = [];
+  /// If not null - holds the position of a positional (i.e. unnamed) argument
+  int position;
+// custom <class ScriptArg>
+// end <class ScriptArg>
+
+
+  Map toJson() { 
+    return { 
+    "id": EBISU_UTILS.toJson(_id),
+    "doc": EBISU_UTILS.toJson(doc),
+    "isRequired": EBISU_UTILS.toJson(isRequired),
+    "isFlag": EBISU_UTILS.toJson(isFlag),
+    "isMultiple": EBISU_UTILS.toJson(isMultiple),
+    "defaultsTo": EBISU_UTILS.toJson(defaultsTo),
+    "allowed": EBISU_UTILS.toJson(allowed),
+    "position": EBISU_UTILS.toJson(position),
+    };
+  }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "isRequired": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isFlag": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "isMultiple": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "defaultsTo": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "allowed": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "position": EBISU_UTILS.randJson(_randomJsonGenerator, int),
+    };
+  }
+
+}
+
+/// A typical script - (i.e. like a bash/python/ruby script but in dart)
+class Script { 
+  Script(
+    this._id
+  ) {
+  }
+  
+  final Id _id;
+  /// Id for this script
+  Id get id => _id;
+  /// Documentation for this script
+  String doc;
+  dynamic _parent;
+  /// Reference to parent of this script
+  dynamic get parent => _parent;
+  /// If true a custom section will be included for script
+  bool includeCustom = true;
+  /// List of imports to be included by this script
+  List<String> imports = [];
+  /// Arguments for this script
+  List<ScriptArg> args = [];
+// custom <class Script>
+
+  set parent(p) {
+    _parent = p;
+    imports.add('"package:args/args.dart"');
+  }
+
+  void generate() {
+    String scriptName = _id.snake;
+    String scriptPath = "${_parent.rootPath}/bin/${scriptName}.dart";
+    mergeWithFile(META.script(this), scriptPath);
+  }
+
+// end <class Script>
+
+
+  Map toJson() { 
+    return { 
+    "id": EBISU_UTILS.toJson(_id),
+    "doc": EBISU_UTILS.toJson(doc),
+    "includeCustom": EBISU_UTILS.toJson(includeCustom),
+    "imports": EBISU_UTILS.toJson(imports),
+    "args": EBISU_UTILS.toJson(args),
+    };
+  }
+
+  static Map randJson() { 
+    return { 
+    "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
+    "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "includeCustom": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "imports": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
+    "args": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => ScriptArg.randJson()),
     };
   }
 
@@ -1110,8 +1242,10 @@ Variable variable(String _id) => new Variable(id(_id));
 Part part(String _id) => new Part(id(_id));
 Class class_(String _id) => new Class(id(_id));
 Member member(String _id) => new Member(id(_id));
-PubSpec pubspec(String _id)=> new PubSpec(id(_id));
+PubSpec pubspec(String _id) => new PubSpec(id(_id));
 PubDependency pubdep(String name)=> new PubDependency(name);
+Script script(String _id) => new Script(id(_id));
+ScriptArg scriptArg(String _id) => new ScriptArg(id(_id));
 
 final RegExp _jsonableTypeRe = new RegExp(r"\b(?:int|double|num|String|bool|DateTime)\b");
 final RegExp _mapTypeRe = new RegExp(r"Map\b");
@@ -1122,6 +1256,7 @@ final RegExp _jsonListTypeRe = new RegExp(r"List<\s*(.*?)\s*>");
 bool isJsonableType(String t) =>_jsonableTypeRe.firstMatch(t) != null;
 bool isMapType(String t) => _mapTypeRe.firstMatch(t) != null;
 bool isListType(String t) => _listTypeRe.firstMatch(t) != null;
+
 String jsonMapValueType(String t) {
   Match m = _jsonMapTypeRe.firstMatch(t);
   if(m != null) {

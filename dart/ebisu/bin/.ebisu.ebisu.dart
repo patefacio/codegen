@@ -364,6 +364,10 @@ At some point when true enums are provided this may be revisited.
           doc_member('system'),
           member('root_path')
           ..doc = 'Path to which code is generated',
+          member('scripts')
+          ..doc = 'Scripts in the system'
+          ..type = 'List<Script>'
+          ..classInit = '[]',
           member('apps')
           ..doc = 'Apps in the system'
           ..type = 'List<App>'
@@ -384,6 +388,50 @@ At some point when true enums are provided this may be revisited.
           ..access = Access.RO
           ..type = 'bool'
           ..classInit = 'false'
+        ],
+        class_('script_arg')
+        ..doc = 'An agrument to a script'
+        ..members = [
+          id_member('script argument'),
+          doc_member('script argument'),
+          parent_member('script argument'),
+          member('is_required')
+          ..doc = 'If true the argument is required'
+          ..type = 'bool',
+          member('is_flag')
+          ..doc = 'If true this argument is a boolean flag (i.e. no option is required)'
+          ..type = 'bool'
+          ..classInit = 'false',
+          member('is_multiple')
+          ..doc = 'If true the argument may be specified mutiple times'
+          ..type = 'bool'
+          ..classInit = 'false',
+          member('defaults_to')
+          ..doc = 'Used to initialize the value in case not set',
+          member('allowed')
+          ..doc = 'A list of allowed values to choose from'
+          ..type = 'List<String>'
+          ..classInit = '[]',
+          member('position')
+          ..doc = 'If not null - holds the position of a positional (i.e. unnamed) argument'
+          ..type = 'int',
+          
+        ],
+        class_('script')
+        ..doc = 'A typical script - (i.e. like a bash/python/ruby script but in dart)'
+        ..members = [
+          id_member('script'),
+          doc_member('script'),
+          parent_member('script'),
+          custom_member('script'),
+          member('imports')
+          ..doc = 'List of imports to be included by this script'
+          ..type = 'List<String>'
+          ..classInit = '[]',
+          member('args')
+          ..doc = 'Arguments for this script'
+          ..type = 'List<ScriptArg>'
+          ..classInit = '[]',
         ],
         class_('app')
         ..doc = 'Defines a dart application'
