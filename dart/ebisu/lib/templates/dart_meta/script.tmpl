@@ -16,6 +16,8 @@ ArgResults _parseArgs() {
 
 main() { 
   ArgResults argResults = _parseArgs();
-  print("Done");
+${indentBlock(customBlock("${_.id} main"))}
 }
+
+${customBlock("${_.id} global")}
 

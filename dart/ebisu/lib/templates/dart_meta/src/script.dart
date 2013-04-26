@@ -28,7 +28,7 @@ ${Library.importStatement(i)}
 ArgResults _parseArgs() { 
   var parser = new ArgParser();
 ''');
-  for(var scriptArg in _.args) { 
+ for(var scriptArg in _.args) { 
   _buf.add('''
     print("${scriptArg.id}");
 ''');
@@ -38,8 +38,10 @@ ArgResults _parseArgs() {
 
 main() { 
   ArgResults argResults = _parseArgs();
-  print("Done");
+${indentBlock(customBlock("${_.id} main"))}
 }
+
+${customBlock("${_.id} global")}
 
 ''');
   return _buf.join();
