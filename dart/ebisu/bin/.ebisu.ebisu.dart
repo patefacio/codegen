@@ -83,7 +83,7 @@ are simple:
       ..doc = 'Regex to match the comment portion of a comment line (i.e. in looks like #<# ... >)'
       ..type = 'RegExp'
       ..isFinal = true
-      ..init = r'new RegExp("^\\s*#")'
+      ..init = r'new RegExp("^\\s*#")',
     ]
     ..parts = [
       part('compiler')
@@ -395,6 +395,9 @@ At some point when true enums are provided this may be revisited.
           id_member('script argument'),
           doc_member('script argument'),
           parent_member('script argument'),
+          member('name')
+          ..doc = 'Name of the the arg (emacs naming convention)'
+          ..access = Access.RO,
           member('is_required')
           ..doc = 'If true the argument is required'
           ..type = 'bool',
@@ -415,7 +418,8 @@ At some point when true enums are provided this may be revisited.
           member('position')
           ..doc = 'If not null - holds the position of a positional (i.e. unnamed) argument'
           ..type = 'int',
-          
+          member('abbr')
+          ..doc = 'An abbreviation (single character)'
         ],
         class_('script')
         ..doc = 'A typical script - (i.e. like a bash/python/ruby script but in dart)'
@@ -643,6 +647,12 @@ other languages like D) using a fairly declarative aproach.
     ..libraries = [
       library('ebisu')
       ..doc = 'Primary library for client usage of ebisu'
+      ..variables = [
+        variable('ebisu_path')
+        ..doc = 'Path to this package - for use until this becomes a pub package'
+        ..isFinal = true
+        ..init = "Platform.environment['EBISU_PATH']"
+      ]
       ..imports = [
         'io',
         '"package:pathos/path.dart" as path'

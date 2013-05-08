@@ -500,6 +500,9 @@ class ScriptArg {
   dynamic _parent;
   /// Reference to parent of this script argument
   dynamic get parent => _parent;
+  String _name;
+  /// Name of the the arg (emacs naming convention)
+  String get name => _name;
   /// If true the argument is required
   bool isRequired;
   /// If true this argument is a boolean flag (i.e. no option is required)
@@ -512,7 +515,15 @@ class ScriptArg {
   List<String> allowed = [];
   /// If not null - holds the position of a positional (i.e. unnamed) argument
   int position;
+  /// An abbreviation (single character)
+  String abbr;
 // custom <class ScriptArg>
+
+  set parent(p) {
+    _parent = p;
+    _name = _id.emacs;
+  }
+
 // end <class ScriptArg>
 
 
@@ -520,12 +531,14 @@ class ScriptArg {
     return { 
     "id": EBISU_UTILS.toJson(_id),
     "doc": EBISU_UTILS.toJson(doc),
+    "name": EBISU_UTILS.toJson(_name),
     "isRequired": EBISU_UTILS.toJson(isRequired),
     "isFlag": EBISU_UTILS.toJson(isFlag),
     "isMultiple": EBISU_UTILS.toJson(isMultiple),
     "defaultsTo": EBISU_UTILS.toJson(defaultsTo),
     "allowed": EBISU_UTILS.toJson(allowed),
     "position": EBISU_UTILS.toJson(position),
+    "abbr": EBISU_UTILS.toJson(abbr),
     };
   }
 
@@ -533,6 +546,7 @@ class ScriptArg {
     return { 
     "id": EBISU_UTILS.randJson(_randomJsonGenerator, Id.randJson),
     "doc": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     "isRequired": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "isFlag": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "isMultiple": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
@@ -541,6 +555,7 @@ class ScriptArg {
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
     "position": EBISU_UTILS.randJson(_randomJsonGenerator, int),
+    "abbr": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
 
@@ -571,6 +586,8 @@ class Script {
 
   set parent(p) {
     _parent = p;
+    args.forEach((sa) => sa.parent = this);
+    imports.add('"dart:io"');
     imports.add('"package:args/args.dart"');
   }
 
