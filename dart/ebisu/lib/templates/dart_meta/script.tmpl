@@ -30,9 +30,12 @@ Map _parseArgs() {
     /// Fill in expectations of the parser
 #< for(var scriptArg in _.args) { >
 #<   if(scriptArg.isFlag) { >
-    _parser.addFlag('${scriptArg.name}', help: \'\'\'
+    _parser.addFlag('${scriptArg.name}', 
+      help: \'\'\'
 ${scriptArg.doc}
-\'\'\');
+\'\'\',
+      defaultsTo: ${scriptArg.defaultsTo}
+    );
 #<   } else if(scriptArg.position == null) { >
     _parser.addOption('${scriptArg.name}', 
 #<     if(scriptArg.doc != null) { >

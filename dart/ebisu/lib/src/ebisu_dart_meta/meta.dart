@@ -389,6 +389,8 @@ class System {
   bool _finalized = false;
   /// Set to true on finalize
   bool get finalized => _finalized;
+  /// If true generate a pubspec.xml file
+  bool generatePubSpec = true;
 // custom <class System>
 
   /// Create system from the id
@@ -437,7 +439,7 @@ class System {
     scripts.forEach((script) => script.generate());
     apps.forEach((app) => app.generate());
     libraries.forEach((lib) => lib.generate());
-    if(pubSpec != null) {
+    if(pubSpec != null && generatePubSpec) {
       String pubSpecPath = "${rootPath}/pubspec.yaml";
       mergeWithFile(META.pubspec(pubSpec), pubSpecPath);
     }
@@ -457,6 +459,7 @@ class System {
     "pubSpec": EBISU_UTILS.toJson(pubSpec),
     "jsonableClasses": EBISU_UTILS.toJson(jsonableClasses),
     "finalized": EBISU_UTILS.toJson(_finalized),
+    "generatePubSpec": EBISU_UTILS.toJson(generatePubSpec),
     };
   }
 
@@ -480,6 +483,7 @@ class System {
         () => Class.randJson(),
         "jsonableClasses"),
     "finalized": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
+    "generatePubSpec": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
   }
 

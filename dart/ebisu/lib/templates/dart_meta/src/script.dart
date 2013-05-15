@@ -50,9 +50,12 @@ Map _parseArgs() {
  for(var scriptArg in _.args) { 
    if(scriptArg.isFlag) { 
   _buf.add('''
-    _parser.addFlag('${scriptArg.name}', help: \'\'\'
+    _parser.addFlag('${scriptArg.name}', 
+      help: \'\'\'
 ${scriptArg.doc}
-\'\'\');
+\'\'\',
+      defaultsTo: ${scriptArg.defaultsTo}
+    );
 ''');
    } else if(scriptArg.position == null) { 
   _buf.add('''

@@ -387,7 +387,11 @@ At some point when true enums are provided this may be revisited.
           ..doc = 'Set to true on finalize'
           ..access = Access.RO
           ..type = 'bool'
-          ..classInit = 'false'
+          ..classInit = 'false',
+          member('generate_pub_spec')
+          ..doc = 'If true generate a pubspec.xml file'
+          ..type = 'bool'
+          ..classInit = 'true'
         ],
         class_('script_arg')
         ..doc = 'An agrument to a script'
