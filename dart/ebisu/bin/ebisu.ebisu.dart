@@ -414,7 +414,8 @@ At some point when true enums are provided this may be revisited.
           ..type = 'bool'
           ..classInit = 'false',
           member('defaults_to')
-          ..doc = 'Used to initialize the value in case not set',
+          ..doc = 'Used to initialize the value in case not set'
+          ..type = 'dynamic',
           member('allowed')
           ..doc = 'A list of allowed values to choose from'
           ..type = 'List<String>'

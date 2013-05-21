@@ -24,6 +24,29 @@ class Id {
     }
   }
 
+  Id.fromCamels(String camelId) : this(splitByCaps(camelId));
+
+  static Id idFromCamels(String camelId) => new Id.fromCamels(camelId);
+  static bool isCamel(String text) => _camelRe.firstMatch(text) != null;
+  static bool isCapCamel(String text) => _capCamelRe.firstMatch(text) != null;
+  static bool isSnake(String text) => _snakeRe.firstMatch(text) != null;
+
+  static RegExp _capCamelRe = new RegExp(r'^[A-Z][A-Za-z]*$');
+  static RegExp _camelRe = new RegExp(r'^[A-Za-z]+$');
+  static RegExp _snakeRe = new RegExp(r'^[a-z][a-z_]*$');
+  static RegExp _capWordDelimiterRe = new RegExp('[A-Z]');
+  static RegExp _leadingTrailingUnderbarRe = new RegExp(r'(?:^_)|(?:_$)');
+
+  static String splitByCaps(String text) {
+    var result = 
+      text.splitMapJoin(_capWordDelimiterRe,
+          onMatch: (Match match) => match.group(0).toLowerCase(),
+          onNonMatch: (String nonMatch) => nonMatch + '_')
+      .replaceAll(_leadingTrailingUnderbarRe, '');
+    print(result);
+    return result;
+  }
+
   static final RegExp _hasUpperRe = new RegExp(r"[A-Z]");
   static final RegExp _validSnakeRe = new RegExp(r"^[a-z][a-z\d_]*$");
 
@@ -83,5 +106,15 @@ class Id {
 
 }
 // custom <part id>
+
+/// Return a new Id instance from either snake case or camel case
+Id IdFromEither(String text) {
+  return 
+    Id.isSnake(text)? 
+    new Id(text) :
+    (Id.isCamel(text)? new Id.fromCamels(text) :
+        throw new ArgumentError("$text is neither snake or camel"));
+}
+
 // end <part id>
 

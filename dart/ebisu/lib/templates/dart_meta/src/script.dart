@@ -69,7 +69,7 @@ ${scriptArg.doc}
 ''');
      }  
   _buf.add('''
-      defaultsTo: ${scriptArg.defaultsTo == null? null : 'scriptArg.defaultsTo'},
+      defaultsTo: ${scriptArg.defaultsTo == null? null : '${scriptArg.defaultsTo}'},
       allowMultiple: ${scriptArg.isMultiple},
       abbr: ${scriptArg.abbr == null? null : "'${scriptArg.abbr}'"},
       allowed: ${scriptArg.allowed.length>0 ? scriptArg.allowed.map((a) => "'$a'").toList() : null});

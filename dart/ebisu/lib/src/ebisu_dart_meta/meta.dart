@@ -514,7 +514,7 @@ class ScriptArg {
   /// If true the argument may be specified mutiple times
   bool isMultiple = false;
   /// Used to initialize the value in case not set
-  String defaultsTo;
+  dynamic defaultsTo;
   /// A list of allowed values to choose from
   List<String> allowed = [];
   /// If not null - holds the position of a positional (i.e. unnamed) argument
@@ -554,7 +554,7 @@ class ScriptArg {
     "isRequired": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "isFlag": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     "isMultiple": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
-    "defaultsTo": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "defaultsTo": EBISU_UTILS.randJson(_randomJsonGenerator, dynamic.randJson),
     "allowed": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => EBISU_UTILS.randJson(_randomJsonGenerator, String)),
@@ -1262,6 +1262,8 @@ Library library(String _id) => new Library(id(_id));
 Variable variable(String _id) => new Variable(id(_id));
 Part part(String _id) => new Part(id(_id));
 Class class_(String _id) => new Class(id(_id));
+
+/// Create new member from snake case id
 Member member(String _id) => new Member(id(_id));
 PubSpec pubspec(String _id) => new PubSpec(id(_id));
 PubDependency pubdep(String name)=> new PubDependency(name);

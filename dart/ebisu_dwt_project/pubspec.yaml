@@ -1,0 +1,7 @@
+name: ebisu_dwt_project
+version: 0.0.1
+dependencies:
+  pathos:
+  ebisu:
+      path: /Users/dbdavidson/dev/open_source/codegen/dart/ebisu
+  dart_web_toolkit:

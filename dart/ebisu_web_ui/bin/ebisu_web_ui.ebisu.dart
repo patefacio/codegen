@@ -7,6 +7,7 @@ import "package:ebisu/ebisu_dart_meta.dart";
 String _topDir = path.dirname(path.dirname(path.absolute(new Options().script)));
 
 main() {
+
   System ebisu_web_ui = system('ebisu_web_ui')
     ..rootPath = _topDir
     ..pubSpec = (pubspec('ebisu_web_ui')
