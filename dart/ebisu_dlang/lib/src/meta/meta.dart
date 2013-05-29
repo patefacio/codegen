@@ -369,7 +369,7 @@ class Module extends Decls {
     _parent = parent;
 
     List<String> orderImports(List<String> listImports) {
-      listImports = listImports.map((i) => _standardImports.contains(i)? 
+      listImports = listImports.map((i) => standardImports.contains(i)? 
           "std.${i}" : i).toList();
       listImports.sort();
       // Put std imports at end
@@ -398,14 +398,6 @@ class Module extends Decls {
   String get rootRelativePath => 
     path.split(path.relative(pkgPath, from:root.pkgPath)).join('.');
   String get qualifiedName => "${rootRelativePath}.$name";
-
-  String importStatement(String i) {
-    if(_standardImports.contains(i)) {
-      return "import std.${i}";
-    } else {
-      return "import ${i}";
-    }
-  }
 
 // end <class Module>
 
@@ -1575,6 +1567,15 @@ Alias arr(String type, { bool mutable : false, String of }) {
   return result;
 }
 
+final Access ia = Access.IA;
+final Access ro = Access.RO;
+final Access rw = Access.RW;
+
+final DAccess public = DAccess.PUBLIC;
+final DAccess private = DAccess.PRIVATE;
+final DAccess protected = DAccess.PROTECTED;
+final DAccess export = DAccess.EXPORT;
+
 Set _standardImports = new Set.from([
   'algorithm', 'array', 'ascii', 'base64', 'bigint', 'bitmanip', 'compiler',
   'complex', 'concurrency', 'container', 'conv', 'cpuid', 'cstream', 'csv',
@@ -1587,14 +1588,18 @@ Set _standardImports = new Set.from([
   'xml', 'zip', 'zlib',
 ]);
 
-final Access ia = Access.IA;
-final Access ro = Access.RO;
-final Access rw = Access.RW;
+Set get standardImports => _standardImports;
 
-final DAccess public = DAccess.PUBLIC;
-final DAccess private = DAccess.PRIVATE;
-final DAccess protected = DAccess.PROTECTED;
-final DAccess export = DAccess.EXPORT;
+String importPackage(String i) {
+  if(_standardImports.contains(i)) {
+    return "std.${i}";
+  } else {
+    return i;
+  }
+}
+
+String importStatement(String i) => "import ${importPackage(i)}";
+
 
 // end <part meta>
 

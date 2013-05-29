@@ -71,6 +71,7 @@ are simple:
     ..imports = [
       'io',
       '"package:ebisu/ebisu.dart"',
+      '"package:ebisu/ebisu_dart_meta.dart"',
       '"package:pathos/path.dart" as path',
     ]
     ..variables = [
@@ -368,10 +369,9 @@ At some point when true enums are provided this may be revisited.
           ..doc = 'Scripts in the system'
           ..type = 'List<Script>'
           ..classInit = '[]',
-          member('apps')
-          ..doc = 'Apps in the system'
-          ..type = 'List<App>'
-          ..classInit = '[]',
+          member('app')
+          ..doc = 'App for this package'
+          ..type = 'App',
           member('libraries')
           ..doc = 'Libraries in the system'
           ..type = 'List<Library>'
@@ -443,7 +443,7 @@ At some point when true enums are provided this may be revisited.
           ..classInit = '[]',
         ],
         class_('app')
-        ..doc = 'Defines a dart application'
+        ..doc = 'Defines a dart *web* application. For non-web console app, use Script'
         ..members = [
           id_member('app'),
           doc_member('app'),
@@ -453,6 +453,9 @@ At some point when true enums are provided this may be revisited.
           ..doc = 'Classes defined in this app'
           ..type = 'List<Class>'
           ..classInit = '[]',
+          member('dependencies')
+          ..type = 'List<PubDependency>'
+          ..classInit = '[]',
           member('libraries')
           ..doc = 'List of libraries of this app'
           ..type = 'List<Library>'
@@ -461,6 +464,10 @@ At some point when true enums are provided this may be revisited.
           ..doc = 'List of global variables for this library'
           ..type = 'List<Variable>'
           ..classInit = '[]',
+          member('is_web_ui')
+          ..doc = 'If true this is a web ui app'
+          ..type = 'bool'
+          ..classInit = 'false',
         ],
         class_('library')
         ..doc = "Defines a dart library - a collection of parts"
@@ -510,6 +517,9 @@ At some point when true enums are provided this may be revisited.
           ..classInit = '[]',
           member('name')
           ..doc = "Name of the part - for use in naming the part file"
+          ..access = Access.RO,
+          member('file_path')
+          ..doc = "Path to the generated part dart file"
           ..access = Access.RO,
         ],
         class_('mixin')
@@ -648,7 +658,6 @@ other languages like D) using a fairly declarative aproach.
           pubdep('pathos'),
         ]
                  )
-    ..apps = []
     ..libraries = [
       library('ebisu')
       ..doc = 'Primary library for client usage of ebisu'

@@ -179,7 +179,7 @@ import "package:ebisu/ebisu_dart_meta.dart";
 
     if(null != imports) {
       for(String imp in imports) {
-        libContents.add('import $imp;');
+        libContents.add(importStatement(imp));
       }
     }
 

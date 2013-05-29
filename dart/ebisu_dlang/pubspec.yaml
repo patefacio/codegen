@@ -6,3 +6,6 @@ dependencies:
   pathos:
   ebisu:
       path: ../ebisu
+# custom <ebisu_dlang dependencies>
+# end <ebisu_dlang dependencies>
+

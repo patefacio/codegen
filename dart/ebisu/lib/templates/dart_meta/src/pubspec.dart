@@ -61,5 +61,8 @@ dependencies:
      }                                          
    }                                            
  } 
+  _buf.add('''
+${scriptCustomBlock('${_.name} dependencies')}
+''');
   return _buf.join();
 }

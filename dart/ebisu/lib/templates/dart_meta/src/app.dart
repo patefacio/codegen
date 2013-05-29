@@ -8,7 +8,8 @@ String app([dynamic _]) {
 
 
   _buf.add('''
-app
+void main() { 
+}
 ''');
   return _buf.join();
 }

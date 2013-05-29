@@ -43,6 +43,10 @@ main() {
             ..type = 'Id'
             ..isFinal = true
             ..ctors = [''],
+            member('libraries')
+            ..doc = 'List of support libraries'
+            ..type = 'List<Library>'
+            ..classInit = '[]',
             member('components')
             ..doc = 'List of components in the collection'
             ..type = 'List<Component>',
@@ -51,6 +55,10 @@ main() {
             ..access = Access.RO
             ..type = 'bool'
             ..classInit = 'false',
+            member('dependencies')
+            ..doc = 'List of PubDependency for this component and supporting libraries'
+            ..type = 'List<PubDependency>'
+            ..classInit = '[]',
           ],
           class_('component')
           ..doc = 'Declaratively define component to generate its stubbed out support'
@@ -58,7 +66,6 @@ main() {
             member('id')
             ..doc = 'Id - used to generate name of component'
             ..type = 'Id'
-            ..isFinal = true
             ..ctors = [''],
             member('doc')
             ..doc = 'Description of the component',
@@ -72,8 +79,16 @@ main() {
             ..type = 'bool'
             ..classInit = 'true',
             member('template_fragment')
-            ..doc = 'Template fragment that will be rendered when the component is initialized'
-            ..classInit = '<template></template>',
+            ..doc = 'The internals of template fragment that will be rendered when the component is initialized'
+            ..classInit = '',
+            member('imports')
+            ..doc = 'Dart imports required by the component'
+            ..type = 'List<String>'
+            ..classInit = '[]',
+            member('html_imports')
+            ..doc = 'Component imports required by the component'
+            ..type = 'List<String>'
+            ..classInit = '[]',
             member('name')
             ..doc = 'Name as used in the html (i.e. words of name hyphenated'
             ..access = Access.RO,

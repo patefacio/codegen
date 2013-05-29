@@ -1,5 +1,39 @@
 part of ebisu_dwt_project;
 
+/// Named grouping of components - just for organization and potentially dependency management
+class ComponentLibrary { 
+  ComponentLibrary(
+    this.id
+  ) {
+  }
+  
+  /// Id of the component library
+  String id;
+  /// Documentation for this library
+  String doc;
+  /// List of components in this library
+  List<Component> components = [];
+  bool _finalized = false;
+  /// Set to true when finalized
+  bool get finalized => _finalized;
+// custom <class ComponentLibrary>
+
+  void _finalize(dynamic owner) {
+    if(!_finalized) {
+      components.forEach((c) => c._finalize(this));
+      _finalized = true;
+    }
+  }
+
+  void generate() {
+    print("Generating component library ${id}");
+    components.forEach((c) => c.generate());    
+  }
+
+// end <class ComponentLibrary>
+
+}
+
 /// A project GUI component
 class Component { 
   Component(
@@ -18,31 +52,27 @@ class Component {
   Id extendsSuper;
   /// List of this component implements
   List<Id> implementsInterfaces = [];
-  /// Child components
-  List<Component> childComponents = [];
-  dynamic _owner;
-  /// Project or component that owns the component
-  dynamic get owner => _owner;
+  ComponentLibrary _owner;
+  /// Component library that owns the component
+  ComponentLibrary get owner => _owner;
   bool _finalized = false;
   /// Set to true when finalized
   bool get finalized => _finalized;
 // custom <class Component>
 
-  void _finalize(dynamic owner) {
+  void _finalize(ComponentLibrary owner) {
     if(!_finalized) {
       _owner = owner;
       _type = id;
       if(extendsSuper != null) {
         _type = new Id('${_type.snake}_${extendsSuper.snake}');
       }
-      childComponents.forEach((child) => child._finalize(this));
       _finalized = true;
     }
   }
 
   Component generate() {
     print("\tGenerating component of type ${_type.capCamel}");
-    childComponents.forEach((c) => c.generate());
     return this;
   }
 
@@ -63,8 +93,8 @@ class Project {
   String doc;
   /// Root path to the generated dwt project
   String rootPath;
-  /// List of components for this project
-  List<Component> components;
+  /// List of component libraries to generate
+  List<ComponentLibrary> componentLibraries = [];
   /// List of additional libraries to generate
   Library libraries;
   bool _finalized = false;
@@ -86,7 +116,7 @@ class Project {
 
   void _finalize() {
     if(!_finalized) {
-      components.forEach((component) => component._finalize(this));
+      componentLibraries.forEach((cl) => cl._finalize(this));
       _projectPath = "${rootPath}/${id.snake}";
       _webPath = "${_projectPath}/web";
       _indexFilePath = "${_webPath}/index.html";
@@ -154,9 +184,9 @@ h2 {
     print("Generating App");
   }
 
-  void _generateComponents() {
-    print("Generating Components");
-    components.forEach((component) => component.generate());
+  void _generateComponentLibraries() {
+    print("Generating Component Libraries");
+    componentLibraries.forEach((cl) => cl.generate());
   }
 
   void generate() {
@@ -164,7 +194,7 @@ h2 {
     _generateIndex();
     _generateCss();
     _generateApp();
-    _generateComponents();
+    _generateComponentLibraries();
     print("Generation Complete");
   }
 

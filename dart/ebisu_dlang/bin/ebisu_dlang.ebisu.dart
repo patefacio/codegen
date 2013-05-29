@@ -21,7 +21,10 @@ void main() {
   }
 
   if(!noCompile) {
-    TemplateFolder templateFolder = new TemplateFolder(templateFolderPath);
+    TemplateFolder templateFolder = new TemplateFolder(templateFolderPath)
+      ..imports = [ 
+        '"package:ebisu_dlang/meta.dart" as D_META'
+      ];
     int filesUpdated = templateFolder.compile();
     if(filesUpdated>0) {
       if(!noCompile && !compileOnly) {

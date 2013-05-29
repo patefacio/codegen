@@ -340,6 +340,17 @@ class PubSpec {
     _parent = p;
   }
 
+  void addDependency(PubDependency dep) {
+    if(dependencies.any((d) => dep.name == d.name)) {
+      throw new ArgumentError("${d.name} is already a dependency of ${_id}");
+    }
+    dependencies.add(dep);
+  }
+
+  void addDependencies(List<PubDependency> deps) {
+    deps.forEach((dep) => addDependency(dep));
+  }
+
 // end <class PubSpec>
 
 
@@ -378,8 +389,8 @@ class System {
   String rootPath;
   /// Scripts in the system
   List<Script> scripts = [];
-  /// Apps in the system
-  List<App> apps = [];
+  /// App for this package
+  App app;
   /// Libraries in the system
   List<Library> libraries = [];
   /// Information for the pubspec
@@ -401,7 +412,9 @@ class System {
     if(!_finalized) {
       libraries.forEach((l) => l.parent = this);
       scripts.forEach((s) => s.parent = this);
-      apps.forEach((a) => a.parent = this);
+      if(app != null) {
+        app.parent = this;
+      }
       pubSpec.parent = this;
 
       // Track all classes and enums with json support so the template side can
@@ -435,13 +448,25 @@ class System {
 
   /// Generate the code
   void generate() {
+    if(app != null) {
+      if(pubSpec != null) {
+        pubSpec = new PubSpec(app.id)
+          ..addDependency(new PubDependency('browser'))
+          ..addDependency(new PubDependency('pathos'))
+          ..addDependency(new PubDependency('web_ui'))
+          ;
+      }
+      app.dependencies.forEach((dep) => pubSpec.addDependency(dep));
+    }
     finalize();
     scripts.forEach((script) => script.generate());
-    apps.forEach((app) => app.generate());
+    if(app != null) {
+      app.generate();
+    }
     libraries.forEach((lib) => lib.generate());
     if(pubSpec != null && generatePubSpec) {
       String pubSpecPath = "${rootPath}/pubspec.yaml";
-      mergeWithFile(META.pubspec(pubSpec), pubSpecPath);
+      scriptMergeWithFile(META.pubspec(pubSpec), pubSpecPath);
     }
   }
 
@@ -454,7 +479,7 @@ class System {
     "doc": EBISU_UTILS.toJson(doc),
     "rootPath": EBISU_UTILS.toJson(rootPath),
     "scripts": EBISU_UTILS.toJson(scripts),
-    "apps": EBISU_UTILS.toJson(apps),
+    "app": EBISU_UTILS.toJson(app),
     "libraries": EBISU_UTILS.toJson(libraries),
     "pubSpec": EBISU_UTILS.toJson(pubSpec),
     "jsonableClasses": EBISU_UTILS.toJson(jsonableClasses),
@@ -471,9 +496,7 @@ class System {
     "scripts": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Script.randJson()),
-    "apps": 
-       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
-        () => App.randJson()),
+    "app": EBISU_UTILS.randJson(_randomJsonGenerator, App.randJson),
     "libraries": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Library.randJson()),
@@ -630,7 +653,7 @@ class Script {
 
 }
 
-/// Defines a dart application
+/// Defines a dart *web* application. For non-web console app, use Script
 class App { 
   App(
     this._id
@@ -649,10 +672,13 @@ class App {
   bool includeCustom = true;
   /// Classes defined in this app
   List<Class> classes = [];
+  List<PubDependency> dependencies = [];
   /// List of libraries of this app
   List<Library> libraries = [];
   /// List of global variables for this library
   List<Variable> variables = [];
+  /// If true this is a web ui app
+  bool isWebUi = false;
 // custom <class App>
 
   set parent(p) {
@@ -662,7 +688,56 @@ class App {
   }
 
   void generate() {
+    classes.forEach((c) => c.generate());
     libraries.forEach((lib) => lib.generate());
+    String appPath = "${_parent.rootPath}/web/${_id.snake}.dart";
+    String appHtmlPath = "${_parent.rootPath}/web/${_id.snake}.html";
+    String appCssPath = "${_parent.rootPath}/web/${_id.snake}.css";
+    String appBuildPath = "${_parent.rootPath}/build.dart";
+    mergeWithFile(META.app(this), appPath);
+    htmlMergeWithFile('''<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>${_id.title}</title>
+    <link rel="stylesheet" href="${_id.snake}.css">
+${htmlCustomBlock(id.toString() + ' head')}
+  </head>
+  <body>
+${htmlCustomBlock(id.toString() + ' body')}
+    <script type="application/dart" src="${_id.snake}.dart"></script>
+    <script src="packages/browser/dart.js"></script>
+  </body>
+</html>
+''', appHtmlPath);
+
+    cssMergeWithFile('''
+body {
+  background-color: #F8F8F8;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.2em;
+  margin: 15px;
+}
+
+h1, p {
+  color: #333;
+}
+
+${cssCustomBlock(id.toString())}
+''', appCssPath);
+
+    mergeWithFile('''
+import 'dart:io';
+import 'package:web_ui/component_build.dart';
+
+main() {
+  build(new Options().arguments, ['web/${_id.snake}.html']);
+}
+''', appBuildPath);
+
   }
 
 // end <class App>
@@ -674,8 +749,10 @@ class App {
     "doc": EBISU_UTILS.toJson(doc),
     "includeCustom": EBISU_UTILS.toJson(includeCustom),
     "classes": EBISU_UTILS.toJson(classes),
+    "dependencies": EBISU_UTILS.toJson(dependencies),
     "libraries": EBISU_UTILS.toJson(libraries),
     "variables": EBISU_UTILS.toJson(variables),
+    "isWebUi": EBISU_UTILS.toJson(isWebUi),
     };
   }
 
@@ -687,12 +764,16 @@ class App {
     "classes": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Class.randJson()),
+    "dependencies": 
+       EBISU_UTILS.randJson(_randomJsonGenerator, [], 
+        () => PubDependency.randJson()),
     "libraries": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Library.randJson()),
     "variables": 
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Variable.randJson()),
+    "isWebUi": EBISU_UTILS.randJson(_randomJsonGenerator, bool),
     };
   }
 
@@ -760,13 +841,23 @@ class Library {
     'unittest'
   ]);
 
+  static final RegExp _hasQuotes = new RegExp(r'''[\'"]''');
+
+  static String importUri(String uri) {
+    if(null == _hasQuotes.firstMatch(uri)) {
+       return '"${uri}"';
+    } else {
+       return '${uri}';
+    }
+  }
+
   static String importStatement(String i) {
     if(_standardImports.contains(i)) {
       return 'import "dart:$i";';
     } else if(_standardPackageImports.contains(i)) {
       return 'import "package:$i";';
     } else {
-      return 'import $i;';
+      return 'import ${importUri(i)};';
     }
   }
 
@@ -839,6 +930,9 @@ class Part {
   String _name;
   /// Name of the part - for use in naming the part file
   String get name => _name;
+  String _filePath;
+  /// Path to the generated part dart file
+  String get filePath => _filePath;
 // custom <class Part>
 
   set parent(p) {
@@ -849,10 +943,8 @@ class Part {
   }
 
   void generate() {
-    Library lib = _parent;
-    String partName = _id.snake;
-    String partStubPath = "${_parent.rootPath}/lib/src/${lib.name}/${partName}.dart";
-    mergeWithFile(META.part(this), partStubPath);
+    _filePath = "${_parent.rootPath}/lib/src/${_parent.name}/${_name}.dart";
+    mergeWithFile(META.part(this), _filePath);
   }
 
   bool isClassJsonable(String className) => _parent.isClassJsonable(className);
@@ -868,6 +960,7 @@ class Part {
     "classes": EBISU_UTILS.toJson(classes),
     "enums": EBISU_UTILS.toJson(enums),
     "name": EBISU_UTILS.toJson(_name),
+    "filePath": EBISU_UTILS.toJson(_filePath),
     };
   }
 
@@ -883,6 +976,7 @@ class Part {
        EBISU_UTILS.randJson(_randomJsonGenerator, [], 
         () => Enum.randJson()),
     "name": EBISU_UTILS.randJson(_randomJsonGenerator, String),
+    "filePath": EBISU_UTILS.randJson(_randomJsonGenerator, String),
     };
   }
 
@@ -1295,6 +1389,8 @@ String jsonListValueType(String t) {
   return 'dynamic';
 }
 
+String importUri(String s) => Library.importUri(s);
+String importStatement(String s) => Library.importStatement(s);
 
 // end <part meta>
 

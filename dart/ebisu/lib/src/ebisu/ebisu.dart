@@ -74,6 +74,48 @@ String customBlock(String tag) {
   return _customBlockText.replaceAll('TAG', tag);
 }
 
+const String _htmlCustomBegin = r'<!--\s*custom';
+const String _htmlCustomEnd = r'<!--\s*end';
+const String _htmlCustomBlockText = '''
+<!-- custom <TAG> -->
+<!-- end <TAG> -->
+''';
+String htmlCustomBlock(String tag) {
+  return _htmlCustomBlockText.replaceAll('TAG', tag);
+}
+
+bool htmlMergeWithFile(String generated, String destFilePath) {
+  return mergeWithFile(generated, destFilePath, _htmlCustomBegin, _htmlCustomEnd);
+}
+
+const String _cssCustomBegin = r'/\*\s*custom';
+const String _cssCustomEnd = r'/\*\s*end';
+const String _cssCustomBlockText = '''
+/* custom <TAG> */
+/* end <TAG> */
+''';
+String cssCustomBlock(String tag) {
+  return _cssCustomBlockText.replaceAll('TAG', tag);
+}
+
+bool cssMergeWithFile(String generated, String destFilePath) {
+  return mergeWithFile(generated, destFilePath, _cssCustomBegin, _cssCustomEnd);
+}
+
+const String _scriptCustomBegin = r'#\s*custom';
+const String _scriptCustomEnd = r'#\s*end';
+const String _scriptCustomBlockText = '''
+# custom <TAG>
+# end <TAG>
+''';
+String scriptCustomBlock(String tag) {
+  return _scriptCustomBlockText.replaceAll('TAG', tag);
+}
+
+bool scriptMergeWithFile(String generated, String destFilePath) {
+  return mergeWithFile(generated, destFilePath, _scriptCustomBegin, _scriptCustomEnd);
+}
+
 final RegExp _trailingNewline = new RegExp(r'\n$');
 final RegExp _trailingNewlines = new RegExp(r'\n*$');
 
@@ -92,8 +134,8 @@ String chomp(String s, [bool multiple = false ]) {
 bool mergeWithFile(String generated, String destFilePath,
     [ String beginProtect, String endProtect ]) {
 
-  if(!?beginProtect) beginProtect = _customBegin;
-  if(!?endProtect) endProtect = _customEnd;
+  if(beginProtect==null) beginProtect = _customBegin;
+  if(endProtect==null) endProtect = _customEnd;
 
   File inFile = new File(destFilePath);
 
@@ -105,9 +147,9 @@ bool mergeWithFile(String generated, String destFilePath,
 
     RegExp block = 
       new RegExp(
-          "\\n?[^\\S\\n]*?$_customBegin"             // Look for begin
-          "\\s+<(.*?)>(?:.|\\n)*?"                   // Eat - non-greedy
-          "$_customEnd\\s+<\\1>",                    // Require matching end
+          "\\n?[^\\S\\n]*?${beginProtect}"             // Look for begin
+          "\\s+<(.*?)>(?:.|\\n)*?"                     // Eat - non-greedy
+          "${endProtect}\\s+<\\1>",                    // Require matching end
           multiLine: true);
 
     block.allMatches(currentText).forEach((m) 

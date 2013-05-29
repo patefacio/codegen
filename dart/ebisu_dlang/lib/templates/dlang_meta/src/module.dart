@@ -18,17 +18,17 @@ module ${_.qualifiedName};
 ''');
  for(String i in _.publicImports) { 
   _buf.add('''
-public ${_.importStatement(i)};
+public ${D_META.importStatement(i)};
 ''');
  } 
  for(String i in _.imports) { 
   _buf.add('''
-${_.importStatement(i)};
+${D_META.importStatement(i)};
 ''');
  } 
  for(String i in _.debugImports) { 
   _buf.add('''
-debug ${_.importStatement(i)};
+debug ${D_META.importStatement(i)};
 ''');
  } 
  if (_.anyImports) { 

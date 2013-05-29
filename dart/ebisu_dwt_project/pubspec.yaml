@@ -5,3 +5,6 @@ dependencies:
   ebisu:
       path: /Users/dbdavidson/dev/open_source/codegen/dart/ebisu
   dart_web_toolkit:
+# custom <ebisu_dwt_project dependencies>
+# end <ebisu_dwt_project dependencies>
+

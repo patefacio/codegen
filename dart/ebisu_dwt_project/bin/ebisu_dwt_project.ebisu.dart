@@ -42,6 +42,24 @@ main() {
             */
         ]
         ..classes = [
+          class_('component_library')
+          ..doc = 'Named grouping of components - just for organization and potentially dependency management'
+          ..members = [
+            member('id')
+            ..doc = 'Id of the component library'
+            ..ctors = [''],
+            member('doc')
+            ..doc = 'Documentation for this library',
+            member('components')
+            ..doc = 'List of components in this library'
+            ..type = 'List<Component>'
+            ..classInit = '[]',
+            member('finalized')
+            ..doc = 'Set to true when finalized'
+            ..type = 'bool'
+            ..classInit = 'false'
+            ..access = Access.RO,
+          ],
           class_('component')
           ..doc = 'A project GUI component'
           ..members = [
@@ -62,13 +80,9 @@ main() {
             ..doc = 'List of this component implements'
             ..type = 'List<Id>'
             ..classInit = '[]',
-            member('child_components')
-            ..doc = 'Child components'
-            ..type = 'List<Component>'
-            ..classInit = '[]',
             member('owner')
-            ..doc = 'Project or component that owns the component'
-            ..type = 'dynamic'
+            ..doc = 'Component library that owns the component'
+            ..type = 'ComponentLibrary'
             ..access = Access.RO,
             member('finalized')
             ..doc = 'Set to true when finalized'
@@ -87,9 +101,10 @@ main() {
             ..doc = 'Project description',
             member('root_path')
             ..doc = 'Root path to the generated dwt project',
-            member('components')
-            ..doc = 'List of components for this project'
-            ..type = 'List<Component>',
+            member('component_libraries')
+            ..doc = 'List of component libraries to generate'
+            ..type= 'List<ComponentLibrary>'
+            ..classInit = '[]',
             member('libraries')
             ..doc = 'List of additional libraries to generate'
             ..type= 'Library',
@@ -117,11 +132,5 @@ main() {
     ];
 
   ebisu_dwt_project.generate();
-  print(new Id.fromCamels('CarpelTunnelSyndrome'));
-  print(new Id.fromCamels('AEIOUEntries'));
-  print(IdFromEither('this_is_a_test'));
-  print(IdFromEither('ThisIsATest'));
-  print(IdFromEither('thisIsATest'));
-  print(IdFromEither('thisIsATestasWell'));
 }
 

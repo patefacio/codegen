@@ -4,3 +4,6 @@ dependencies:
   pathos:
   ebisu:
       path: /Users/dbdavidson/dev/open_source/codegen/dart/ebisu
+# custom <ebisu_web_ui dependencies>
+# end <ebisu_web_ui dependencies>
+

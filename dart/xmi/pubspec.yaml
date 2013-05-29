@@ -19,3 +19,6 @@ dependencies:
   pathos:
   ebisu:
       path: ../ebisu
+# custom <xmi dependencies>
+# end <xmi dependencies>
+
